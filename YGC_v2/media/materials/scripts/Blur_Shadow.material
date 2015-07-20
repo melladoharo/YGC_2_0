@@ -1,0 +1,64 @@
+//NV Cg Vertex Shader vs_1_1	
+vertex_program StdQuad_vp cg
+{
+	source StdQuad_vp.cg
+	entry_point StdQuad_vp
+    profiles vs_4_0 vs_2_0 vs_1_1 arbvp1
+
+	default_params
+	{
+		param_named_auto worldViewProj worldviewproj_matrix
+	}
+}
+
+//NV Cg HLSL Pixel Shader ps_2_0
+fragment_program Blur1_ps20_cg cg
+{
+	source Blur1_ps20.hlsl
+	profiles ps_2_0 arbfp1
+	entry_point main
+}
+
+//DirectX 9.0 HLSL Pixel Shader ps_2_0
+fragment_program Blur1_ps20_hlsl hlsl
+{
+	source Blur1_ps20.hlsl
+	target ps_2_0
+	entry_point main
+}
+
+fragment_program Blur1_ps20 unified
+{
+	delegate Blur1_ps20_hlsl
+	delegate Blur1_ps20_cg
+}
+
+//Effect: Blur
+material Compositor/Blur
+{
+	technique
+	{
+		pass
+		{
+			cull_hardware none
+			cull_software none
+			depth_check off
+
+			vertex_program_ref StdQuad_vp
+			{
+			}
+			
+			fragment_program_ref Blur1_ps20
+			{
+			}
+
+			texture_unit RT
+			{
+                tex_coord_set 0
+				tex_address_mode clamp
+				filtering anisotropic
+				max_anisotropy 8
+			}
+		}
+	}
+}

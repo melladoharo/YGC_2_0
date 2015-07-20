@@ -1,0 +1,695 @@
+
+
+# a template for most widget materials
+material SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            lighting off
+            scene_blend alpha_blend
+            depth_check off
+            
+            texture_unit
+            {
+                tex_address_mode clamp
+                filtering linear linear none
+            }
+        }
+    }
+}
+
+material SdkTrays/Cursor : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_cursor.png
+            }
+        }
+    }
+}
+
+material SdkTrays/Button/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_button_up.png
+            }
+        }
+    }
+}
+
+material SdkTrays/Button/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_button_over.png
+            }
+			
+		    texture_unit
+			{
+			    texture sdk_pulse.png
+			    colour_op add
+				scroll_anim 0.5 0
+				scale 100 1
+			}
+        }
+    }
+}
+
+material SdkTrays/Button/Down : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_button_down.png
+            }
+        }
+    }
+}
+
+material YgcGui/IconSettings/Mat : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+			texture_unit
+            {
+                texture sdk_icon_settings.png
+            }
+		}
+	}
+}
+
+material YgcGui/DecorBar/Mat : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+			texture_unit
+            {
+                texture sdk_decor_bar.png
+            }
+		}
+	}
+}
+
+material YgcGui/MenuBar/Colours
+{
+    technique
+    {
+        pass
+        {
+			ambient 0.96, 0.95, 0.97
+			diffuse 0.59, 0.64, 0.64
+		}
+	}
+}
+
+material YgcGui/MenuBar : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_menubar.png
+            }
+        }
+    }
+}
+
+material YgcGui/MenuBar/Selected : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_menubar_down.png
+            }
+        }
+    }
+}
+
+material YgcGui/MenuBar/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_menubar_over.png
+            }
+			texture_unit
+			{
+			    texture sdk_pulse.png
+			    colour_op add
+				scroll_anim 0.8 0
+				scale 100 1
+			}
+        }
+    }
+}
+
+material YgcGui/Thumbnail : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_tray_light.png
+            }
+        }
+    }
+}
+material YgcGui/Thumbnail/Dark : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_tray.png
+            }
+        }
+    }
+}
+material YgcGui/Thumbnail/Light/Transparent : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_tray_light_transparent.png
+            }
+        }
+    }
+}
+
+material YgcGui/MiniTray : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_tray.png
+            }
+        }
+    }
+}
+
+material YgcGui/SliderTrack : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_track.png
+                rotate 90
+            }
+        }
+    }
+}
+
+material YgcGui/SliderTrack/Back : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_track_back.png
+                rotate 90
+            }
+        }
+    }
+}
+
+material YgcGui/SliderTrack/Progress : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_track_progress.png
+				tex_address_mode wrap             
+            }
+        }
+    }
+}
+
+material YgcGui/Handle : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_handle.png
+            }
+        }
+    }
+}
+
+material YgcGui/SelectMenu : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_selectmenu.png
+            }
+        }
+    }
+}
+
+material YgcGui/SelectMenuExpanded : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_sm_expandedbox.png
+            }
+        }
+    }
+}
+
+material YgcGui/SelectMenu/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_sm_over.png
+            }
+        }
+    }
+}
+
+material YgcGui/CheckBox/Enable : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_checkbox_on.png
+            }
+        }
+    }
+}
+material YgcGui/CheckBox/Disable : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_checkbox_off.png
+            }
+        }
+    }
+}
+
+
+material YgcGui/ItemSelector/Next/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_itemselector_up.png
+            }
+        }
+    }
+}
+material YgcGui/ItemSelector/Previous/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_itemselector_up.png
+				rotate 180
+            }
+        }
+    }
+}
+
+
+material YgcGui/DialogWindow/Header : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_dialog_header.png
+            }
+        }
+    }
+}
+material YgcGui/DialogWindow/Body : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_dialog_body.png
+            }
+        }
+    }
+}
+
+material YgcGui/SliderOption/Track/Back : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_trackOption_back.png
+            }
+        }
+    }
+}
+material YgcGui/SliderOption/Track/Front : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_trackOption_front.png
+            }
+        }
+    }
+}
+material YgcGui/SliderOption/Handle : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_trackOption_handle.png
+            }
+        }
+    }
+}
+
+
+material YgcGui/MiniPlay/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_play_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniPlay/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_play_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniPlay/Down : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_play_down.png
+            }
+        }
+    }
+}
+
+material YgcGui/MiniStop/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_stop_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniStop/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_stop_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniStop/Down : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_stop_down.png
+            }
+        }
+    }
+}
+
+material YgcGui/MiniNext/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_next_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniNext/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_next_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniNext/Down : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_next_down.png
+            }
+        }
+    }
+}
+
+material YgcGui/MiniPrevious/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_previous_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniPrevious/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_previous_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniPrevious/Down : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_previous_down.png
+            }
+        }
+    }
+}
+
+material YgcGui/MiniVol/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_vol_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniVol/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_vol_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniVol/Down : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_vol_down.png
+            }
+        }
+    }
+}
+
+
+material YgcGui/MiniPause/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_pause_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniPause/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_pause_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniPause/Down : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_pause_down.png
+            }
+        }
+    }
+}

@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="audiodecoder.cpp" />
+    <ClCompile Include="Background.cpp" />
+    <ClCompile Include="BaseApp.cpp" />
+    <ClCompile Include="Button.cpp" />
+    <ClCompile Include="CheckBox.cpp" />
+    <ClCompile Include="ConfigReader.cpp" />
+    <ClCompile Include="DecorWidget.cpp" />
+    <ClCompile Include="DepthOfFieldEffect.cpp" />
+    <ClCompile Include="DialogWindows.cpp" />
+    <ClCompile Include="FormBase.cpp" />
+    <ClCompile Include="FormCollector.cpp" />
+    <ClCompile Include="FormGames.cpp" />
+    <ClCompile Include="FormImages.cpp" />
+    <ClCompile Include="FormModels.cpp" />
+    <ClCompile Include="FormMusic.cpp" />
+    <ClCompile Include="FormOverview.cpp" />
+    <ClCompile Include="FormReview.cpp" />
+    <ClCompile Include="FormSelectorGame.cpp" />
+    <ClCompile Include="FormSelectorMain.cpp" />
+    <ClCompile Include="FormVideos.cpp" />
+    <ClCompile Include="GameInfo.cpp" />
+    <ClCompile Include="Ground.cpp" />
+    <ClCompile Include="GuiManager.cpp" />
+    <ClCompile Include="ItemSelector.cpp" />
+    <ClCompile Include="Label.cpp" />
+    <ClCompile Include="Lens.cpp" />
+    <ClCompile Include="libavwrapper.cpp" />
+    <ClCompile Include="MediaPlayer.cpp" />
+    <ClCompile Include="MenuBar.cpp" />
+    <ClCompile Include="CModel.cpp" />
+    <ClCompile Include="ModelController.cpp" />
+    <ClCompile Include="ProgressBar.cpp" />
+    <ClCompile Include="SDLMovieAudioFactory.cpp" />
+    <ClCompile Include="SelectMenu.cpp" />
+    <ClCompile Include="SimpleText.cpp" />
+    <ClCompile Include="Slider.cpp" />
+    <ClCompile Include="SliderOptions.cpp" />
+    <ClCompile Include="Stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Thumbnail.cpp" />
+    <ClCompile Include="Thumbnail3D.cpp" />
+    <ClCompile Include="TrackList.cpp" />
+    <ClCompile Include="UtilsOgreDshow.cpp" />
+    <ClCompile Include="videoplayer.cpp" />
+    <ClCompile Include="videostate.cpp" />
+    <ClCompile Include="Widget.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="audiodecoder.hpp" />
+    <ClInclude Include="audiofactory.hpp" />
+    <ClInclude Include="Background.h" />
+    <ClInclude Include="BaseApp.h" />
+    <ClInclude Include="Button.h" />
+    <ClInclude Include="CheckBox.h" />
+    <ClInclude Include="ConfigReader.h" />
+    <ClInclude Include="DecorWidget.h" />
+    <ClInclude Include="DepthOfFieldEffect.h" />
+    <ClInclude Include="DialogWindows.h" />
+    <ClInclude Include="FormBase.h" />
+    <ClInclude Include="FormCollector.h" />
+    <ClInclude Include="FormGames.h" />
+    <ClInclude Include="FormImages.h" />
+    <ClInclude Include="FormModels.h" />
+    <ClInclude Include="FormMusic.h" />
+    <ClInclude Include="FormOverview.h" />
+    <ClInclude Include="FormReview.h" />
+    <ClInclude Include="FormSelectorGame.h" />
+    <ClInclude Include="FormSelectorMain.h" />
+    <ClInclude Include="FormVideos.h" />
+    <ClInclude Include="GameInfo.h" />
+    <ClInclude Include="Ground.h" />
+    <ClInclude Include="GuiListener.h" />
+    <ClInclude Include="GuiManager.h" />
+    <ClInclude Include="ItemSelector.h" />
+    <ClInclude Include="Label.h" />
+    <ClInclude Include="Lens.h" />
+    <ClInclude Include="MediaPlayer.h" />
+    <ClInclude Include="MenuBar.h" />
+    <ClInclude Include="CModel.h" />
+    <ClInclude Include="ModelController.h" />
+    <ClInclude Include="ProgressBar.h" />
+    <ClInclude Include="SDLMovieAudioFactory.h" />
+    <ClInclude Include="SelectMenu.h" />
+    <ClInclude Include="SimpleText.h" />
+    <ClInclude Include="Slider.h" />
+    <ClInclude Include="SliderOptions.h" />
+    <ClInclude Include="Stdafx.h" />
+    <ClInclude Include="Thumbnail.h" />
+    <ClInclude Include="Thumbnail3D.h" />
+    <ClInclude Include="TrackList.h" />
+    <ClInclude Include="UtilsOgreDshow.h" />
+    <ClInclude Include="UtilsOgreDshow_private.h" />
+    <ClInclude Include="videodefs.hpp" />
+    <ClInclude Include="videoplayer.hpp" />
+    <ClInclude Include="videostate.hpp" />
+    <ClInclude Include="Widget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\GNU-license.txt" />
+    <Text Include="..\License-ffmpeg-videoplayer.txt" />
+    <Text Include="..\License-ygc-2_0.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{54B6D37D-8582-4C81-8180-7EE0941A77EA}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>YGC_v2</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;HAVE_LIBSWRESAMPLE;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(OGRE_HOME)\include;$(OGRE_HOME)\include\OIS;$(OGRE_HOME)\include\OGRE;$(BOOST_ROOT);$(BOOST_ROOT)\boost;C:\Librerias\simpleini_sdk_vs120;C:\Librerias\simpleini_sdk_vs120\include;C:\Librerias\freeimage_sdk_v120\include;C:\Librerias\ffmpeg_sdk_vs120\;C:\Librerias\ffmpeg_sdk_vs120\include;C:\Librerias\sdl_sdk_vs120\;C:\Librerias\sdl_sdk_vs120\include</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zm216 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration);$(BOOST_ROOT)\stage\lib;C:\Librerias\freeimage_sdk_v120\lib;C:\Librerias\ffmpeg_sdk_vs120\lib;C:\Librerias\sdl_sdk_vs120\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OgreMain_d.lib;OIS_d.lib;FreeImage.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;SDL2.lib;Strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(OutDir)\$(TargetFileName)" "$(OGRE_HOME)\Bin\$(Configuration)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;HAVE_LIBSWRESAMPLE;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(OGRE_HOME)\include;$(OGRE_HOME)\include\OIS;$(OGRE_HOME)\include\OGRE;$(BOOST_ROOT);$(BOOST_ROOT)\boost;C:\Librerias\simpleini_sdk_vs120;C:\Librerias\simpleini_sdk_vs120\include;C:\Librerias\freeimage_sdk_v120\include;C:\Librerias\ffmpeg_sdk_vs120\;C:\Librerias\ffmpeg_sdk_vs120\include;C:\Librerias\sdl_sdk_vs120\;C:\Librerias\sdl_sdk_vs120\include</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zm216 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration);$(BOOST_ROOT)\stage\lib;C:\Librerias\freeimage_sdk_v120\lib;C:\Librerias\ffmpeg_sdk_vs120\lib;C:\Librerias\sdl_sdk_vs120\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OgreMain.lib;OIS.lib;FreeImage.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;SDL2.lib;Strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(OutDir)\$(TargetFileName)" "$(OGRE_HOME)\Bin\$(Configuration)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

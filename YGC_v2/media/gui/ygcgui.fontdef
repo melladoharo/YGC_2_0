@@ -1,0 +1,45 @@
+YgcFont/Bold/22
+{
+	type 		truetype
+	source 		OpenSans-Bold.ttf
+	size 		21
+	resolution 	96
+}
+
+YgcFont/SemiBold/21
+{
+	type 		truetype
+	source 		OpenSans-Semibold.ttf
+	size 		21
+	resolution 	96
+}
+YgcFont/SemiBold/16
+{
+	type 		truetype
+	source 		OpenSans-Semibold.ttf
+	size 		16
+	resolution 	96
+}
+
+YgcFont/Regular/17
+{
+	type 		truetype
+	source 		OpenSans-Regular.ttf
+	size 		18
+	resolution 	96
+}
+
+YgcFont/Italic/16
+{
+	type 		truetype
+	source 		OpenSans-Italic.ttf
+	size 		16
+	resolution 	96
+}
+YgcFont/SemiboldItalic/16
+{
+	type 		truetype
+	source 		OpenSans-SemiboldItalic.ttf
+	size 		16
+	resolution 	96
+}

@@ -1,0 +1,580 @@
+template container Panel(SdkTrays/Cursor)
+{
+	metrics_mode pixels
+	transparent true
+	
+	// You can offset the image to change the cursor "hotspot"
+	element Panel(CursorImage)
+	{
+        metrics_mode pixels
+        material SdkTrays/Cursor
+        width 32
+        height 32
+	}
+}
+
+template container BorderPanel(SdkTrays/Button)
+{
+	metrics_mode pixels
+	material SdkTrays/Button/Up
+	horz_align left
+	height 35
+	width 60
+	uv_coords 0.145 0.000 0.855 1.000
+	
+	border_material SdkTrays/Button/Up
+	border_size 16 16 0 0
+	border_left_uv  0.000 0.000 0.125 1.000
+	border_right_uv 0.875 0.000 1.000 1.000
+
+	element TextArea(ButtonCaption)
+	{
+        metrics_mode pixels
+        horz_align center
+        vert_align center
+        alignment center
+        font_name YgcFont/SemiBold/16
+		top 4
+        char_height 16
+        space_width 7
+        colour 0.96 0.95 0.97
+	}
+}
+
+template container BorderPanel(YgcGui/MenuBar)
+{
+	metrics_mode pixels
+	material YgcGui/MenuBar
+	horz_align left
+	height 60
+	uv_coords 0.145 0.000 0.855 1.000
+	
+	border_material YgcGui/MenuBar
+	border_size 16 16 0 0
+	border_left_uv  0.000 0.000 0.125 1.000
+	border_right_uv 0.875 0.000 1.000 1.000
+}
+
+template container BorderPanel(YgcGui/MenuBar/Item)
+{
+	metrics_mode pixels
+	material YgcGui/MenuBar
+	horz_align left
+	height 60
+	//uv_coords 0.145 0.000 0.855 1.000
+	
+	border_material YgcGui/MenuBar
+	//border_size 16 16 0 0
+	//border_left_uv  0.000 0.000 0.125 1.000
+	//border_right_uv 0.875 0.000 1.000 1.000
+	
+	element TextArea(ItemCaption)
+	{
+        metrics_mode pixels
+        horz_align center
+        vert_align center
+        alignment center
+        font_name YgcFont/SemiBold/21
+        char_height 21
+		top -8
+        space_width 7
+        colour 1 1 1
+	}
+}
+
+template container BorderPanel(YgcGui/Thumbnail)
+{
+	metrics_mode pixels
+	material YgcGui/Thumbnail
+	uv_coords 0.000 0.000 1.000 1.000
+	horz_align left
+	
+	border_material YgcGui/Thumbnail
+	
+	container BorderPanel(ThumbImage)
+	{
+		metrics_mode pixels
+		material YgcGui/Thumbnail
+		uv_coords 0.000 0.000 1.000 1.000
+		
+		border_material YgcGui/Thumbnail
+		
+		container BorderPanel(ThumbPanelCaption)
+		{
+			metrics_mode pixels
+			material YgcGui/Thumbnail
+			horz_align left
+			vert_align bottom
+			uv_coords 0.000 0.000 1.000 1.000
+		
+			border_material YgcGui/Thumbnail
+			
+			element TextArea(ThumbCaption)
+			{
+				metrics_mode pixels
+				horz_align center
+				vert_align bottom
+				alignment center
+				font_name YgcFont/SemiBold/21
+				top 10
+				char_height 21
+				space_width 7
+				colour 0.96 0.95 0.97
+			}
+		}
+	}
+}
+
+template container BorderPanel(YgcGui/Slider)
+{
+	metrics_mode pixels
+	material YgcGui/SliderTrack
+	height 9
+	uv_coords 0.20 0.0 0.75 1.0
+		
+	border_material YgcGui/SliderTrack
+	border_size 10 10 0 0
+	border_left_uv  0.0 0.0 0.20 1.0
+	border_right_uv 0.75 0.0 1.0 1.0
+	
+	container BorderPanel(SliderBack)
+	{
+		metrics_mode pixels
+		material YgcGui/SliderTrack/Back
+		height 9
+		uv_coords 0.20 0.0 0.75 1.0
+		
+		border_material YgcGui/SliderTrack/Back
+		border_size 10 10 0 0
+		border_left_uv  0.0 0.0 0.20 1.0
+		border_right_uv 0.75 0.0 1.0 1.0
+	}
+	
+	element Panel(SliderHandle)
+	{
+		metrics_mode pixels
+		material YgcGui/Handle
+		vert_align center
+		top -7.5
+		width 25
+		height 15
+	}
+}
+
+template container Panel(YgcGui/Logo)
+{
+	metrics_mode pixels
+	material SdkTrays/Cursor
+	horz_align right
+	vert_align bottom
+	width 128
+	height 53
+}
+
+	
+template container BorderPanel(YgcGui/DecorBar)
+{
+	metrics_mode pixels
+	material YgcGui/DecorBar/Mat
+	horz_align left
+	width 100
+	height 3.5
+	//uv_coords 0.025 0.015 0.975 0.985
+	uv_coords 0.05 0.015 0.95 0.985
+	
+	border_material YgcGui/DecorBar/Mat
+	border_size 10 10 0 0
+	border_left_uv  0.00 0.015 0.05 0.985
+	border_right_uv 0.95 0.015 1.000  0.985
+}
+
+template container Panel(YgcGui/IconSettings)
+{
+	metrics_mode pixels
+	material YgcGui/IconSettings/Mat
+	horz_align left
+	vert_align bottom
+	width 20
+	height 20
+	left 10
+	top -30
+}
+
+template container BorderPanel(YgcGui/SelectMenu)
+{
+	metrics_mode pixels
+	material YgcGui/SelectMenu
+	horz_align center
+	height 40
+	uv_coords 0.05 0.25 0.80 0.75
+	
+	border_material YgcGui/SelectMenu
+	border_size 18 60 9 9
+	border_topleft_uv     0.0 0.0 0.05 0.25
+	border_top_uv         0.05 0.0 0.8 0.25
+	border_topright_uv    0.8 0.0 1.0 0.25
+	border_left_uv        0.0 0.25 0.05 0.75
+	border_right_uv       0.8 0.25 1.0 0.75
+	border_bottomleft_uv  0.0 0.75 0.05 1.0
+	border_bottom_uv      0.05 0.75 0.8 1.0
+	border_bottomright_uv 0.8 0.75 1.0 1.0
+	
+	element TextArea(MenuCaption)
+	{
+        metrics_mode pixels
+        horz_align left
+        alignment left
+        top 13
+		left 20
+        font_name YgcFont/SemiBold/21
+        char_height 18
+        space_width 7
+        colour 0.96, 0.95, 0.97
+	}
+	
+	container BorderPanel(MenuExpandedBox)
+	{
+		metrics_mode pixels
+		material YgcGui/SelectMenuExpanded
+		top 40
+		uv_coords 0.05 0.25 0.80 0.75
+		
+		border_material YgcGui/SelectMenuExpanded
+		border_size 18 60 9 9
+		border_topleft_uv     0.0 0.0 0.05 0.25
+		border_top_uv         0.05 0.0 0.8 0.25
+		border_topright_uv    0.8 0.0 1.0 0.25
+		border_left_uv        0.0 0.25 0.05 0.75
+		border_right_uv       0.8 0.25 1.0 0.75
+		border_bottomleft_uv  0.0 0.75 0.05 1.0
+		border_bottom_uv      0.05 0.75 0.8 1.0
+		border_bottomright_uv 0.8 0.75 1.0 1.0
+	}
+}
+
+template container BorderPanel(SdkTrays/SelectMenuItem)
+{
+	metrics_mode pixels
+	material YgcGui/SelectMenuExpanded
+	horz_align left
+	alignment left
+	height 40
+	left 5
+	uv_coords 0.05 0.25 0.80 0.75
+	
+	border_material YgcGui/SelectMenuExpanded
+	border_size 18 60 9 9
+	border_topleft_uv     0.0 0.0 0.05 0.25
+	border_top_uv         0.05 0.0 0.8 0.25
+	border_topright_uv    0.8 0.0 1.0 0.25
+	border_left_uv        0.0 0.25 0.05 0.75
+	border_right_uv       0.8 0.25 1.0 0.75
+	border_bottomleft_uv  0.0 0.75 0.05 1.0
+	border_bottom_uv      0.05 0.75 0.8 1.0
+	border_bottomright_uv 0.8 0.75 1.0 1.0
+
+	element TextArea(MenuItemText)
+	{
+		metrics_mode pixels
+		left 18
+		top 14
+		font_name YgcFont/Regular/17
+		char_height 18
+        space_width 7
+        colour 0.59, 0.64, 0.64
+		caption Special Delivery
+	}
+}
+
+template container Panel(YgcGui/ProgressBar)
+{
+	transparent true
+	metrics_mode pixels
+	height 40
+	horz_align center
+	alignment center
+	vert_align bottom
+	
+	element TextArea(ProgressCaption)
+	{
+        metrics_mode pixels
+        left 2
+        top 10
+        font_name YgcFont/SemiBold/21
+        char_height 21
+        space_width 7
+        colour 1 1 1
+	}
+	
+	container BorderPanel(ProgressMeter)
+	{
+		metrics_mode pixels
+		material YgcGui/SliderTrack
+		height 25
+		top -34
+		uv_coords 0.20 0.0 0.75 1.0
+		
+		border_material YgcGui/SliderTrack
+		border_size 10 10 0 0
+		border_left_uv  0.0 0.0 0.20 1.0
+		border_right_uv 0.75 0.0 1.0 1.0
+		
+		element Panel(ProgressFill)
+		{
+			metrics_mode pixels
+			material YgcGui/SliderTrack/Progress
+			height 25
+			//uv_coords 0.1 0.1 0.59 0.9
+			tiling 0 10 1
+		}
+	}
+}
+
+template container Panel(YgcGui/CheckBox)
+{
+	metrics_mode pixels
+	horz_align left
+	transparent true
+	height 45
+	
+	element TextArea(CheckBoxCaption)
+	{
+        metrics_mode pixels
+        horz_align left
+        //vert_align center
+        //alignment left
+        font_name YgcFont/SemiBold/16
+		top 7
+        char_height 19
+        space_width 7
+        colour 0.96 0.95 0.97
+	}
+	
+	element Panel(CheckBoxSquare)
+	{
+		metrics_mode pixels
+		horz_align right
+        material YgcGui/CheckBox/Disable
+        width 45
+        height 28
+		left -45
+	}
+}
+
+template container Panel(YgcGui/ItemSelector)
+{
+	metrics_mode pixels
+	horz_align left
+	transparent true
+	height 28
+	material YgcGui/Thumbnail/Light/Transparent
+	
+	element TextArea(ItemSelectorCaption)
+	{
+        metrics_mode pixels
+        horz_align left
+        font_name YgcFont/SemiBold/16
+		top 7
+        char_height 19
+        space_width 7
+        colour 0.96 0.95 0.97
+		left 12
+	}
+	
+	container Panel(ItemSelectorPrevious)
+	{
+		metrics_mode pixels
+		transparent true
+		height 28
+		horz_align right
+		//material YgcGui/Thumbnail/Dark
+		
+		element Panel(PreviousItem)
+		{
+			horz_align right
+			metrics_mode pixels
+			material YgcGui/ItemSelector/Previous/Up
+			top 3
+			height 22
+			width 16
+			left -16
+		}
+	}
+	element TextArea(ItemSelectorOption)
+	{
+        metrics_mode pixels
+        horz_align right
+        font_name YgcFont/SemiBold/16
+		top 7
+        char_height 19
+        space_width 7
+        colour 0.96 0.95 0.97
+	}
+	container Panel(ItemSelectorNext)
+	{
+		metrics_mode pixels
+		transparent true
+		height 28
+		horz_align right
+		//material YgcGui/Thumbnail/Dark
+		
+		element Panel(NextItem)
+		{
+			horz_align right
+			metrics_mode pixels
+			material YgcGui/ItemSelector/Next/Up
+			top 3
+			height 22
+			width 16
+			left -16
+		}
+	}
+}
+
+template container BorderPanel(YgcGui/DialogWindow)
+{
+	metrics_mode pixels
+	material YgcGui/DialogWindow/Body
+	horz_align left
+	height 35
+	width 60
+	uv_coords 0.25 0.38 0.75 0.62
+	
+	border_material YgcGui/DialogWindow/Body
+	border_size 12 6 12 6
+	border_topleft_uv     0.00 0.00 0.25 0.38
+	border_top_uv         0.25 0.00 0.75 0.38
+	border_topright_uv    0.75 0.00 1.00 0.38
+	border_left_uv        0.00 0.25 0.25 0.62
+	border_right_uv       0.75 0.25 1.00 0.62
+	border_bottomleft_uv  0.00 0.62 0.25 1.00
+	border_bottom_uv      0.25 0.62 0.75 1.00
+	border_bottomright_uv 0.75 0.62 1.00 1.00
+	
+	container BorderPanel(DialogWindowHeader)
+	{
+		metrics_mode pixels
+		material YgcGui/DialogWindow/Header
+		horz_align left
+		height 60
+		width 60
+		top -58
+		uv_coords 0.25 0.38 0.75 0.62
+	
+		border_material YgcGui/DialogWindow/Header
+		border_size 12 12 6 25
+		border_topleft_uv     0.00 0.00 0.25 0.38
+		border_top_uv         0.25 0.00 0.75 0.38
+		border_topright_uv    0.75 0.00 1.00 0.38
+		border_left_uv        0.00 0.25 0.25 0.62
+		border_right_uv       0.75 0.25 1.00 0.62
+		border_bottomleft_uv  0.00 0.62 0.25 1.00
+		border_bottom_uv      0.25 0.62 0.75 1.00
+		border_bottomright_uv 0.75 0.62 1.00 1.00
+		
+		element TextArea(HeaderCaption)
+		{
+			metrics_mode pixels
+			horz_align center
+			vert_align center
+			alignment center
+			font_name YgcFont/SemiBold/21
+			top -8
+			char_height 30
+			space_width 15
+			colour 0.96 0.95 0.97
+		}
+	}
+}
+
+template container Panel(YgcGui/Label)
+{
+	metrics_mode pixels
+	horz_align left
+	transparent true
+	height 28
+	material YgcGui/Thumbnail/Light/Transparent
+
+	element TextArea(LabelCaption)
+	{
+        metrics_mode pixels
+        horz_align left
+        //font_name YgcFont/SemiBold/21
+		font_name YgcFont/Regular/17
+		top 7
+        char_height 19
+        space_width 7
+        colour 0.96 0.95 0.97
+	}
+}
+
+template container Panel(YgcGui/SliderOption)
+{
+	metrics_mode pixels
+	horz_align left
+	transparent true
+	height 28
+	material YgcGui/Thumbnail/Light/Transparent
+	
+	container Panel(SliderOptionContainer)
+	{
+		metrics_mode pixels
+		horz_align right
+		transparent true
+		height 28
+		
+		container BorderPanel(SliderOptionTrackFront)
+		{
+			metrics_mode pixels
+			horz_align left
+			material YgcGui/SliderOption/Track/Front
+			height 7
+			width 5
+			top 12
+			uv_coords 0.20 0.0 0.75 1.0
+			
+			border_material YgcGui/SliderOption/Track/Front
+			border_size 1 1 0 0
+			border_left_uv  0.0 0.0 0.20 1.0
+			border_right_uv 0.75 0.0 1.0 1.0
+		}
+		container BorderPanel(SliderOptionTrackBack)
+		{
+			metrics_mode pixels
+			horz_align left
+			material YgcGui/SliderOption/Track/Back
+			width 5
+			height 7
+			top 12
+			uv_coords 0.20 0.0 0.75 1.0
+			
+			border_material YgcGui/SliderOption/Track/Back
+			border_size 1 1 0 0
+			border_left_uv  0.0 0.0 0.20 1.0
+			border_right_uv 0.75 0.0 1.0 1.0
+		}
+		element Panel(SliderOptionHandle)
+		{
+			metrics_mode pixels
+			horz_align left
+			material YgcGui/SliderOption/Handle
+			top 5
+			left -12
+			width 12
+			height 7
+		}
+	}
+	
+	element TextArea(SliderOptionCaption)
+	{
+        metrics_mode pixels
+        horz_align left
+        font_name YgcFont/SemiBold/16
+		top 7
+        char_height 19
+        space_width 7
+        colour 0.96 0.95 0.97
+		left 12
+	}
+}
+
