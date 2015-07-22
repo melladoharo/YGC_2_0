@@ -159,78 +159,70 @@ bool BaseApp::go(void)
 	Ogre::FontManager::getSingleton().getByName("YgcFont/Italic/16")->load();
 	Ogre::FontManager::getSingleton().getByName("YgcFont/SemiboldItalic/16")->load();
 
-	if (ConfigReader::getSingletonPtr()->getLastError() < 0)
-	{
-		Ogre::LogManager::getSingletonPtr()->logMessage("Can't load 'ygcConfig.ini'.");
-		mShutDown = true;
-	}
-	else
-	{
-		//-------------------------------------------------------------------------------------
-		// Create the scene
-		mDofEffect = new DOFManager(mCamera, mCamera->getViewport());
-		mGround = new Ground;
-		mBackground = new Background;
-
-		// Set ambient light
-		//mSceneMgr->setAmbientLight(Ogre::ColourValue(0.93f, 0.94f, 0.95f));
-		//mSceneMgr->setAmbientLight(Ogre::ColourValue(0.85f, 0.85f, 0.87f));
-		mSceneMgr->setAmbientLight(Ogre::ColourValue(0.73f, 0.74f, 0.75f));
-		//mSceneMgr->setAmbientLight(Ogre::ColourValue(0,0,0));
-		mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_MODULATIVE);
-		mSceneMgr->setShadowColour(Ogre::ColourValue(0.88f, 0.87f, 0.897f));
-		mSceneMgr->setShadowFarDistance(200.0f);
-		//mSceneMgr->setShadowTextureCount(1);
-		//mSceneMgr->setShadowTextureSize(512);
+	//-------------------------------------------------------------------------------------
+	// Create the scene
+	mDofEffect = new DOFManager(mCamera, mCamera->getViewport());
+	mGround = new Ground;
+	mBackground = new Background;
+	
+	// Set ambient light
+	//mSceneMgr->setAmbientLight(Ogre::ColourValue(0.93f, 0.94f, 0.95f));
+	//mSceneMgr->setAmbientLight(Ogre::ColourValue(0.85f, 0.85f, 0.87f));
+	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.73f, 0.74f, 0.75f));
+	//mSceneMgr->setAmbientLight(Ogre::ColourValue(0,0,0));
+	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_MODULATIVE);
+	mSceneMgr->setShadowColour(Ogre::ColourValue(0.88f, 0.87f, 0.897f));
+	mSceneMgr->setShadowFarDistance(200.0f);
+	//mSceneMgr->setShadowTextureCount(1);
+	//mSceneMgr->setShadowTextureSize(512);
 		
-		// Fixed light, dim
-		Ogre::Light* mSunLight = mSceneMgr->createLight("SunLight");
-		mSunLight->setType(Ogre::Light::LT_SPOTLIGHT);
-		mSunLight->setPosition(250, 275, 230);
-		mSunLight->setSpotlightRange(Ogre::Degree(30), Ogre::Degree(50));
-		mSunLight->setCastShadows(true);
-		Ogre::Vector3 dir;
-		dir = -mSunLight->getPosition();
-		dir.normalise();
-		mSunLight->setDirection(dir);
-		mSunLight->setDiffuseColour(0.42f, 0.42f, 0.49f);
-		mSunLight->setSpecularColour(0.22f, 0.22f, 0.29f);
-		Ogre::Viewport* shadowMapViewport = mSceneMgr->getShadowTexture(0)->getBuffer()->getRenderTarget()->getViewport(0);
-		Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport, "BlurTexture");
-		Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport, "BlurTexture", true);
+	// Fixed light, dim
+	Ogre::Light* mSunLight = mSceneMgr->createLight("SunLight");
+	mSunLight->setType(Ogre::Light::LT_SPOTLIGHT);
+	mSunLight->setPosition(250, 275, 230);
+	mSunLight->setSpotlightRange(Ogre::Degree(30), Ogre::Degree(50));
+	mSunLight->setCastShadows(true);
+	Ogre::Vector3 dir;
+	dir = -mSunLight->getPosition();
+	dir.normalise();
+	mSunLight->setDirection(dir);
+	mSunLight->setDiffuseColour(0.42f, 0.42f, 0.49f);
+	mSunLight->setSpecularColour(0.22f, 0.22f, 0.29f);
+	Ogre::Viewport* shadowMapViewport = mSceneMgr->getShadowTexture(0)->getBuffer()->getRenderTarget()->getViewport(0);
+	Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport, "BlurTexture");
+	Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport, "BlurTexture", true);
 
-		/*
-		// Create a light
-		Ogre::Light* l = mSceneMgr->createLight("MainLight");
-		l->setType(Ogre::Light::LT_POINT);
-		l->setPosition(80, 150, 100);
-		l->setCastShadows(true);
-		l->setDiffuseColour(Ogre::ColourValue(0.33f, 0.34f, 0.35f));
-		l->setSpecularColour(Ogre::ColourValue(0.23f, 0.24f, 0.25f));
-		Ogre::Viewport* shadowMapViewport = mSceneMgr->getShadowTexture(0)->getBuffer()->getRenderTarget()->getViewport(0);
-		Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport, "BlurTexture");
-		Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport, "BlurTexture", true);
-		*/
-		/*
-		// Create a second light
-		Ogre::Light* l2 = mSceneMgr->createLight("MainLight2");
-		l2->setType(Ogre::Light::LT_POINT);
-		l2->setPosition(-40, 340, -65);
-		l2->setCastShadows(true);
-		l2->setDiffuseColour(Ogre::ColourValue(0.33f, 0.34f, 0.35f));
-		l2->setSpecularColour(Ogre::ColourValue(0.23f, 0.24f, 0.25f));
-		Ogre::Viewport* shadowMapViewport2=mSceneMgr->getShadowTexture(1)->getBuffer()->getRenderTarget()->getViewport(0);
-		Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport2, "BlurTexture");
-		Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport2, "BlurTexture", true);
-		*/
-		//nodoLight = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-		//nodoLight->attachObject(l);
-
-		mNodeCamera = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-		mNodeCamera->attachObject(mCamera);
-		//mNodeCamera->setPosition(0, 26, -5);
-		//mNodeCamera->pitch(Ogre::Degree(-16));
-	}
+	/*
+	// Create a light
+	Ogre::Light* l = mSceneMgr->createLight("MainLight");
+	l->setType(Ogre::Light::LT_POINT);
+	l->setPosition(80, 150, 100);
+	l->setCastShadows(true);
+	l->setDiffuseColour(Ogre::ColourValue(0.33f, 0.34f, 0.35f));
+	l->setSpecularColour(Ogre::ColourValue(0.23f, 0.24f, 0.25f));
+	Ogre::Viewport* shadowMapViewport = mSceneMgr->getShadowTexture(0)->getBuffer()->getRenderTarget()->getViewport(0);
+	Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport, "BlurTexture");
+	Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport, "BlurTexture", true);
+	*/
+	/*
+	// Create a second light
+	Ogre::Light* l2 = mSceneMgr->createLight("MainLight2");
+	l2->setType(Ogre::Light::LT_POINT);
+	l2->setPosition(-40, 340, -65);
+	l2->setCastShadows(true);
+	l2->setDiffuseColour(Ogre::ColourValue(0.33f, 0.34f, 0.35f));
+	l2->setSpecularColour(Ogre::ColourValue(0.23f, 0.24f, 0.25f));
+	Ogre::Viewport* shadowMapViewport2=mSceneMgr->getShadowTexture(1)->getBuffer()->getRenderTarget()->getViewport(0);
+	Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport2, "BlurTexture");
+	Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport2, "BlurTexture", true);
+	*/
+	//nodoLight = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	//nodoLight->attachObject(l);
+	
+	mNodeCamera = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	mNodeCamera->attachObject(mCamera);
+	//mNodeCamera->setPosition(0, 26, -5);
+	//mNodeCamera->pitch(Ogre::Degree(-16));
 
 	//-------------------------------------------------------------------------------------
 	//create FrameListener

@@ -27,11 +27,19 @@ public:
 	// FormBase
 	void hide();
 	void show();
+	void hideAllOptions();
+	void hideOptions();
 	void showOptions();
+	void hideOptionsThumbs();
+	void showOptionsThumbs();
 
 	// GuiListener
+	void buttonHit(Button* button);
 	void sliderMoved(Slider* slider);
 	void itemSelected(SelectMenu* menu);
+	void labelHit(Label* label);
+	void itemChanged(ItemSelector* selector);
+	void sliderOptionsMoved(SliderOptions* slider);
 
 private:
 	void _removeThumbs();
@@ -45,6 +53,7 @@ private:
 	std::vector<Thumbnail3D*> mThumbs;
 	Ogre::SceneNode* mParentThumbs;
 	Thumbnail3D* mLastThumbOver;
+	sGridThumbs mGridThumbs;
 };
 
 #endif // #ifndef _FORMGAMES_H__

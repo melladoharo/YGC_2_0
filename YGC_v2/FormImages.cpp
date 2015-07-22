@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "FormImages.h"
+#include "ConfigReader.h"
 
 FormImages::FormImages(GameInfo* gInfo, GuiManager* tray, GuiListener* oldListener) : 
 FormBase(tray, oldListener),
@@ -7,6 +8,15 @@ mParentThumbs(mSceneMgr->getRootSceneNode()->createChildSceneNode()),
 mGameInfo(gInfo),
 mLastThumbOver(0)
 {
+	resetCamera();
+	// load grid-thumbs values from .ini config file
+	mGridThumbs.rows = Ogre::StringConverter::parseInt(ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM_IMAGES", "Thumbs_Rows", "1"));
+	mGridThumbs.top = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Top", 0);
+	mGridThumbs.left = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Left", 0);
+	mGridThumbs.horizontalSep = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Horizontal_Sep", 0);
+	mGridThumbs.verticalSep = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Vertial_Sep", 0);
+	mGridThumbs.size = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Size", 0);
+
 	// find all images of the game
 	mGameInfo->findScreenshotsResources(mImages);
 	mIndexScreenshots = std::make_pair(0, mImages.size());
@@ -24,34 +34,30 @@ mLastThumbOver(0)
 		mThumbs.push_back(new Thumbnail3D(mParentThumbs, "FormImages/Thumb/" + Ogre::StringConverter::toString(i),
 			mGameInfo->getGroupName(), mImages[i].filename, mImages[i].nameThumb));
 		mThumbs.back()->setIndex(mThumbs.size() - 1);
+		mThumbs.back()->setScale(Ogre::Vector3(mGridThumbs.size, mGridThumbs.size, mGridThumbs.size));
 	}
 	
-	// ... and set in a grid
-	Thumbnail3D::setThumbs3DInGrid(mThumbs, 3, 10.4f, 6.25f, 3);
+	// ... and set them in a grid
+	Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
 
 	// material for original-selected images
 	Ogre::MaterialPtr matImage = Ogre::MaterialManager::getSingleton().create(
 		"FormImage/Mat/Original", mGameInfo->getGroupName());
 
-	// slider for movement
-	if (mThumbs.size() > 9)
-	{
-		Ogre::Real minValue = 0;
-		Ogre::Real maxValue = mThumbs.back()->getPosition().x;
-		Slider* sd = mTrayMgr->createSlider("FormImages/Slider", 370, minValue, maxValue, maxValue + 100);
-		sd->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
-		sd->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
-		sd->setLeft(-(sd->getWidth() / 2));
-		sd->setTop(-50);
-		addWidgetToForm(sd);
-	}
+	// slider 
+	Ogre::Real minValue = 0;
+	Ogre::Real maxValue = (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0);
+	Slider* sd = mTrayMgr->createSlider("FormImages/Slider", 370, minValue, maxValue, 1000);
+	sd->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
+	sd->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+	sd->setLeft(-(sd->getWidth() / 2));
+	sd->setTop(-50);
+	addWidgetToForm(sd);
 
 	// select menu 
 	Ogre::StringVector items;
-	items.push_back("All Images");
-	items.push_back("Concept Art");
-	items.push_back("Screenshots");
-	items.push_back("Wallpapers");
+		items.push_back("All Images"); items.push_back("Concept Art");
+		items.push_back("Screenshots"); items.push_back("Wallpapers");
 	SelectMenu* sm = mTrayMgr->createSelectMenu("FormImages/SelMenu", items, 275.0f);
 	sm->getOverlayElement()->setVerticalAlignment(Ogre::GVA_TOP);
 	sm->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
@@ -66,6 +72,7 @@ FormImages::~FormImages()
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		delete mThumbs[i];
 	mSceneMgr->destroySceneNode(mParentThumbs);
+	hideAllOptions();
 }
 
 
@@ -84,24 +91,27 @@ bool FormImages::mouseMoved(const OIS::MouseEvent &arg)
 {
 	if (mTrayMgr->injectMouseMove(arg)) return true;
 
-	// mouse ray [intersection with objects]
-	Ogre::Ray mouseRay = mTrayMgr->getCursorRay(mCamera);
-	mRaySceneQuery->setRay(mouseRay);
-
-	// execute query
-	Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
-	Ogre::RaySceneQueryResult::reverse_iterator iter = result.rbegin();
-
-	Thumbnail3D* currentOver = 0;
-	for (iter; iter != result.rend(); ++iter)
+	if (!mTrayMgr->isWindowDialogVisible()) // is a option windows visible? if not, continue
 	{
-		if (iter->movable->isVisible() && iter->movable->getName().find("Mesh/Thumbnail3D/") != Ogre::String::npos)
+		// mouse ray [intersection with objects]
+		Ogre::Ray mouseRay = mTrayMgr->getCursorRay(mCamera);
+		mRaySceneQuery->setRay(mouseRay);
+
+		// execute query
+		Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
+		Ogre::RaySceneQueryResult::reverse_iterator iter = result.rbegin();
+
+		Thumbnail3D* currentOver = 0;
+		for (iter; iter != result.rend(); ++iter)
 		{
-			currentOver = Thumbnail3D::getThumbnail3dOver(mThumbs, iter->movable->getName());
+			if (iter->movable->isVisible() && iter->movable->getName().find("Mesh/Thumbnail3D/") != Ogre::String::npos)
+			{
+				currentOver = Thumbnail3D::getThumbnail3dOver(mThumbs, iter->movable->getName());
+			}
 		}
+		if (currentOver) mLastThumbOver = currentOver;
+		else if (mLastThumbOver) { mLastThumbOver->setMouseUp(); mLastThumbOver = 0; }
 	}
-	if (currentOver) mLastThumbOver = currentOver;
-	else if (mLastThumbOver) { mLastThumbOver->setMouseUp(); mLastThumbOver = 0; }
 	
 	return FormBase::mouseMoved(arg);
 }
@@ -159,6 +169,7 @@ void FormImages::hide()
 	FormBase::hide();
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->hide();
+	hideAllOptions();
 }
 
 void FormImages::show()
@@ -172,6 +183,20 @@ void FormImages::show()
 }
 
 
+
+void FormImages::buttonHit(Button* button)
+{
+	if (button->getName() == "FormImages/Button/CloseOptions")
+	{
+		hideOptions();
+	}
+	else if (button->getName() == "FormImages/Button/CloseOptionsThumbs")
+	{
+		hideOptionsThumbs();
+		showOptions();
+		ConfigReader::getSingletonPtr()->saveConfig();
+	}
+}
 
 void FormImages::sliderMoved(Slider* slider)
 {
@@ -198,9 +223,64 @@ void FormImages::itemSelected(SelectMenu* menu)
 	}
 }
 
-void FormImages::showOptions()
+void FormImages::labelHit(Label* label)
 {
+	if (label->getName() == "FormImages/Label/EditThumbs")
+	{
+		hideOptions();
+		showOptionsThumbs();
+	}
+}
 
+void FormImages::itemChanged(ItemSelector* selector)
+{
+	if (selector->getName() == "FormImages/Selector/Rows")
+	{
+		mGridThumbs.rows = Ogre::StringConverter::parseInt(selector->getSelectedOption());
+		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Rows", mGridThumbs.rows);
+		Slider* sd = dynamic_cast<Slider*>(mTrayMgr->getWidget("FormImages/Slider"));
+		sd->setRange(0, (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0), 1000, false);
+	}
+}
+
+void FormImages::sliderOptionsMoved(SliderOptions* slider)
+{
+	if (slider->getName() == "FormImages/Slider/Size")
+	{
+		mGridThumbs.size = slider->getValue();
+		for (unsigned int i = 0; i < mThumbs.size(); ++i)
+			mThumbs[i]->setScale(Ogre::Vector3(mGridThumbs.size, mGridThumbs.size, mGridThumbs.size));
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Size", mGridThumbs.size);
+	}
+	else if (slider->getName() == "FormImages/Slider/Top")
+	{
+		mGridThumbs.top = slider->getValue();
+		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Top", mGridThumbs.top);
+	}
+	else if (slider->getName() == "FormImages/Slider/Left")
+	{
+		mGridThumbs.left = slider->getValue();
+		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Left", mGridThumbs.left);
+		Slider* sd = dynamic_cast<Slider*>(mTrayMgr->getWidget("FormImages/Slider"));
+		sd->setRange(0, (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0), 1000, false);
+	}
+	else if (slider->getName() == "FormImages/Slider/SepHor")
+	{
+		mGridThumbs.horizontalSep = slider->getValue();
+		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Horizontal_Sep", mGridThumbs.horizontalSep);
+		Slider* sd = dynamic_cast<Slider*>(mTrayMgr->getWidget("FormImages/Slider"));
+		sd->setRange(0, (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0), 1000, false);
+	}
+	else if (slider->getName() == "FormImages/Slider/SepVer")
+	{
+		mGridThumbs.verticalSep = slider->getValue();
+		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Vertial_Sep", mGridThumbs.verticalSep);
+	}
 }
 
 
@@ -223,7 +303,7 @@ void FormImages::_filterImageByIndex(std::pair<unsigned int, unsigned int> index
 	if (!mThumbs.empty())
 	{
 		// adjust thumbnail in a grid
-		Thumbnail3D::setThumbs3DInGrid(mThumbs, 3, 10.4f, 6.25f, 3);
+		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
 
 		Slider* slider = (Slider *)mTrayMgr->getWidget("FormImages/Slider");
 		if (slider)
@@ -240,6 +320,88 @@ void FormImages::_filterImageByIndex(std::pair<unsigned int, unsigned int> index
 				slider->hide();
 			}
 		}
+	}
+}
+
+
+
+void FormImages::hideAllOptions()
+{
+	hideOptions();
+	hideOptionsThumbs();
+}
+
+void FormImages::hideOptions()
+{
+	if (mTrayMgr->getWidget("FormImages/Window/Options"))
+	{
+		mTrayMgr->destroyDialogWindow("FormImages/Window/Options");
+		mTrayMgr->destroyWidget("FormImages/Label/EditThumbs");
+		mTrayMgr->destroyWidget("FormImages/Label/Help");
+		mTrayMgr->destroyWidget("FormImages/Button/CloseOptions");
+	}
+}
+
+void FormImages::showOptions()
+{
+	if (!mTrayMgr->getWidget("FormImages/Window/Options")) // menu is hidden
+	{
+		unsigned int numOptions = 3;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 450;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+		mTrayMgr->createDialogWindow("FormImages/Window/Options", "FORM IMAGES OPTIONS", left, top, width, height); top += sepOptions / 2;
+		mTrayMgr->createLabel("FormImages/Label/EditThumbs", "EDIT THUMBNAILS", left, top, width, 23);				top += sepOptions;
+		mTrayMgr->createLabel("FormImages/Label/Help", "HELP", left, top, width, 23);								top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormImages/Button/CloseOptions", "BACK", left, top, 60);
+	}
+}
+
+void FormImages::hideOptionsThumbs()
+{
+	if (mTrayMgr->getWidget("FormImages/Window/Thumbs"))
+	{
+		mTrayMgr->destroyDialogWindow("FormImages/Window/Thumbs");
+		mTrayMgr->destroyWidget("FormImages/Selector/Rows");
+		mTrayMgr->destroyWidget("FormImages/Slider/Top");
+		mTrayMgr->destroyWidget("FormImages/Slider/Left");
+		mTrayMgr->destroyWidget("FormImages/Slider/SepHor");
+		mTrayMgr->destroyWidget("FormImages/Slider/SepVer");
+		mTrayMgr->destroyWidget("FormImages/Slider/Size");
+		mTrayMgr->destroyWidget("FormImages/Button/CloseOptionsThumbs");
+	}
+}
+
+void FormImages::showOptionsThumbs()
+{
+	if (!mTrayMgr->getWidget("FormImages/Window/Thumbs")) // menu is hidden
+	{
+		unsigned int numOptions = 7;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 450;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+		Ogre::StringVector itemsRows;
+		for (unsigned int i = 1; i < 5; ++i) itemsRows.push_back(Ogre::StringConverter::toString(i));
+
+		mTrayMgr->createDialogWindow("FormImages/Window/Thumbs", "THUMBNAILS OPTIONS", left, top, width, height);											top += sepOptions / 2;
+		ItemSelector* selectorRows = mTrayMgr->createItemSelector("FormImages/Selector/Rows", "Number of rows", itemsRows, left, top, width);				top += sepOptions;
+		SliderOptions* sliderTop = mTrayMgr->createSliderOptions("FormImages/Slider/Top", "Thumbs Top", left, top, width, -10, 10, 1000);					top += sepOptions;
+		SliderOptions* sliderLeft = mTrayMgr->createSliderOptions("FormImages/Slider/Left", "Thumbs Left", left, top, width, 0, 40, 1000);					top += sepOptions;
+		SliderOptions* sliderHorSep = mTrayMgr->createSliderOptions("FormImages/Slider/SepHor", "Horizontal Separation", left, top, width, 1, 40, 1000);		top += sepOptions;
+		SliderOptions* sliderVerSep = mTrayMgr->createSliderOptions("FormImages/Slider/SepVer", "Vertical Separation", left, top, width, 1, 20, 1000);		top += sepOptions;
+		SliderOptions* sliderSize = mTrayMgr->createSliderOptions("FormImages/Slider/Size", "Thumbs size", left, top, width, 2, 8, 1000);					top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormImages/Button/CloseOptionsThumbs", "BACK", left, top, 60);
+
+		selectorRows->selectOption(Ogre::StringConverter::toString(mGridThumbs.rows), false);
+		sliderTop->setValue(mGridThumbs.top, false);
+		sliderLeft->setValue(mGridThumbs.left, false);
+		sliderHorSep->setValue(mGridThumbs.horizontalSep, false);
+		sliderVerSep->setValue(mGridThumbs.verticalSep, false);
+		sliderSize->setValue(mGridThumbs.size, false);
 	}
 }
 

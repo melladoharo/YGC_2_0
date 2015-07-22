@@ -3,6 +3,16 @@
 
 #include "Thumbnail.h"
 
+struct sGridThumbs
+{
+	unsigned int rows;
+	Ogre::Real size;
+	Ogre::Real left;
+	Ogre::Real top;
+	Ogre::Real horizontalSep;
+	Ogre::Real verticalSep;
+};
+
 class Thumbnail3D
 {
 public:
@@ -21,14 +31,15 @@ public:
 	void setPosition(const Ogre::Vector3& newPos) { if (mNodeThumb) mNodeThumb->setPosition(newPos); }
 	Ogre::Vector3 getPosition() { return mNodeThumb->getPosition(); }
 	void scale(Ogre::Vector3 newScl) { mNodeThumb->scale(newScl); }
+	void setScale(Ogre::Vector3 newScl) { _resizeThumb(newScl); }
 	void setMaterialWidget(Ogre::String nameMaterial) { mThumbWidget->setMaterial(nameMaterial); }
 	Ogre::String getName() { return (mEntThumb) ? mEntThumb->getName() : Ogre::StringUtil::BLANK; }
 
 	static Thumbnail3D* getThumbnail3dOver(std::vector<Thumbnail3D*>& thumbs, const Ogre::String& nameSelected);
-	static void setThumbs3DInGrid(std::vector<Thumbnail3D*>& thumbs, Ogre::Real top,
-		Ogre::Real sepHor, Ogre::Real sepVer, unsigned int maxRows);
+	static void setThumbs3DInGrid(std::vector<Thumbnail3D*>& thumbs, const sGridThumbs& gridThumbs);
 
 private:
+	void _resizeThumb(const Ogre::Vector3& scl);
 	Ogre::Vector2 _getScreenPosition(Ogre::Vector3 position);
 	Thumbnail* _createThumbWidget(Ogre::Real left, Ogre::Real top, Ogre::Real width, Ogre::Real height);
 	void _removeThumbWidget();

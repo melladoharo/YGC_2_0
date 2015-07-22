@@ -30,13 +30,7 @@ mVisible(true)
 	mEntThumb->getSubEntity(1)->setMaterialName(matThumb->getName());
 
 	// resize thumb to correct aspect ratio
-	Ogre::Real sizeTexX = matThumb->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions().first;
-	Ogre::Real sizeTexY = matThumb->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions().second;
-	Ogre::Vector3 sclFactor(mNodeThumb->getScale());
-	Ogre::Real ratio = sizeTexX / sizeTexY;
-	sclFactor.x *= ratio;
-	mNodeThumb->scale(sclFactor);
-	mNodeThumb->scale(2.7f, 2.7f, 2.7f);
+	_resizeThumb(Ogre::Vector3(2.7f, 2.7f, 2.7f));
 }
 
 Thumbnail3D::~Thumbnail3D()
@@ -90,77 +84,33 @@ void Thumbnail3D::setMouseUp()
 
 
 
-
-Thumbnail* Thumbnail3D::_createThumbWidget(Ogre::Real left, Ogre::Real top, Ogre::Real width, Ogre::Real height)
+void Thumbnail3D::setThumbs3DInGrid(std::vector<Thumbnail3D*>& thumbs, const sGridThumbs& gridThumbs)
 {
-	_removeThumbWidget();
-
-	mThumbLayer = Ogre::OverlayManager::getSingleton().create("/GUImanager/Thumblayer3D/" + mName);
-	mElement = (Ogre::OverlayContainer *)Ogre::OverlayManager::getSingleton().createOverlayElement("Panel", "Thumb/Panel/" + mName);
-	mThumbWidget = new Thumbnail("Thumbnail/Widget" + mName, mNameGroup, mCaption, mTextName, height);
-	mThumbWidget->setLeft(left);
-	mThumbWidget->setTop(top);
-	mElement->addChild(mThumbWidget->getOverlayElement());
-	mThumbLayer->add2D(mElement);
-	mThumbLayer->setZOrder(390);
-	mThumbLayer->show();
-
-	return mThumbWidget;
-}
-
-void Thumbnail3D::_removeThumbWidget()
-{
-	if (Ogre::OverlayManager::getSingleton().getByName("/GUImanager/Thumblayer3D/" + mName))
-	{
-		Widget::nukeOverlayElement(mElement);
-		mElement = 0;
-		Ogre::OverlayManager::getSingleton().destroy(mThumbLayer);
-		mThumbLayer = 0;
-		if (mThumbWidget) delete mThumbWidget;
-		mThumbWidget = 0;
-	}
-}
-
-Ogre::Vector2 Thumbnail3D::_getScreenPosition(Ogre::Vector3 position)
-{
-	Ogre::Real screenX = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualWidth();
-	Ogre::Real screenY = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
-	Ogre::Vector3 hcsPosition = mCamera->getProjectionMatrix() * mCamera->getViewMatrix() * position;
-	Ogre::Vector2 screenPos;
-	screenPos.x = screenX / 2.0f;
-	screenPos.y = screenY / 2.0f;
-	screenPos.x = screenPos.x - (screenPos.x * -hcsPosition.x);
-	screenPos.y = screenPos.y - (screenPos.y * hcsPosition.y);
-	return screenPos;
-}
-
-
-
-void Thumbnail3D::setThumbs3DInGrid(std::vector<Thumbnail3D*>& thumbs, Ogre::Real top, Ogre::Real sepHor, Ogre::Real sepVer, unsigned int maxRows)
-{
+	/*
 	Ogre::Real aspectRatio = 
 		(Ogre::Real) Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualWidth() /
 		(Ogre::Real) Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
-
+	
 	Ogre::Real left = 0;
 	if (aspectRatio == 16.0f / 10.0f) left = 19;
 	else if (aspectRatio == 16.0f / 9.0f) left = 22;
 	else left = 21;
+	*/
 
-	Ogre::Vector3 posThumb(-left, top, -40);
-	unsigned int row = 0;
+	Ogre::Vector3 posThumb(-gridThumbs.left, gridThumbs.top, -40);
+	unsigned int currentRow = 0;
 
 	for (unsigned int i = 0; i < thumbs.size(); ++i)
 	{
 		thumbs[i]->setPosition(posThumb);
-		posThumb.y -= sepVer;
-		row++;
+		posThumb.y -= gridThumbs.verticalSep;
+		currentRow++;
 
-		if (row >= maxRows)
+		if (currentRow >= gridThumbs.rows)
 		{
-			posThumb.y = top;
-			posThumb.x += sepHor;
-			row = 0;
+			posThumb.y = gridThumbs.top;
+			posThumb.x += gridThumbs.horizontalSep;
+			currentRow = 0;
 		}
 	}
 }
@@ -192,5 +142,61 @@ Thumbnail3D* Thumbnail3D::getThumbnail3dOver(std::vector<Thumbnail3D*>& thumbs, 
 	}
 
 	return lastThumbOver;
+}
+
+
+
+void Thumbnail3D::_resizeThumb(const Ogre::Vector3& scl)
+{
+	mNodeThumb->setScale(scl);
+	Ogre::Real sizeTexX = matThumb->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions().first;
+	Ogre::Real sizeTexY = matThumb->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions().second;
+	Ogre::Vector3 sclFactor(mNodeThumb->getScale());
+	Ogre::Real ratio = sizeTexX / sizeTexY;
+	sclFactor.x *= ratio;
+	mNodeThumb->setScale(sclFactor);
+}
+
+Ogre::Vector2 Thumbnail3D::_getScreenPosition(Ogre::Vector3 position)
+{
+	Ogre::Real screenX = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualWidth();
+	Ogre::Real screenY = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
+	Ogre::Vector3 hcsPosition = mCamera->getProjectionMatrix() * mCamera->getViewMatrix() * position;
+	Ogre::Vector2 screenPos;
+	screenPos.x = screenX / 2.0f;
+	screenPos.y = screenY / 2.0f;
+	screenPos.x = screenPos.x - (screenPos.x * -hcsPosition.x);
+	screenPos.y = screenPos.y - (screenPos.y * hcsPosition.y);
+	return screenPos;
+}
+
+Thumbnail* Thumbnail3D::_createThumbWidget(Ogre::Real left, Ogre::Real top, Ogre::Real width, Ogre::Real height)
+{
+	_removeThumbWidget();
+
+	mThumbLayer = Ogre::OverlayManager::getSingleton().create("/GUImanager/Thumblayer3D/" + mName);
+	mElement = (Ogre::OverlayContainer *)Ogre::OverlayManager::getSingleton().createOverlayElement("Panel", "Thumb/Panel/" + mName);
+	mThumbWidget = new Thumbnail("Thumbnail/Widget" + mName, mNameGroup, mCaption, mTextName, height);
+	mThumbWidget->setLeft(left);
+	mThumbWidget->setTop(top);
+	mElement->addChild(mThumbWidget->getOverlayElement());
+	mThumbLayer->add2D(mElement);
+	mThumbLayer->setZOrder(390);
+	mThumbLayer->show();
+
+	return mThumbWidget;
+}
+
+void Thumbnail3D::_removeThumbWidget()
+{
+	if (Ogre::OverlayManager::getSingleton().getByName("/GUImanager/Thumblayer3D/" + mName))
+	{
+		Widget::nukeOverlayElement(mElement);
+		mElement = 0;
+		Ogre::OverlayManager::getSingleton().destroy(mThumbLayer);
+		mThumbLayer = 0;
+		if (mThumbWidget) delete mThumbWidget;
+		mThumbWidget = 0;
+	}
 }
 

@@ -75,6 +75,7 @@ public:
 	bool isBackdropVisible() { return mBackdropLayer->isVisible(); }
 	bool isMenuBarVisible() { return mMenuBar->isVisible(); }
 	bool isWidgetsVisible() { return mWidgetsLayer->isVisible(); }
+	bool isWindowDialogVisible() { return mWindowsLayer->isVisible(); }
 
 	/*-----------------------------------------------------------------------------
 	| Displays specified material on backdrop, or the last material used if

@@ -23,11 +23,19 @@ public:
 	// FormBase
 	void hide();
 	void show();
+	void hideAllOptions();
+	void hideOptions();
 	void showOptions();
+	void hideOptionsThumbs();
+	void showOptionsThumbs();
 
 	// GuiListener
+	void buttonHit(Button* button);
 	void sliderMoved(Slider* slider);
+	void labelHit(Label* label);
 	void itemSelected(SelectMenu* menu);
+	void itemChanged(ItemSelector* selector);
+	void sliderOptionsMoved(SliderOptions* slider);
 
 private:
 	void _filterImageByIndex(std::pair<unsigned int, unsigned int> indexFilter);
@@ -37,6 +45,7 @@ private:
 	std::vector<sInfoResource> mImages;
 	std::vector<Thumbnail3D*> mThumbs;
 	Thumbnail3D* mLastThumbOver;
+	sGridThumbs mGridThumbs;
 	std::pair<unsigned int, unsigned int> mIndexScreenshots,
 		mIndexWallpapers, mIndexConceptArt;
 };

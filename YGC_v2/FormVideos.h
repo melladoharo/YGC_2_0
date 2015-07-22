@@ -28,12 +28,20 @@ public:
 	// FormBase
 	void hide();
 	void show();
+	void hideAllOptions();
+	void hideOptions();
 	void showOptions();
+	void hideOptionsThumbs();
+	void showOptionsThumbs();
 
 	// GuiListener
+	void buttonHit(Button* button);
 	void sliderMoved(Slider* slider);
 	void itemSelected(SelectMenu* menu);
 	void medialPlayerHit(MediaPlayer* player);
+	void labelHit(Label* label);
+	void itemChanged(ItemSelector* selector);
+	void sliderOptionsMoved(SliderOptions* slider);
 
 	// Form video
 	void playVideo(unsigned int index, bool fullscreen = true);
@@ -47,6 +55,7 @@ private:
 	std::vector<Thumbnail3D*> mThumbs;
 	Ogre::SceneNode* mParentThumbs;
 	Thumbnail3D* mLastThumbOver;
+	sGridThumbs mGridThumbs;
 	Video::VideoPlayer* mVideoPlayer;
 	Ogre::Real mTimeOver;
 	std::pair<unsigned int, unsigned int> mIndexTrailer, mIndexGameplay;
