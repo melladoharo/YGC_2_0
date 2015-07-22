@@ -291,6 +291,14 @@ bool BaseApp::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	mTrayMgr->frameRenderingQueued(evt);
 	if( mCameraMan) mCameraMan->frameRenderingQueued(evt);
 
+	// finish ygc 2.0
+	if (mFormSelector && mFormSelector->isFinished())
+	{
+		delete mFormSelector;
+		mFormSelector = 0;
+		mShutDown = true;
+	}
+
 	return true;
 }
 

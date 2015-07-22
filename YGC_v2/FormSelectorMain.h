@@ -14,6 +14,8 @@ public:
 	FormSelectorMain(GuiManager* tray, GuiListener* oldListener = 0);
 	~FormSelectorMain();
 
+	bool isFinished() { return (mFormCurrent == 0); }
+
 	void menuBarItemHit(MenuBar* menu);
 
 private:
