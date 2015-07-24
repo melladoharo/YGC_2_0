@@ -17,6 +17,7 @@
 #include "Label.h"
 #include "DialogWindows.h"
 #include "SliderOptions.h"
+#include "FileExplorer.h"
 #include "DepthOfFieldEffect.h"
 
 class GuiManager : public GuiListener, public Ogre::ResourceGroupListener
@@ -309,6 +310,15 @@ public:
 		mTray->addChild(mWidgets.back()->getOverlayElement());
 		so->_assignListener(mListener);
 		return so;
+	}
+
+	FileExplorer* createFileExplorer(const Ogre::String& name, const Ogre::String& path, Ogre::Real left, Ogre::Real top, Ogre::Real width, Ogre::Real height)
+	{
+		FileExplorer* fe = new FileExplorer(name, path, left, top, width, height);
+		mWidgets.push_back(fe);
+		mTray->addChild(mWidgets.back()->getOverlayElement());
+		fe->_assignListener(mListener);
+		return fe;
 	}
 
 	ProgressBar* createProgressBar(const Ogre::String& name, Ogre::Real width)

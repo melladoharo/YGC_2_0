@@ -20,6 +20,7 @@
     <ClCompile Include="DecorWidget.cpp" />
     <ClCompile Include="DepthOfFieldEffect.cpp" />
     <ClCompile Include="DialogWindows.cpp" />
+    <ClCompile Include="FileExplorer.cpp" />
     <ClCompile Include="FormBase.cpp" />
     <ClCompile Include="FormCollector.cpp" />
     <ClCompile Include="FormGames.cpp" />
@@ -71,6 +72,7 @@
     <ClInclude Include="DecorWidget.h" />
     <ClInclude Include="DepthOfFieldEffect.h" />
     <ClInclude Include="DialogWindows.h" />
+    <ClInclude Include="FileExplorer.h" />
     <ClInclude Include="FormBase.h" />
     <ClInclude Include="FormCollector.h" />
     <ClInclude Include="FormGames.h" />

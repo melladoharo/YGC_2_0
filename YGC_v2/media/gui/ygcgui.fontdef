@@ -25,7 +25,7 @@ YgcFont/Regular/17
 {
 	type 		truetype
 	source 		OpenSans-Regular.ttf
-	size 		18
+	size 		16
 	resolution 	96
 }
 

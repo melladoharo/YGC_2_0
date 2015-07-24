@@ -97,6 +97,19 @@ material YgcGui/IconSettings/Mat : SdkTrays/Base
 		}
 	}
 }
+material YgcGui/IconHome/Mat : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+			texture_unit
+            {
+                texture sdk_icon_home.png
+            }
+		}
+	}
+}
 
 material YgcGui/DecorBar/Mat : SdkTrays/Base
 {

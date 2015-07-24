@@ -578,3 +578,145 @@ template container Panel(YgcGui/SliderOption)
 	}
 }
 
+
+template container Panel(ItemFileExplorer)
+{
+	metrics_mode pixels
+	horz_align left
+	transparent true
+	height 28
+	material YgcGui/Thumbnail/Light/Transparent
+		
+	element TextArea(ItemFileExplorerCaption)
+	{
+		metrics_mode pixels
+		horz_align left
+		font_name YgcFont/Regular/17
+		top 7
+		char_height 18
+		space_width 7
+		colour 0.96 0.95 0.97
+		left 12
+	}
+}
+
+template container Panel(YgcGui/FileExplorer)
+{
+	metrics_mode pixels
+	horz_align left
+	transparent true
+	height 100
+	
+	container Panel(YgcGui/FileExplorerHeader)
+	{
+		metrics_mode pixels
+		horz_align left
+		transparent true
+		height 28
+		
+		element Panel(PreviousButton)
+		{
+			horz_align left
+			metrics_mode pixels
+			material YgcGui/ItemSelector/Previous/Up
+			top 3
+			height 22
+			width 16
+		}
+		element Panel(NextButton)
+		{
+			horz_align left
+			metrics_mode pixels
+			material YgcGui/ItemSelector/Next/Up
+			top 3
+			height 22
+			width 16
+		}
+		element Panel(HomeButton)
+		{
+			horz_align left
+			metrics_mode pixels
+			material YgcGui/IconHome/Mat
+			top 1
+			height 25
+			width 25
+		}
+		container Panel(HeaderContainerTextArea)
+		{
+			metrics_mode pixels
+			horz_align left
+			//transparent true
+			height 28
+			material YgcGui/Thumbnail/Light/Transparent
+			
+			element TextArea(FileExplorerCaption)
+			{
+				metrics_mode pixels
+				horz_align left
+				font_name YgcFont/SemiBold/16
+				top 7
+				char_height 19
+				space_width 7
+				colour 0.96 0.95 0.97
+				left 7
+			}
+		}
+	}
+	container Panel(YgcGui/FileExplorerBody)
+	{
+		metrics_mode pixels
+		horz_align left
+		transparent true
+		//material YgcGui/Thumbnail/Light/Transparent
+		
+		container Panel(BodyContainerTextArea)
+		{
+			metrics_mode pixels
+			horz_align left
+			transparent true
+			height 30
+			material YgcGui/Thumbnail/Light/Transparent
+			
+			element TextArea(ItemsCaption)
+			{
+				metrics_mode pixels
+				horz_align left
+				font_name YgcFont/SemiBold/16
+				top 7
+				char_height 19
+				space_width 7
+				colour 0.96 0.95 0.97
+				left 12
+			}
+		}
+		container BorderPanel(ExplorerTrackFront)
+		{
+			metrics_mode pixels
+			horz_align left
+			material YgcGui/SliderOption/Track/Back
+			height 7
+			width 5
+			uv_coords 0.20 0.0 0.75 1.0
+			
+			border_material YgcGui/SliderOption/Track/Back
+			border_size 1 1 0 0
+			border_left_uv  0.0 0.0 0.20 1.0
+			border_right_uv 0.75 0.0 1.0 1.0
+			
+			element Panel(ExplorerHandle)
+			{	
+				metrics_mode pixels
+				horz_align left
+				material YgcGui/SliderOption/Track/Front
+				height 7
+				width 6
+				uv_coords 0.20 0.0 0.75 1.0
+			
+				border_material YgcGui/SliderOption/Track/Front
+				border_size 1 1 0 0
+				border_left_uv  0.0 0.0 0.20 1.0
+				border_right_uv 0.75 0.0 1.0 1.0
+			}
+		}
+	}
+}
