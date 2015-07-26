@@ -9,6 +9,7 @@
 #include "FormOverview.h"
 #include "FormReview.h"
 #include "FormGames.h"
+#include "FormOptions.h"
 #include "FormImages.h"
 #include "FormModels.h"
 #include "FormMusic.h"
@@ -24,7 +25,7 @@ BaseApp::BaseApp()
 	mShutDown(false),
 	mInputManager(0), mMouse(0), mKeyboard(0), mTrayMgr(0), mGround(0), mBackground(0), mDofEffect(0),
 	mFormSelector(0), mFormGames(0), mFormOverview(0), mFormReview(0), mFormImages(0), mFormModels(0),
-	mFormMusic(0), mFormVideos(0), mFormCollector(0), mGameInfo(0)
+	mFormMusic(0), mFormVideos(0), mFormCollector(0), mGameInfo(0), mFormOptions(0)
 {
 	srand(time(NULL));
 }
@@ -34,6 +35,7 @@ BaseApp::~BaseApp()
 {
 	if (mFormSelector) delete mFormSelector;
 	if (mFormGames) delete mFormGames;
+	if (mFormOptions) delete mFormOptions;
 	if (mFormOverview) delete mFormOverview;
 	if (mFormReview) delete mFormReview;
 	if (mFormImages) delete mFormImages;
@@ -57,50 +59,82 @@ BaseApp::~BaseApp()
 //-------------------------------------------------------------------------------------
 bool BaseApp::go(void)
 {
-#ifdef _DEBUG
-	mResourcesCfg = "resources_d.cfg";
-	mPluginsCfg = "plugins_d.cfg";
-#else
-	mResourcesCfg = "resources.cfg";
-	mPluginsCfg = "plugins.cfg";
-#endif
+	// construct the Ogre::Root object
+	mRoot = new Ogre::Root("", "", "YGC2.log");
 
-	// construct Ogre::Root
-	mRoot = new Ogre::Root(mPluginsCfg);
+	// list of required plugins
+	Ogre::StringVector required_plugins;
+	required_plugins.push_back("D3D9 RenderSystem");
+	required_plugins.push_back("Cg Program Manager");
+	// list of plugins to load
+	Ogre::StringVector plugins_toLoad;
+	plugins_toLoad.push_back("RenderSystem_Direct3D9");
+	plugins_toLoad.push_back("Plugin_CgProgramManager");
 
-	//-------------------------------------------------------------------------------------
-	// Load resource paths from config file
-	Ogre::ConfigFile cf;
-	cf.load(mResourcesCfg);
-
-	// Go through all sections & settings in the file
-	Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
-
-	Ogre::String secName, typeName, archName;
-	while (seci.hasMoreElements())
+	// load the Direct3d RenderSystem and the Octree SceneManager plugins
+	for (Ogre::StringVector::iterator j = plugins_toLoad.begin(); j != plugins_toLoad.end(); ++j)
 	{
-		secName = seci.peekNextKey();
-		Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
-		Ogre::ConfigFile::SettingsMultiMap::iterator i;
-		for (i = settings->begin(); i != settings->end(); ++i)
+#ifdef _DEBUG
+		mRoot->loadPlugin(*j + Ogre::String("_d"));
+#else
+		mRoot->loadPlugin(*j);
+#endif;
+	}
+	// Check if the required plugins are installed and ready for use [If not, exit the application]
+	Ogre::Root::PluginInstanceList ip = mRoot->getInstalledPlugins();
+	for (Ogre::StringVector::iterator j = required_plugins.begin(); j != required_plugins.end(); ++j)
+	{
+		bool found = false;
+		// try to find the required plugin in the current installed plugins
+		for (Ogre::Root::PluginInstanceList::iterator k = ip.begin(); k != ip.end(); ++k)
 		{
-			typeName = i->first;
-			archName = i->second;
-			Ogre::ResourceGroupManager::getSingleton().addResourceLocation(archName, typeName, secName);
+			if ((*k)->getName() == *j)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)  // return false because a required plugin is not available
+		{
+			return false;
 		}
 	}
 
-	//-------------------------------------------------------------------------------------
-	// configure
-	//if(mRoot->restoreConfig())
-	if (mRoot->showConfigDialog())
+	/*--------------------------------------------------------------------------------------------------*/
+	// Setup resources
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./media/fonts", "FileSystem", "General");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./media/gui", "FileSystem", "General");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./media/materials/programs", "FileSystem", "General");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./media/materials/scripts", "FileSystem", "General");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./media/materials/textures", "FileSystem", "General");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./media/models", "FileSystem", "General");
+
+	/*--------------------------------------------------------------------------------------------------*/
+	// Initialize render system config
+	Ogre::RenderSystem* rs = mRoot->getRenderSystemByName("Direct3D9 Rendering Subsystem");
+	if (!(rs->getName() == "Direct3D9 Rendering Subsystem"))
 	{
-		mWindow = mRoot->initialise(true, "YGC 2.0 - Your Games Collection");
+		return false; //No RenderSystem found
 	}
-	else
-	{
-		return false;
-	}
+
+	// configure our RenderSystem
+	rs->setConfigOption("Allow NVPerfHUD", "No");
+	//rs->setConfigOption("FSAA", mConfig->fsaa);
+	rs->setConfigOption("Fixed Pipeline Enabled", "Yes");
+	rs->setConfigOption("Floating-point mode", "Fastest");
+	rs->setConfigOption("Full Screen", ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Fullscreen", "Yes"));
+	rs->setConfigOption("Multi device memory hint", "Use minimun system memory");
+	rs->setConfigOption("Resource Creation Policy", "Create on all devices");
+	const Ogre::StringVector& rDevice = rs->getConfigOptions()["Rendering Device"].possibleValues;
+	if (!rDevice.empty()) rs->setConfigOption("Rendering Device", rDevice.back());
+	rs->setConfigOption("Use Multihead", "Auto");
+	rs->setConfigOption("VSync", ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "VSync", "Yes"));
+	rs->setConfigOption("VSync Interval", "1");
+	rs->setConfigOption("Video Mode", ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Resolution", ""));
+	rs->setConfigOption("sRGB Gamma Conversion", "No");
+
+	mRoot->setRenderSystem(rs);
+	mWindow = mRoot->initialise(true, "YGC 2.0 - Your Games Collection");
 
 	//-------------------------------------------------------------------------------------
 	// Get the SceneManager, in this case a generic one
@@ -251,6 +285,7 @@ bool BaseApp::go(void)
 	mTrayMgr->setDofEffectEnable(false);
 	mFormSelector = new FormSelectorMain(mTrayMgr, this);
 	//mFormGames = new FormGames("D:/Programas/Juegos - Info DEBUG", mTrayMgr, this);
+	//mFormOptions = new FormOptions(mTrayMgr, this);
 	//mGameInfo = new GameInfo("D:/Programas/Juegos - Info DEBUG/The Witcher 2");
 	//mGameInfo = new GameInfo("D:/Programas/Juegos - Info DEBUG/Dragon Age Inquisition");
 	//mGameInfo = new GameInfo("D:/Programas/Juegos - Info DEBUG/Pruebas");

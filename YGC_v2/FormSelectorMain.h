@@ -5,8 +5,7 @@
 
 class FormBase;
 class FormGames;
-class FormSagas;
-class FormOptionMain;
+class FormOptions;
 
 class FormSelectorMain : public GuiListener
 {
@@ -23,6 +22,7 @@ private:
 	GuiListener* mOldListener;
 	FormBase* mFormCurrent;
 	FormGames* mFormGames;
+	FormOptions* mFormOptions;
 };
 
 #endif // #ifndef _FORMSELECTORMAIN_H__

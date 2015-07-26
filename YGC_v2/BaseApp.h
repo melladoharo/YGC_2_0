@@ -16,6 +16,7 @@ class FormMusic;
 class FormVideos;
 class FormCollector;
 class GameInfo;
+class FormOptions;
 class FormSelectorMain;
 
 class BaseApp : public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener, public GuiListener
@@ -71,6 +72,7 @@ private:
 	FormMusic* mFormMusic;
 	FormVideos* mFormVideos;
 	FormCollector* mFormCollector;
+	FormOptions* mFormOptions;
 	Ground* mGround;
 	Background* mBackground;
 	DOFManager* mDofEffect;

@@ -117,7 +117,7 @@ void ItemSelector::selectOption(const Ogre::String& option, bool notifyListener 
 	}
 }
 
-Ogre::DisplayString ItemSelector::getSelectedOption()
+Ogre::String ItemSelector::getSelectedOption()
 {
 	if (mCurrentItem >= 0 && mCurrentItem < mItems.size())
 		return mItems[mCurrentItem];

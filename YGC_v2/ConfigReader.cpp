@@ -27,7 +27,10 @@ SI_Error ConfigReader::_createDefaultConfig()
 	mReader->Reset();
 	mReader->SetValue("SYSTEM", "Path_Games", "./Games");
 	mReader->SetValue("SYSTEM", "Path_Sagas", "./Sagas");
-	mReader->SetValue("SYSTEM", "Last_Path", "0");
+	mReader->SetValue("SYSTEM.GRAPHICS", "Fullscreen", "Yes");
+	mReader->SetValue("SYSTEM.GRAPHICS", "VSync", "Yes");
+	mReader->SetValue("SYSTEM.GRAPHICS", "Aspect_Ratio", "Auto");
+	mReader->SetValue("SYSTEM.GRAPHICS", "Resolution", "1024 x 768 @ 32-bit colour");
 	mReader->SetDoubleValue("FORM_GAMES", "Thumbs_Rows", 3);
 	mReader->SetDoubleValue("FORM_GAMES", "Thumbs_Size", 2.77f);
 	mReader->SetDoubleValue("FORM_GAMES", "Thumbs_Top", 3);

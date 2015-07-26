@@ -2,13 +2,15 @@
 #include "FormSelectorMain.h"
 #include "FormBase.h"
 #include "FormGames.h"
+#include "FormOptions.h"
 #include "ConfigReader.h"
 
 FormSelectorMain::FormSelectorMain(GuiManager* tray, GuiListener* oldListener /*= 0*/) : 
 mTrayMgr(tray),
 mOldListener(oldListener),
 mFormCurrent(0),
-mFormGames(0)
+mFormGames(0),
+mFormOptions(0)
 {
 	mTrayMgr->setListener(this);
 	mTrayMgr->assignListenerToMenuBar(this);
@@ -23,6 +25,7 @@ mFormGames(0)
 FormSelectorMain::~FormSelectorMain()
 {
 	if (mFormGames) delete mFormGames;
+	if (mFormOptions) delete mFormOptions;
 }
 
 void FormSelectorMain::menuBarItemHit(MenuBar* menu)
@@ -35,7 +38,7 @@ void FormSelectorMain::menuBarItemHit(MenuBar* menu)
 	}
 	else if (menu->getSelectedItem() == "mbw_main_games")
 	{
-		if (!mFormGames) mFormGames = mFormGames = new FormGames(ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Games", "./Games"), mTrayMgr, this);
+		if (!mFormGames) mFormGames = new FormGames(ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Games", "./Games"), mTrayMgr, this);
 		mFormCurrent = mFormGames;
 	}
 	else if (menu->getSelectedItem() == "mbw_main_sagas")
@@ -44,7 +47,8 @@ void FormSelectorMain::menuBarItemHit(MenuBar* menu)
 	}
 	else if (menu->getSelectedItem() == "mbw_main_options")
 	{
-
+		if (!mFormOptions) mFormOptions = new FormOptions(mTrayMgr, this);
+		mFormCurrent = mFormOptions;
 	}
 
 	// apply the new form

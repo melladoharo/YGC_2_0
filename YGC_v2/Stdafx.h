@@ -1,14 +1,20 @@
 #ifndef _STDAFX_H__
 #define _STDAFX_H__
 
+#include <OgrePlugin.h>
 #include <OgreCamera.h>
-#include <OgreEntity.h>
-#include <OgreLogManager.h>
-#include <OgreRoot.h>
-#include <OgreViewport.h>
-#include <OgreSceneManager.h>
-#include <OgreRenderWindow.h>
 #include <OgreConfigFile.h>
+#include <OgreEntity.h>
+#include <OgreHardwarePixelBuffer.h>
+#include <OgreLogManager.h>
+#include <OgreMeshManager.h>
+#include <OgreRenderTargetListener.h>
+#include <OgreRoot.h>
+#include <OgreSceneManager.h>
+#include <OgreSubEntity.h>
+#include <OgreViewport.h>
+#include <OgreRenderWindow.h>
+#include <OgreWindowEventUtilities.h>
 
 #include <OISEvents.h>
 #include <OISInputManager.h>
