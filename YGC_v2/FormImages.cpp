@@ -196,6 +196,39 @@ void FormImages::buttonHit(Button* button)
 		showOptions();
 		ConfigReader::getSingletonPtr()->saveConfig();
 	}
+	else if (button->getName() == "FormImages/Button/DefaultThumbs")
+	{
+		mGridThumbs.rows = 3;
+		mGridThumbs.top = 3;
+		mGridThumbs.left = -20;
+		mGridThumbs.horizontalSep = 11.5f;
+		mGridThumbs.verticalSep = 6.25f;
+		mGridThumbs.size = 2.7f;
+		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
+		for (unsigned int i = 0; i < mThumbs.size(); ++i)
+			mThumbs[i]->setScale(Ogre::Vector3(mGridThumbs.size, mGridThumbs.size, mGridThumbs.size));
+
+		ItemSelector* selectorRows = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormImages/Selector/Rows"));
+		SliderOptions* sliderTop = dynamic_cast<SliderOptions*>(mTrayMgr->getWidget("FormImages/Slider/Top"));
+		SliderOptions* sliderLeft = dynamic_cast<SliderOptions*>(mTrayMgr->getWidget("FormImages/Slider/Left"));
+		SliderOptions* sliderHorSep = dynamic_cast<SliderOptions*>(mTrayMgr->getWidget("FormImages/Slider/SepHor"));
+		SliderOptions* sliderVerSep = dynamic_cast<SliderOptions*>(mTrayMgr->getWidget("FormImages/Slider/SepVer"));
+		SliderOptions* sliderSize = dynamic_cast<SliderOptions*>(mTrayMgr->getWidget("FormImages/Slider/Size"));
+		if (selectorRows) selectorRows->selectOption(Ogre::StringConverter::toString(mGridThumbs.rows), false);
+		if (sliderTop) sliderTop->setValue(mGridThumbs.top, false);
+		if (sliderLeft) sliderLeft->setValue(mGridThumbs.left, false);
+		if (sliderHorSep) sliderHorSep->setValue(mGridThumbs.horizontalSep, false);
+		if (sliderVerSep) sliderVerSep->setValue(mGridThumbs.verticalSep, false);
+		if (sliderSize) sliderSize->setValue(mGridThumbs.size, false);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Rows", mGridThumbs.rows);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Size", mGridThumbs.size);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Top", mGridThumbs.top);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Left", mGridThumbs.left);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Horizontal_Sep", mGridThumbs.horizontalSep);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Vertial_Sep", mGridThumbs.verticalSep);
+		Slider* sd = dynamic_cast<Slider*>(mTrayMgr->getWidget("FormImages/Slider"));
+		sd->setRange(0, (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0), 1000, false);
+	}
 }
 
 void FormImages::sliderMoved(Slider* slider)
@@ -255,7 +288,7 @@ void FormImages::sliderOptionsMoved(SliderOptions* slider)
 	}
 	else if (slider->getName() == "FormImages/Slider/Top")
 	{
-		mGridThumbs.top = slider->getValue();
+		mGridThumbs.top = -slider->getValue();
 		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
 		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Top", mGridThumbs.top);
 	}
@@ -371,6 +404,7 @@ void FormImages::hideOptionsThumbs()
 		mTrayMgr->destroyWidget("FormImages/Slider/SepVer");
 		mTrayMgr->destroyWidget("FormImages/Slider/Size");
 		mTrayMgr->destroyWidget("FormImages/Button/CloseOptionsThumbs");
+		mTrayMgr->destroyWidget("FormImages/Button/DefaultThumbs");
 	}
 }
 
@@ -389,12 +423,13 @@ void FormImages::showOptionsThumbs()
 
 		mTrayMgr->createDialogWindow("FormImages/Window/Thumbs", "THUMBNAILS OPTIONS", left, top, width, height);											top += sepOptions / 2;
 		ItemSelector* selectorRows = mTrayMgr->createItemSelector("FormImages/Selector/Rows", "Number of rows", itemsRows, left, top, width);				top += sepOptions;
-		SliderOptions* sliderTop = mTrayMgr->createSliderOptions("FormImages/Slider/Top", "Thumbs Top", left, top, width, -10, 10, 1000);					top += sepOptions;
-		SliderOptions* sliderLeft = mTrayMgr->createSliderOptions("FormImages/Slider/Left", "Thumbs Left", left, top, width, 0, 40, 1000);					top += sepOptions;
-		SliderOptions* sliderHorSep = mTrayMgr->createSliderOptions("FormImages/Slider/SepHor", "Horizontal Separation", left, top, width, 1, 40, 1000);		top += sepOptions;
-		SliderOptions* sliderVerSep = mTrayMgr->createSliderOptions("FormImages/Slider/SepVer", "Vertical Separation", left, top, width, 1, 20, 1000);		top += sepOptions;
-		SliderOptions* sliderSize = mTrayMgr->createSliderOptions("FormImages/Slider/Size", "Thumbs size", left, top, width, 2, 8, 1000);					top = mScreenSize.y - sepWindow - sepButton;
+		SliderOptions* sliderTop = mTrayMgr->createSliderOptions("FormImages/Slider/Top", "Thumbs Top", left, top, width, -10, 10, 100);						top += sepOptions;
+		SliderOptions* sliderLeft = mTrayMgr->createSliderOptions("FormImages/Slider/Left", "Thumbs Left", left, top, width, -25, 0, 100);					top += sepOptions;
+		SliderOptions* sliderHorSep = mTrayMgr->createSliderOptions("FormImages/Slider/SepHor", "Horizontal Separation", left, top, width, 1, 20, 100);		top += sepOptions;
+		SliderOptions* sliderVerSep = mTrayMgr->createSliderOptions("FormImages/Slider/SepVer", "Vertical Separation", left, top, width, 1, 20, 100);		top += sepOptions;
+		SliderOptions* sliderSize = mTrayMgr->createSliderOptions("FormImages/Slider/Size", "Thumbs size", left, top, width, 2, 5, 100);						top = mScreenSize.y - sepWindow - sepButton;
 		mTrayMgr->createButton("FormImages/Button/CloseOptionsThumbs", "BACK", left, top, 60);
+		mTrayMgr->createButton("FormImages/Button/DefaultThumbs", "DEFAULT", left + 68, top, 85);
 
 		selectorRows->selectOption(Ogre::StringConverter::toString(mGridThumbs.rows), false);
 		sliderTop->setValue(mGridThumbs.top, false);

@@ -86,18 +86,7 @@ void Thumbnail3D::setMouseUp()
 
 void Thumbnail3D::setThumbs3DInGrid(std::vector<Thumbnail3D*>& thumbs, const sGridThumbs& gridThumbs)
 {
-	/*
-	Ogre::Real aspectRatio = 
-		(Ogre::Real) Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualWidth() /
-		(Ogre::Real) Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
-	
-	Ogre::Real left = 0;
-	if (aspectRatio == 16.0f / 10.0f) left = 19;
-	else if (aspectRatio == 16.0f / 9.0f) left = 22;
-	else left = 21;
-	*/
-
-	Ogre::Vector3 posThumb(-gridThumbs.left, gridThumbs.top, -40);
+	Ogre::Vector3 posThumb(gridThumbs.left, gridThumbs.top, -40);
 	unsigned int currentRow = 0;
 
 	for (unsigned int i = 0; i < thumbs.size(); ++i)

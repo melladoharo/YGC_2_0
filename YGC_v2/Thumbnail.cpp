@@ -3,7 +3,7 @@
 
 Thumbnail::Thumbnail(const Ogre::String& name, const Ogre::String& nameGroupRes, const Ogre::String& caption, const Ogre::String& textName, int size) :
 mBorder(6),
-mZoom(35),
+mZoom(25),
 mState(BS_UP),
 mIndex(0)
 {
@@ -38,7 +38,7 @@ mIndex(0)
 	mThumbPanelCaption->setLeft(mThumbImage->getLeft() - mBorder);
 	mThumbPanelCaption->setVerticalAlignment(Ogre::GVA_BOTTOM);
 	mTextArea->setTop(-22);
-	fitCaptionToArea(caption, mTextArea, mThumbBackground->getWidth() + 60);
+	fitCaptionToArea(caption, mTextArea, mThumbBackground->getWidth() + 30);
 }
 
 Thumbnail::~Thumbnail()
