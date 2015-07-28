@@ -10,6 +10,7 @@ enum ButtonState
 	BS_SELECTED // added for menubar
 };
 
+
 struct sMiniButton
 {
 	Ogre::PanelOverlayElement* panel;
@@ -48,8 +49,8 @@ public:
 	virtual void checkBoxToggled(CheckBox* box) {}
 	virtual void sliderOptionsMoved(SliderOptions* slider) {}
 	virtual void itemChanged(ItemSelector* selector) {}
-	//virtual void okDialogClosed(const Ogre::DisplayString& message) {}
-	//virtual void yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit) {}
+	virtual void okDialogClosed(const Ogre::DisplayString& message) {}
+	virtual void yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit) {}
 };
 
 #endif // #ifndef _GUILISTENER_H__

@@ -8,7 +8,8 @@ mMouse(mouse),
 mKeyboard(keyboard),
 mWidgetDeathRow(), 
 mListener(listener), 
-mExpandedMenu(0), mMediaPlayer(0), mLoadBar(0),
+mExpandedMenu(0), mMediaPlayer(0), mLoadBar(0), mDialogDecorWindows(0), mDialogMessage(0),
+mOk(0), mYes(0), mNo(0),
 mDofEffect(0),
 mCursorWasVisible(false),
 mShutDown(false)
@@ -167,6 +168,20 @@ bool GuiManager::injectMouseMove(const OIS::MouseEvent& evt)
 		return true;
 	}
 
+	if (mDialogDecorWindows)   // only check top priority widget until it passes on
+	{
+		if (mOk)
+		{
+			mOk->_cursorMoved(cursorPos);
+		}
+		else
+		{
+			mYes->_cursorMoved(cursorPos);
+			mNo->_cursorMoved(cursorPos);
+		}
+		return true;
+	}
+
 	mMenuBar->_cursorMoved(cursorPos);
 	if (mMenuBar->isMouseOver())
 		return true;
@@ -195,6 +210,21 @@ bool GuiManager::injectMouseUp(const OIS::MouseEvent& evt, OIS::MouseButtonID id
 		return true;
 	}
 
+	if (mDialogDecorWindows)   // only check top priority widget until it passes on
+	{		
+		if (mOk)
+		{
+			mOk->_cursorReleased(cursorPos);
+		}
+		else
+		{
+			mYes->_cursorReleased(cursorPos);
+			// very important to check if second button still exists, because first button could've closed the popup
+			if (mNo) mNo->_cursorReleased(cursorPos);
+		}
+		return true;
+	}
+
 	mMenuBar->_cursorReleased(cursorPos);
 	if (mMenuBar->isMouseOver())
 		return true;
@@ -220,6 +250,20 @@ bool GuiManager::injectMouseDown(const OIS::MouseEvent& evt, OIS::MouseButtonID 
 	{
 		mExpandedMenu->_cursorPressed(cursorPos);
 		if (!mExpandedMenu->isExpanded()) setExpandedMenu(0);
+		return true;
+	}
+
+	if (mDialogDecorWindows)   // only check top priority widget until it passes on
+	{
+		if (mOk)
+		{
+			mOk->_cursorPressed(cursorPos);
+		}
+		else
+		{
+			mYes->_cursorPressed(cursorPos);
+			mNo->_cursorPressed(cursorPos);
+		}
 		return true;
 	}
 
@@ -358,6 +402,153 @@ void GuiManager::setProgressBarCaption(const Ogre::DisplayString& caption)
 	{
 		mLoadBar->setCaption(caption);
 		Ogre::Root::getSingleton().getAutoCreatedWindow()->update(true);
+	}
+}
+
+
+
+void GuiManager::buttonHit(Button* button)
+{
+	if (mListener)
+	{
+		if (button == mOk) mListener->okDialogClosed(mDialogMessage->getText());
+		else mListener->yesNoDialogClosed(mDialogMessage->getText(), button == mYes);
+	}
+	closeDialog();
+}
+
+void GuiManager::showOkDialog(const Ogre::DisplayString& caption, const Ogre::DisplayString& message)
+{
+	if (mDialogDecorWindows)
+	{
+		mDialogDecorWindows->setHeaderCaption(caption);
+		mDialogMessage->setText(message);
+
+		if (mOk) return;
+		else
+		{
+			mYes->cleanup();
+			mNo->cleanup();
+			delete mYes;
+			delete mNo;
+			mYes = 0;
+			mNo = 0;
+		}
+	}
+	else
+	{
+		// give widgets a chance to reset in case they're in the middle of something
+		for (unsigned int i = 0; i < mWidgets.size(); i++)
+			mWidgets[i]->_focusLost();
+
+		mDialogShade->show();
+		mDialogDecorWindows = new DialogWindows("GuiManager/OkDialog/Windows", caption, 1, 1, 550, 250);
+		mDialogShade->addChild(mDialogDecorWindows->getOverlayElement());
+		mDialogDecorWindows->getOverlayElement()->setVerticalAlignment(Ogre::GVA_CENTER);
+		mDialogDecorWindows->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+		mDialogDecorWindows->getOverlayElement()->setLeft(-mDialogDecorWindows->getOverlayElement()->getWidth() / 2);
+		mDialogDecorWindows->getOverlayElement()->setTop(-mDialogDecorWindows->getOverlayElement()->getHeight() / 2);
+
+		mDialogMessage = new SimpleText("GuiManager/OkDialog/Message", message, "YgcFont/SemiBold/16", 19, 520, 250, 7);
+		mDialogShade->addChild(mDialogMessage->getOverlayElement());
+		mDialogMessage->getOverlayElement()->setVerticalAlignment(Ogre::GVA_CENTER);
+		mDialogMessage->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+		mDialogMessage->getOverlayElement()->setLeft(mDialogDecorWindows->getLeft() + 12);
+		mDialogMessage->getOverlayElement()->setTop(mDialogDecorWindows->getTop() + 30);
+		mDialogDecorWindows->getOverlayElement()->setHeight((mDialogMessage->getNumLines() * (19 + 7)) + 30 + 10);
+	}
+	mOk = new Button("GuiManager/OkDialog/OkButton", "OK", 1, 1, 60);
+	mOk->_assignListener(this);
+	mDialogShade->addChild(mOk->getOverlayElement());
+	mOk->getOverlayElement()->setVerticalAlignment(Ogre::GVA_CENTER);
+	mOk->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+	mOk->getOverlayElement()->setLeft(mDialogDecorWindows->getLeft());
+	mOk->getOverlayElement()->setTop(mDialogDecorWindows->getOverlayElement()->getTop() + mDialogDecorWindows->getOverlayElement()->getHeight() + 5);
+}
+
+void GuiManager::showYesNoDialog(const Ogre::DisplayString& caption, const Ogre::DisplayString& question)
+{
+	if (mDialogDecorWindows)
+	{
+		mDialogDecorWindows->setHeaderCaption(caption);
+		mDialogMessage->setText(question);
+
+		if (mOk)
+		{
+			mOk->cleanup();
+			delete mOk;
+			mOk = 0;
+		}
+		else return;
+	}
+	else
+	{
+		// give widgets a chance to reset in case they're in the middle of something
+		for (unsigned int i = 0; i < mWidgets.size(); i++)
+			mWidgets[i]->_focusLost();
+
+		mDialogShade->show();
+		mDialogDecorWindows = new DialogWindows("GuiManager/OkDialog/Windows", caption, 1, 1, 550, 250);
+		mDialogShade->addChild(mDialogDecorWindows->getOverlayElement());
+		mDialogDecorWindows->getOverlayElement()->setVerticalAlignment(Ogre::GVA_CENTER);
+		mDialogDecorWindows->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+		mDialogDecorWindows->getOverlayElement()->setLeft(-mDialogDecorWindows->getOverlayElement()->getWidth() / 2);
+		mDialogDecorWindows->getOverlayElement()->setTop(-mDialogDecorWindows->getOverlayElement()->getHeight() / 2);
+
+		mDialogMessage = new SimpleText("GuiManager/OkDialog/Message", question, "YgcFont/SemiBold/16", 19, 520, 250, 7);
+		mDialogShade->addChild(mDialogMessage->getOverlayElement());
+		mDialogMessage->getOverlayElement()->setVerticalAlignment(Ogre::GVA_CENTER);
+		mDialogMessage->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+		mDialogMessage->getOverlayElement()->setLeft(mDialogDecorWindows->getLeft() + 12);
+		mDialogMessage->getOverlayElement()->setTop(mDialogDecorWindows->getTop() + 30);
+		mDialogDecorWindows->getOverlayElement()->setHeight((mDialogMessage->getNumLines() * (19 + 7)) + 30 + 10);
+	}
+
+	mYes = new Button("GuiManager/OkDialog/YesButton", "YES", 1, 1, 60);
+	mYes->_assignListener(this);
+	mDialogShade->addChild(mYes->getOverlayElement());
+	mYes->getOverlayElement()->setVerticalAlignment(Ogre::GVA_CENTER);
+	mYes->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+	mYes->getOverlayElement()->setLeft(mDialogDecorWindows->getLeft());
+	mYes->getOverlayElement()->setTop(mDialogDecorWindows->getOverlayElement()->getTop() + mDialogDecorWindows->getOverlayElement()->getHeight() + 5);
+
+	mNo = new Button("GuiManager/OkDialog/NoButton", "NO", 1, 1, 60);
+	mNo->_assignListener(this);
+	mDialogShade->addChild(mNo->getOverlayElement());
+	mNo->getOverlayElement()->setVerticalAlignment(Ogre::GVA_CENTER);
+	mNo->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+	mNo->getOverlayElement()->setLeft(mDialogDecorWindows->getLeft() + 65);
+	mNo->getOverlayElement()->setTop(mDialogDecorWindows->getOverlayElement()->getTop() + mDialogDecorWindows->getOverlayElement()->getHeight() + 5);
+}
+
+void GuiManager::closeDialog()
+{
+	if (mDialogDecorWindows)
+	{
+		if (mOk)
+		{
+			mOk->cleanup();
+			delete mOk;
+			mOk = 0;
+		}
+		else
+		{
+			mYes->cleanup();
+			mNo->cleanup();
+			delete mYes;
+			delete mNo;
+			mYes = 0;
+			mNo = 0;
+		}
+
+		mDialogShade->hide();
+
+		mDialogMessage->cleanup();
+		delete mDialogMessage;
+		mDialogMessage = 0;
+		mDialogDecorWindows->cleanup();
+		delete mDialogDecorWindows;
+		mDialogDecorWindows = 0;
 	}
 }
 

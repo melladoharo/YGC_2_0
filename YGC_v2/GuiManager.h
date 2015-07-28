@@ -77,6 +77,7 @@ public:
 	bool isMenuBarVisible() { return mMenuBar->isVisible(); }
 	bool isWidgetsVisible() { return mWidgetsLayer->isVisible(); }
 	bool isWindowDialogVisible() { return mWindowsLayer->isVisible(); }
+	bool isDialogVisible() { return mDialogDecorWindows != 0; }
 
 	/*-----------------------------------------------------------------------------
 	| Displays specified material on backdrop, or the last material used if
@@ -136,6 +137,9 @@ public:
 
 	void destroyDialogWindow(Widget* windows);
 	void destroyDialogWindow(const Ogre::String& name) { destroyDialogWindow(getWidget(name)); }
+
+	// Listener
+	void buttonHit(Button* button);
 
 	/*-----------------------------------------------------------------------------
 	| Process frame events. Updates frame statistics widget set and deletes
@@ -355,8 +359,13 @@ public:
 		mWindowsLayer->show();
 		return dw;
 	}
-
-
+	
+	// Pops up a message dialog with an OK button
+	void showOkDialog(const Ogre::DisplayString& caption, const Ogre::DisplayString& message);
+	// Pops up a question dialog with Yes and No buttons
+	void showYesNoDialog(const Ogre::DisplayString& caption, const Ogre::DisplayString& question);
+	// Hides whatever dialog is currently showing
+	void closeDialog();
 
 	// Returns a 3D ray into the scene that is directly underneath the cursor.
 	Ogre::Ray getCursorRay(Ogre::Camera* cam)
@@ -393,14 +402,17 @@ protected:
 	Ogre::OverlayContainer* mCursor;      // cursor
 	Ogre::OverlayContainer* mTray;
 	Ogre::OverlayContainer* mDialogWindows;
+	Ogre::OverlayContainer* mDialogShade; // top priority dialog shade
 	WidgetList mWidgets;			      // widgets
 	WidgetList mWidgetDeathRow;           // widget queue for deletion
 	GuiListener* mListener;				  // tray listener
-	Ogre::OverlayContainer* mDialogShade; // top priority dialog shade
 	MenuBar* mMenuBar;
 	MediaPlayer* mMediaPlayer;
 	SelectMenu* mExpandedMenu;            // top priority expanded menu widget
 	ProgressBar* mLoadBar;				  // progress bar widget
+	DialogWindows* mDialogDecorWindows;
+	Button* mOk, *mYes, *mNo;
+	SimpleText* mDialogMessage;
 	DOFManager* mDofEffect;				  // Depth of field effect
 	Ogre::Timer* mTimer;                  // Root::getSingleton().getTimer()
 	unsigned long mLastStatUpdateTime;    // The last time the stat text were updated
