@@ -5,7 +5,7 @@
 #include "GameInfo.h"
 #include "CModel.h"
 
-enum eFOstatus{ FO_SHORTDESC, FO_LARGEDESC, FO_ZOOM, FO_OPENVIEW };
+enum eFOstatus{ FO_SHORTDESC, FO_ZOOM, FO_OPENVIEW };
 
 class FormOverview : public FormBase
 {
@@ -31,19 +31,21 @@ public:
 	void showOptions();
 
 private:
-	void _setCameraDvdOpen();
-	void _setCameraDvdClose();
 	void _createOverview();
+	void _setCameraDvdClose();
+	void _setCameraDvdZoom();
+	void _setCameraDvdOpen();
 	void _setPositionDisc();
 
 	GameInfo* mGameInfo;
 	OgreBites::SdkCameraMan* mCameraMan;
+	Ogre::SceneNode* mTarget;
 	eFOstatus mCurrentState;
 	CModel* mDvdClose; // 3d model dvd case closed
 	CModel* mDvdOpen; // 3d model open dvd case
 	CModel* mDiscClose; // the first disc game, for the view with the close dvd
 	std::vector<CModel*> mDiscOpen; // all the disc game
-	bool mLCTRLpressed, mLALTpressed;
+	bool mCtrlPressed, mAltPressed, mShiftPressed;
 };
 
 #endif // #ifndef _FORMOVERVIEW_H__

@@ -5,9 +5,9 @@ FormOverview::FormOverview(GameInfo* gInfo, GuiManager* tray, GuiListener* oldLi
 FormBase(tray, oldListener),
 mGameInfo(gInfo),
 mCameraMan(0),
+mTarget(mSceneMgr->getRootSceneNode()->createChildSceneNode()),
 mCurrentState(FO_SHORTDESC),
-mLCTRLpressed(false),
-mLALTpressed(false)
+mCtrlPressed(false), mAltPressed(false), mShiftPressed(false)
 {
 	_setCameraDvdClose();
 	_createOverview();
@@ -16,12 +16,12 @@ mLALTpressed(false)
 FormOverview::~FormOverview()
 {
 	if (mCameraMan) delete mCameraMan;
+	if (mTarget) mSceneMgr->destroySceneNode(mTarget);
 	delete mDvdClose;
 	delete mDvdOpen;
 	for (unsigned int i = 0; i < mDiscOpen.size(); ++i) delete mDiscOpen[i];
 	delete mDiscClose;
 }
-
 
 
 
@@ -37,56 +37,76 @@ bool FormOverview::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	return FormBase::frameRenderingQueued(evt);
 }
 
+
+
 bool FormOverview::keyPressed(const OIS::KeyEvent &arg)
 {
-	if (arg.key == OIS::KC_LCONTROL)
-		mLCTRLpressed = true;
-	else if (arg.key == OIS::KC_LMENU)
-		mLALTpressed = true;
+	if (arg.key == OIS::KC_LCONTROL)	mCtrlPressed = true;
+	else if (arg.key == OIS::KC_LMENU)	mAltPressed = true;
+	else if (arg.key == OIS::KC_LSHIFT)	mShiftPressed = true;
+	else if (arg.key == OIS::KC_C)
+	{
+		if (mCurrentState == FO_ZOOM) _setCameraDvdZoom();
+		else if (mCurrentState == FO_OPENVIEW) _setCameraDvdOpen();
+	}
 
 	return FormBase::keyPressed(arg);
 }
 
 bool FormOverview::keyReleased(const OIS::KeyEvent &arg)
 {
-	mLCTRLpressed = mLALTpressed = false;
+	if (arg.key == OIS::KC_LCONTROL)	mCtrlPressed = false;
+	else if (arg.key == OIS::KC_LMENU)	mAltPressed = false;
+	else if (arg.key == OIS::KC_LSHIFT)	mShiftPressed = false;
 
 	return FormBase::keyReleased(arg);
 }
 
+
+
 bool FormOverview::mouseMoved(const OIS::MouseEvent &arg)
 {
 	if (mTrayMgr->injectMouseMove(arg)) return true;
-	
-	if (mCameraMan && mCurrentState == FO_OPENVIEW)
-		mCameraMan->injectMouseMove(arg);
 
-	if (mLBPressed)
+	if (mLBPressed) // left button 
 	{
-		if (mLCTRLpressed && mLALTpressed)
+		if (mCurrentState == FO_ZOOM || mCurrentState == FO_OPENVIEW)
 		{
-			mDragging = true;
-
-			if (mCurrentState == FO_ZOOM)
+			if (mAltPressed) // left ALT...
 			{
-				Ogre::Real dist = (mCamera->getPosition() - mDvdClose->getNode()->_getDerivedPosition()).length();
-				mCamera->moveRelative(Ogre::Vector3(0, arg.state.Y.rel * 0.00080f * dist, 0));
+				if (mShiftPressed) // ...and left SHIFT are pressed? then move camera and mTarget
+				{
+					mDragging = true;
+					Ogre::Vector3 newPos =
+						(mCamera->getRight() * -arg.state.X.rel * 0.040f) +
+						(mCamera->getUp() * arg.state.Y.rel *0.025f);
+					mTarget->translate(newPos);
+					mCamera->move(newPos);
+				}
+				else if (mCtrlPressed) // ...and left CTRL are pressed? then zoom
+				{
+					Ogre::Real dist = (mCamera->getPosition() - mDvdClose->getNode()->_getDerivedPosition()).length();
+					mCamera->moveRelative(Ogre::Vector3(0, 0, arg.state.Y.rel * 0.0020f * dist));
+				}
+				else // ...is pressed (only left ALT)? then rotate camera around mTarget
+				{
+					if (mCameraMan)
+					{
+						mCameraMan->injectMouseMove(arg);
+						if (mCamera->getPosition().y < 0)
+							mCamera->moveRelative(Ogre::Vector3(0, -mCamera->getPosition().y, 0));
+					}
+				}
 			}
-		}
-		else  if (mCurrentState == FO_ZOOM)
-		{
-			mDvdClose->getNode()->yaw(Ogre::Degree(arg.state.X.rel * 0.40f));
+			else if (mCtrlPressed) // only left CTRL is pressed?, yaw the dvdcase model
+			{
+				mDvdClose->getNode()->yaw(Ogre::Degree(arg.state.X.rel * 0.40f));
+			}
 		}
 	}
 	else if (mRBPressed)
 	{
-		mDragging = true;
 
-		if (mCurrentState == FO_ZOOM)
-		{
-			Ogre::Real dist = (mCamera->getPosition() - mDvdClose->getNode()->_getDerivedPosition()).length();
-			mCamera->moveRelative(Ogre::Vector3(0, 0, arg.state.Y.rel * 0.0025f * dist));
-		}
 	}
 	else if (mMBPressed)
 	{
@@ -100,22 +120,21 @@ bool FormOverview::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID i
 {
 	if (mTrayMgr->injectMouseDown(arg, id)) return true;
 
-	if (mCameraMan && mCurrentState == FO_OPENVIEW)
+	if (mCameraMan && mAltPressed)
 		mCameraMan->injectMouseDown(arg, id);
 
 	if (id == OIS::MouseButtonID::MB_Left)
 	{
-		mLBPressed = true;
+		// double clic? then go to the next mode of this form [description->zoom | zoom->openview]
 		if (mTimeDoubleClick > 0 && mTimeDoubleClick < 0.15f)
 		{
 			mDoubleClick = true;
 			if (mCurrentState == FO_SHORTDESC)
 			{
-				createAnimNode("Anim/Zoom", 0.45f, mDvdClose->getNode(),
-					mDvdClose->getNode()->getPosition(), mDvdClose->getNode()->getOrientation(),
-					Ogre::Vector3(0, 0, -48), Ogre::Quaternion(Ogre::Degree(0), Ogre::Vector3::UNIT_Y));
+				mDvdClose->getNode()->setOrientation(Ogre::Quaternion(Ogre::Degree(0), Ogre::Vector3::UNIT_Y));
 				FormBase::hide();
 				mTrayMgr->getWidget("FormOverview/Logo")->show();
+				_setCameraDvdZoom();
 				mCurrentState = FO_ZOOM;
 			}
 			else if (mCurrentState == FO_ZOOM)
@@ -130,11 +149,29 @@ bool FormOverview::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID i
 	}
 	else if (id == OIS::MouseButtonID::MB_Right)
 	{
-		mRBPressed = true;
 	}
 	else if (id == OIS::MouseButtonID::MB_Middle)
 	{
-		mMBPressed = true;
+		// zoom in-out animation for dvd disc
+		if (mCurrentState == FO_ZOOM)
+		{
+			if (mDiscClose->isVisible())
+			{
+				if (!mSceneMgr->hasAnimation("Anim/Disc/Out"))
+					createAnimNode("Anim/Disc/In", 0.25f, mDiscClose->getNode(),
+					mDiscClose->getPosition(), mDiscClose->getOrientation(),
+					mDiscClose->getPosition() + Ogre::Vector3(-10, 0, 0), mDiscClose->getOrientation());
+				//mDvdClosedDisc->setVisible(false); [see frameRenderingQueued]
+			}
+			else
+			{
+				if (!mSceneMgr->hasAnimation("Anim/Disc/In"))
+					createAnimNode("Anim/Disc/Out", 0.25f, mDiscClose->getNode(),
+					mDiscClose->getPosition(), mDiscClose->getOrientation(),
+					mDiscClose->getPosition() + Ogre::Vector3(10, 0, 0), mDiscClose->getOrientation());
+				mDiscClose->setVisible(true);
+			}
+		}
 	}
 
 	return FormBase::mousePressed(arg, id);;
@@ -144,29 +181,11 @@ bool FormOverview::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID 
 {
 	if (mTrayMgr->injectMouseUp(arg, id)) return true;
 
-	if (mCameraMan && mCurrentState == FO_OPENVIEW)
+	if (mCameraMan && mAltPressed)
 		mCameraMan->injectMouseUp(arg, id);
 
-	if (mMBPressed && !mDragging && mCurrentState == FO_ZOOM)
-	{
-		if (mDiscClose->isVisible())
-		{
-			if (!mSceneMgr->hasAnimation("Anim/Disc/Out"))
-				createAnimNode("Anim/Disc/In", 0.25f, mDiscClose->getNode(),
-				mDiscClose->getPosition(), mDiscClose->getOrientation(),
-				mDiscClose->getPosition() + Ogre::Vector3(-10, 0, 0), mDiscClose->getOrientation());
-			//mDvdClosedDisc->setVisible(false); [see frameRenderingQueued]
-		}
-		else
-		{
-			if (!mSceneMgr->hasAnimation("Anim/Disc/In"))
-				createAnimNode("Anim/Disc/Out", 0.25f, mDiscClose->getNode(),
-				mDiscClose->getPosition(), mDiscClose->getOrientation(),
-				mDiscClose->getPosition() + Ogre::Vector3(10, 0, 0), mDiscClose->getOrientation());
-			mDiscClose->setVisible(true);
-		}
-	}
-	else if (mRBPressed && !mDragging)
+	// return to the previous mode form [zoom->descripcion | openview->zoom]
+	if (mRBPressed)
 	{
 		if (mCurrentState == FO_ZOOM)
 		{
@@ -174,8 +193,8 @@ bool FormOverview::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID 
 			mDvdClose->getNode()->setOrientation(Ogre::Quaternion(Ogre::Degree(50), Ogre::Vector3::UNIT_Y));
 			mDiscClose->getNode()->setPosition(0, 11, 0);
 			mDiscClose->hide();
-			_setCameraDvdClose();
 			FormBase::show();
+			_setCameraDvdClose();
 			mCurrentState = FO_SHORTDESC;
 		}
 		else if (mCurrentState == FO_OPENVIEW)
@@ -184,8 +203,9 @@ bool FormOverview::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID 
 			mDvdClose->getNode()->setOrientation(Ogre::Quaternion(Ogre::Degree(0), Ogre::Vector3::UNIT_Y));
 			mDvdClose->show();
 			mDvdOpen->hide();
-			for (unsigned int i = 0; i < mDiscOpen.size(); ++i) mDiscOpen[i]->hide();
-			_setCameraDvdClose();
+			for (unsigned int i = 0; i < mDiscOpen.size(); ++i) 
+				mDiscOpen[i]->hide();
+			_setCameraDvdZoom();
 			mCurrentState = FO_ZOOM;
 		}
 	}
@@ -198,8 +218,8 @@ void FormOverview::hide()
 	FormBase::hide();
 	mDvdClose->hide();
 	mDvdOpen->hide();
-	for (unsigned int i = 0; i < mDiscOpen.size(); ++i) mDiscOpen[i]->hide();
-	_setCameraDvdClose();
+	for (unsigned int i = 0; i < mDiscOpen.size(); ++i) 
+		mDiscOpen[i]->hide();
 }
 
 void FormOverview::show()
@@ -215,7 +235,7 @@ void FormOverview::show()
 	}
 	else if (mCurrentState == FO_ZOOM)
 	{
-		_setCameraDvdClose();
+		_setCameraDvdZoom();
 		mDvdClose->show();
 		FormBase::hide();
 	}
@@ -363,28 +383,36 @@ void FormOverview::_createOverview()
 	addWidgetToForm(stOverview);
 }
 
-void FormOverview::_setCameraDvdOpen()
-{
-	mNodeCamera->setPosition(0, 0, 0);
-
-	mCameraMan = new OgreBites::SdkCameraMan(mCamera);
-	mCameraMan->setStyle(OgreBites::CS_ORBIT);
-
-	Ogre::SceneNode* nodoObjetivo = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	nodoObjetivo->setPosition(0, 0, -38);
-	nodoObjetivo->translate(0, 10, 3);
-	mCameraMan->setTarget(nodoObjetivo);
-	mCameraMan->setYawPitchDist(Ogre::Degree(0), Ogre::Degree(30), 54);
-}
-
 void FormOverview::_setCameraDvdClose()
 {
 	if (mCameraMan) delete mCameraMan;
 	mCameraMan = 0;
-	mCamera->setAutoTracking(false);
-	mCamera->setPosition(0, 0, 0);
-	mCamera->setOrientation(mNodeCamera->getOrientation());
+	resetCamera();
 	mNodeCamera->setPosition(0, 14, 0);
+}
+
+void FormOverview::_setCameraDvdZoom()
+{
+	mNodeCamera->setPosition(0, 0, 0);
+	mTarget->setPosition(mDvdClose->getPosition());
+	mTarget->translate(0, 14, 0);
+	if (!mCameraMan)
+		mCameraMan = new OgreBites::SdkCameraMan(mCamera);
+	mCameraMan->setStyle(OgreBites::CS_ORBIT);
+	mCameraMan->setTarget(mTarget);
+	mCameraMan->setYawPitchDist(Ogre::Degree(0), Ogre::Degree(0), 46);
+}
+
+void FormOverview::_setCameraDvdOpen()
+{
+	mNodeCamera->setPosition(0, 0, 0);
+	mTarget->setPosition(mDvdOpen->getPosition());
+	mTarget->translate(0, 9, 0);
+	if (!mCameraMan) 
+		mCameraMan = new OgreBites::SdkCameraMan(mCamera);
+	mCameraMan->setStyle(OgreBites::CS_ORBIT);
+	mCameraMan->setTarget(mTarget);
+	mCameraMan->setYawPitchDist(Ogre::Degree(0), Ogre::Degree(30), 58);
 }
 
 void FormOverview::_setPositionDisc()
