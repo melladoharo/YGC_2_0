@@ -280,7 +280,7 @@ bool BaseApp::go(void)
 	//Set initial mouse clipping size
 	windowResized(mWindow);
 
-	mTrayMgr = new GuiManager("YGC2/GuiManager", mWindow, mMouse, mKeyboard, this);
+	mTrayMgr = new GuiManager("YGC2/GuiManager", mWindow, mCamera, mMouse, mKeyboard, this);
 	mTrayMgr->setDofEffectManager(mDofEffect);
 	mTrayMgr->setDofEffectEnable(false);
 	mFormSelector = new FormSelectorMain(mTrayMgr, this);

@@ -23,7 +23,8 @@
 class GuiManager : public GuiListener, public Ogre::ResourceGroupListener
 {
 public:
-	GuiManager(const Ogre::String& name, Ogre::RenderWindow* window, OIS::Mouse* mouse, OIS::Keyboard* keyboard, GuiListener* listener = 0);
+	GuiManager(const Ogre::String& name, Ogre::RenderWindow* window, Ogre::Camera* camera, 
+		OIS::Mouse* mouse, OIS::Keyboard* keyboard, GuiListener* listener = 0);
 	virtual ~GuiManager();
 
 	// these methods get the underlying overlays and overlay elements
@@ -140,6 +141,15 @@ public:
 
 	// Listener
 	void buttonHit(Button* button);
+
+	// Fade effect
+	void enableFadeEffect()
+	{
+		mRenderText->update();
+		showBackdrop(mMatRtt->getName());
+		mFadeAmount = 1;
+	}
+
 
 	/*-----------------------------------------------------------------------------
 	| Process frame events. Updates frame statistics widget set and deletes
@@ -390,6 +400,7 @@ protected:
 	
 	Ogre::String mName;                   // name of this tray system
 	Ogre::RenderWindow* mWindow;          // render window
+	Ogre::Camera* mCamera;				  // camera
 	OIS::Mouse* mMouse;                   // mouse device
 	OIS::Keyboard* mKeyboard;			  // keyboard device
 	Ogre::Overlay* mBackdropLayer;        // backdrop layer
@@ -414,7 +425,11 @@ protected:
 	Button* mOk, *mYes, *mNo;
 	SimpleText* mDialogMessage;
 	DOFManager* mDofEffect;				  // Depth of field effect
+	Ogre::RenderTexture* mRenderText;
+	Ogre::TexturePtr mTextRtt;
+	Ogre::MaterialPtr mMatRtt;
 	Ogre::Timer* mTimer;                  // Root::getSingleton().getTimer()
+	Ogre::Real mFadeAmount;				  // [0 - 1]  [not-visible - visible]
 	unsigned long mLastStatUpdateTime;    // The last time the stat text were updated
 	bool mCursorWasVisible;               // cursor state before showing dialog
 	bool mShutDown;

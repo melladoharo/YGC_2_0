@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "GuiManager.h"
 
-GuiManager::GuiManager(const Ogre::String& name, Ogre::RenderWindow* window, OIS::Mouse* mouse, OIS::Keyboard* keyboard, GuiListener* listener) :
+GuiManager::GuiManager(const Ogre::String& name, Ogre::RenderWindow* window, Ogre::Camera* camera, 
+	OIS::Mouse* mouse, OIS::Keyboard* keyboard, GuiListener* listener) :
 mName(name), 
 mWindow(window), 
+mCamera(camera),
 mMouse(mouse),  
 mKeyboard(keyboard),
 mWidgetDeathRow(), 
@@ -11,6 +13,8 @@ mListener(listener),
 mExpandedMenu(0), mMediaPlayer(0), mLoadBar(0), mDialogDecorWindows(0), mDialogMessage(0),
 mOk(0), mYes(0), mNo(0),
 mDofEffect(0),
+mRenderText(0),
+mFadeAmount(0),
 mCursorWasVisible(false),
 mShutDown(false)
 {
@@ -29,11 +33,11 @@ mShutDown(false)
 	mWidgetsLayer = om.create(nameBase + "WidgetsLayer");
 	mMenuBarLayer = om.create(nameBase + "MenuBarLayer");
 	mWindowsLayer = om.create(nameBase + "WindowsLayer");
-	mBackdropLayer->setZOrder(100);
-	mWindowsLayer->setZOrder(150);
-	mWidgetsLayer->setZOrder(200);
-	mPriorityLayer->setZOrder(300);
-	mMenuBarLayer->setZOrder(380);
+	mWindowsLayer->setZOrder(300);
+	mWidgetsLayer->setZOrder(350);
+	mMenuBarLayer->setZOrder(370);
+	mBackdropLayer->setZOrder(380);
+	mPriorityLayer->setZOrder(390);
 	mCursorLayer->setZOrder(400);
 
 	// make backdrop and cursor overlay containers
@@ -62,6 +66,20 @@ mShutDown(false)
 	// create media player
 	mMediaPlayer = createMediaPlayer("GuiManager/MediaPlayer");
 	mMediaPlayer->hide();
+
+	// render texture [fade effect]
+	mTextRtt = Ogre::TextureManager::getSingleton().createManual("GuiManager/Texture/Rtt", 
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, 
+		mWindow->getWidth(), mWindow->getHeight(), 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET);
+	mMatRtt = Ogre::MaterialManager::getSingleton().create("GuiManager/Material/MatRtt", 
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	mRenderText = mTextRtt->getBuffer()->getRenderTarget();
+	mRenderText->setAutoUpdated(false);
+	mRenderText->addViewport(mCamera);
+	mMatRtt->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+	mMatRtt->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+	mMatRtt->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+	mMatRtt->getTechnique(0)->getPass(0)->createTextureUnitState("GuiManager/Texture/Rtt");
 
 	showCursor();
 }
@@ -151,6 +169,16 @@ bool GuiManager::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		delete mWidgetDeathRow[i];
 	}
 	mWidgetDeathRow.clear();
+
+	// fade effect
+	if (isBackdropVisible() && mFadeAmount > 0)
+	{
+		mMatRtt->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setAlphaOperation(
+			Ogre::LBX_SOURCE1, Ogre::LBS_MANUAL, Ogre::LBS_CURRENT, mFadeAmount);
+		mFadeAmount -= evt.timeSinceLastFrame * 2.5f;
+		if (mFadeAmount <= 0)
+			hideBackdrop();
+	}
 
 	return true;
 }
@@ -549,6 +577,7 @@ void GuiManager::closeDialog()
 		mDialogDecorWindows->cleanup();
 		delete mDialogDecorWindows;
 		mDialogDecorWindows = 0;
+		hideBackdrop();
 	}
 }
 
