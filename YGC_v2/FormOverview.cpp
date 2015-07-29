@@ -21,6 +21,7 @@ FormOverview::~FormOverview()
 	delete mDvdOpen;
 	for (unsigned int i = 0; i < mDiscOpen.size(); ++i) delete mDiscOpen[i];
 	delete mDiscClose;
+	hideAllOptions();
 }
 
 
@@ -220,6 +221,7 @@ void FormOverview::hide()
 	mDvdOpen->hide();
 	for (unsigned int i = 0; i < mDiscOpen.size(); ++i) 
 		mDiscOpen[i]->hide();
+	hideAllOptions();
 }
 
 void FormOverview::show()
@@ -245,6 +247,35 @@ void FormOverview::show()
 		mDvdClose->show();
 	}
 }
+
+
+
+void FormOverview::buttonHit(Button* button)
+{
+	if (button->getName() == "FormOverview/Button/CloseOptions")
+	{
+		hideOptions();
+	}
+}
+
+void FormOverview::labelHit(Label* label)
+{
+	if (label->getName() == "FormOverview/Label/Help")
+	{
+		hideOptions();
+		Ogre::String messageOverview = 
+			"The overview view has three subviews: the overview view, the zoom view, and the open view. "
+			"Passing through the different views is as simple as double clicking anywhere on the screen. "
+			"To return to the previous view click with the right mouse button.\n\n"
+			"In zoom and open view, you can move the camera around. Here are the controls to move the camera:\n"
+			"[Left ALT] + [Left Mouse Button] = move around target.\n"
+			"[Left CTRL] + [Left ALT] + [Left Mouse Button] = zoom.\n"
+			"[Left SHIFT] + [Left ALT] + [Left Mouse Button] = move target.";
+		mTrayMgr->showOkDialog("OVERVIEW TUTORIAL", messageOverview);
+	}
+}
+
+
 
 void FormOverview::_createOverview()
 {
@@ -461,8 +492,36 @@ void FormOverview::_setPositionDisc()
 	}
 }
 
+
+void FormOverview::hideAllOptions()
+{
+	hideOptions();
+}
+
+void FormOverview::hideOptions()
+{
+	if (mTrayMgr->getWidget("FormOverview/Window/Options"))
+	{
+		mTrayMgr->destroyDialogWindow("FormOverview/Window/Options");
+		mTrayMgr->destroyWidget("FormOverview/Label/Help");
+		mTrayMgr->destroyWidget("FormOverview/Button/CloseOptions");
+	}
+}
+
 void FormOverview::showOptions()
 {
+	if (!mTrayMgr->getWidget("FormOverview/Window/Options")) // menu is hidden
+	{
+		unsigned int numOptions = 2;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 250;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
 
+		mTrayMgr->createDialogWindow("FormOverview/Window/Options", "OPTIONS", left, top, width, height); top += sepOptions / 2;
+		mTrayMgr->createLabel("FormOverview/Label/Help", "HELP", left, top, width, 23); top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormOverview/Button/CloseOptions", "BACK", left, top, 60);
+	}
 }
 

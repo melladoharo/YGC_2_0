@@ -28,7 +28,13 @@ public:
 	// FormBase
 	void hide();
 	void show();
+	void hideAllOptions();
+	void hideOptions();
 	void showOptions();
+
+	// GuiListener
+	void buttonHit(Button* button);
+	void labelHit(Label* label);
 
 private:
 	void _createOverview();
