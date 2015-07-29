@@ -175,7 +175,7 @@ bool GuiManager::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 		mMatRtt->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setAlphaOperation(
 			Ogre::LBX_SOURCE1, Ogre::LBS_MANUAL, Ogre::LBS_CURRENT, mFadeAmount);
-		mFadeAmount -= evt.timeSinceLastFrame * 2.5f;
+		mFadeAmount -= 0.125f;
 		if (mFadeAmount <= 0)
 			hideBackdrop();
 	}

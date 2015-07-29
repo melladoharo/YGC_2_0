@@ -85,8 +85,6 @@ FormGames::~FormGames()
 
 bool FormGames::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	FormBase::frameRenderingQueued(evt);
-
 	if (mFormSelector && mFormSelector->isFinished())
 	{
 		if (mFormSelector) delete mFormSelector;
@@ -99,7 +97,7 @@ bool FormGames::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		show();
 	}
 
-	return true;
+	return FormBase::frameRenderingQueued(evt);
 }
 
 bool FormGames::keyPressed(const OIS::KeyEvent &arg)

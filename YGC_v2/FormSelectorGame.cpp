@@ -72,7 +72,7 @@ mFormCollector(0)
 	mFormCurrent->enableForm();
 	mFormCurrent->show();
 	mTrayMgr->hideProgressBar();
-	mTrayMgr->hideBackdrop();
+	mTrayMgr->enableFadeEffect();
 	mTrayMgr->showMenuBar();
 	mTrayMgr->showCursor();
 }
@@ -138,6 +138,7 @@ void FormSelectorGame::menuBarItemHit(MenuBar* menu)
 	// Apply the new form
 	if (mFormCurrent)
 	{
+		mTrayMgr->enableFadeEffect();
 		previousForm->hide();
 		//previousForm->disableForm(); // some forms need to be update every frame
 		mFormCurrent->enableForm();

@@ -132,6 +132,7 @@ bool FormOverview::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID i
 			mDoubleClick = true;
 			if (mCurrentState == FO_SHORTDESC)
 			{
+				mTrayMgr->enableFadeEffect();
 				mDvdClose->getNode()->setOrientation(Ogre::Quaternion(Ogre::Degree(0), Ogre::Vector3::UNIT_Y));
 				FormBase::hide();
 				mTrayMgr->getWidget("FormOverview/Logo")->show();
@@ -140,6 +141,7 @@ bool FormOverview::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID i
 			}
 			else if (mCurrentState == FO_ZOOM)
 			{
+				mTrayMgr->enableFadeEffect();
 				mDvdClose->hide();
 				mDvdOpen->show();
 				for (unsigned int i = 0; i < mDiscOpen.size(); ++i) mDiscOpen[i]->show();
@@ -190,6 +192,7 @@ bool FormOverview::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID 
 	{
 		if (mCurrentState == FO_ZOOM)
 		{
+			mTrayMgr->enableFadeEffect();
 			mDvdClose->getNode()->setPosition(-18, 0, -48);
 			mDvdClose->getNode()->setOrientation(Ogre::Quaternion(Ogre::Degree(50), Ogre::Vector3::UNIT_Y));
 			mDiscClose->getNode()->setPosition(0, 11, 0);
@@ -200,6 +203,7 @@ bool FormOverview::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID 
 		}
 		else if (mCurrentState == FO_OPENVIEW)
 		{
+			mTrayMgr->enableFadeEffect();
 			mDvdClose->getNode()->setPosition(Ogre::Vector3(0, 0, -48));
 			mDvdClose->getNode()->setOrientation(Ogre::Quaternion(Ogre::Degree(0), Ogre::Vector3::UNIT_Y));
 			mDvdClose->show();

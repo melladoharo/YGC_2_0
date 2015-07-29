@@ -51,10 +51,6 @@ FormBase::~FormBase()
 
 bool FormBase::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	mTrayMgr->frameRenderingQueued(evt);
-	mTimeBase += evt.timeSinceLastFrame;
-	mTimeDoubleClick += evt.timeSinceLastFrame;
-
 	// update animations
 	for (unsigned int i = 0; i < mAnimState.size(); ++i)
 	{
@@ -73,6 +69,9 @@ bool FormBase::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			}
 		}
 	}
+
+	mTimeBase += evt.timeSinceLastFrame;
+	mTimeDoubleClick += evt.timeSinceLastFrame;
 
 	return true;
 }
