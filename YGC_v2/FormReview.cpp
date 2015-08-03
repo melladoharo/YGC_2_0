@@ -5,7 +5,7 @@ FormReview::FormReview(GameInfo* gInfo, GuiManager* tray, GuiListener* oldListen
 FormBase(tray, oldListener),
 mGameInfo(gInfo),
 mPathIni(Ogre::StringUtil::BLANK),
-mStatus(FR_VIEW)
+mCurrentReview(0)
 {
 	// find the .ini config file
 	sInfoResource infoIni;
@@ -17,20 +17,42 @@ mStatus(FR_VIEW)
 
 FormReview::~FormReview()
 {
-	hideOptions();
+	hideAllOptions();
+	for (unsigned int i = 0; i < mReviews.size(); ++i)
+	{
+		mTrayMgr->destroyWidget(mReviews[i].review);
+		mTrayMgr->destroyWidget(mReviews[i].score);
+		mTrayMgr->destroyWidget(mReviews[i].author);
+	}
 }
 
 
 
 bool FormReview::keyPressed(const OIS::KeyEvent &arg)
 {
-	if (arg.key == OIS::KC_A)
+	if (!mReviews.empty())
 	{
-		_increaseSize(mCurrentReview);
-	}
-	else if (arg.key == OIS::KC_R)
-	{
-		_drecreaseSize(mCurrentReview);
+		LineEdit* leReview = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormReview/LineEdit/Review"));
+		if (leReview)
+		{
+			leReview->injectKeyPress(arg);
+			mReviews[mCurrentReview].review->setText(leReview->getText());
+			_spacingReview(mCurrentReview);
+		}
+		LineEdit* leScore = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormReview/LineEdit/Score"));
+		if (leScore)
+		{
+			leScore->injectKeyPress(arg);
+			mReviews[mCurrentReview].score->setText(leScore->getText());
+			_spacingReview(mCurrentReview);
+		}
+		LineEdit* leAuthor = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormReview/LineEdit/Author"));
+		if (leAuthor)
+		{
+			leAuthor->injectKeyPress(arg);
+			mReviews[mCurrentReview].author->setText(leAuthor->getText());
+			_spacingReview(mCurrentReview);
+		}
 	}
 	
 	return FormBase::keyPressed(arg);
@@ -45,32 +67,12 @@ bool FormReview::mouseMoved(const OIS::MouseEvent &arg)
 {
 	if (mTrayMgr->injectMouseMove(arg)) return true;
 
-	if (mStatus == FR_MOVE)
-	{
-		Ogre::Vector2 cursorPos(arg.state.X.abs, arg.state.Y.abs);
-		_moveReview(mCurrentReview, cursorPos);
-	}
-
 	return FormBase::mouseMoved(arg);
 }
 
 bool FormReview::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
 	if (mTrayMgr->injectMouseDown(arg, id)) return true;
-
-	if (mStatus == FR_EDIT)
-	{
-		Ogre::Vector2 cursorPos(arg.state.X.abs, arg.state.Y.abs);
-		for (unsigned int i = 0; i < mReviews.size(); ++i)
-		{
-			if (Widget::isCursorOver(mReviews[i].review->getOverlayElement(), cursorPos))
-			{
-				mCurrentReview = i;
-				mStatus = FR_MOVE;
-				break;
-			}
-		}
-	}
 
 	return FormBase::mousePressed(arg, id);
 }
@@ -79,23 +81,81 @@ bool FormReview::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id
 {
 	if (mTrayMgr->injectMouseUp(arg, id)) return true;
 
-	if (mStatus == FR_MOVE) mStatus = FR_EDIT;
-
 	return FormBase::mouseReleased(arg, id);
 }
 
 void FormReview::buttonHit(Button* button)
 {
-	if (button->getName() == "FormReview/Button/EditReviews")
+	if (button->getName() == "FormReview/Button/CloseOptions")
 	{
-		mStatus = FR_EDIT;
-	}
-	else if (button->getName() == "FormReview/Button/CloseOptions")
-	{
-		if (mStatus == FR_EDIT) 
-			_saveReviews(mPathIni);
-		mStatus = FR_VIEW;
 		hideOptions();
+	}
+	else if (button->getName() == "FormReview/Button/CloseOptionsReviews")
+	{
+		_saveReviews(mPathIni);
+		hideOptionsReviews();
+		showOptions();
+	}
+}
+
+void FormReview::labelHit(Label* label)
+{
+	if (label->getName() == "FormReview/Label/EditReviews")
+	{
+		hideOptions();
+		showOptionsReviews();
+	}
+	else if (label->getName() == "FormReview/Label/NewReview")
+	{
+		Ogre::String nameReview = "Review_" + Ogre::StringConverter::toString(mReviews.size());
+		_createReview(nameReview, "Review", "-/-", "Author", 0.5f, 0.5f, 21);
+		mCurrentReview = mReviews.size() - 1;
+		_loadConfigWindowsReview(mCurrentReview, true);
+	}
+	else if (label->getName() == "FormReview/Label/DeleteReview")
+	{
+		if (mCurrentReview >= 0 && mCurrentReview < mReviews.size())
+		{
+			mTrayMgr->destroyWidget(mReviews[mCurrentReview].review->getName());
+			mTrayMgr->destroyWidget(mReviews[mCurrentReview].score->getName());
+			mTrayMgr->destroyWidget(mReviews[mCurrentReview].author->getName());
+			mReviews.erase(mReviews.begin() + mCurrentReview);
+			_saveReviews(mPathIni);
+			mCurrentReview = 0;
+			_loadConfigWindowsReview(mCurrentReview);
+		}
+	}
+}
+
+void FormReview::itemChanged(ItemSelector* selector)
+{
+	if (selector->getName() == "FormReview/Selector/Review")
+	{
+		// saves the changes before pass to the next (or previous) review
+		_saveReviews(mPathIni);
+
+		// pass to next (or previous) review, and load its parameters in the windows configuration
+		Ogre::String reviewString = selector->getSelectedOption();
+		mCurrentReview = Ogre::StringConverter::parseInt(reviewString);
+		_loadConfigWindowsReview(mCurrentReview);
+	}
+}
+
+void FormReview::sliderOptionsMoved(SliderOptions* slider)
+{
+	if (slider->getName() == "FormReview/Slider/Size")
+	{
+		_setFontSize(mCurrentReview, slider->getValue());
+	}
+	else if (slider->getName() == "FormReview/Slider/PosX")
+	{
+		if (!mReviews.empty())
+			_moveReview(mCurrentReview, Ogre::Vector2(slider->getValue() / 100.0f, mReviews[mCurrentReview].top));
+	}
+	else if (slider->getName() == "FormReview/Slider/PosY")
+	{
+		if (!mReviews.empty())
+			_moveReview(mCurrentReview, Ogre::Vector2(mReviews[mCurrentReview].left, slider->getValue() / 100.0f));
 	}
 }
 
@@ -187,35 +247,17 @@ void FormReview::_createReview(const Ogre::String& name, const Ogre::String& tex
 		textAuthor, "YgcFont/SemiboldItalic/16", 250, 90, mReviews.back().fontSize - 6, 6);
 	mReviews.back().author->setTextColor(Ogre::ColourValue(0.79f, 0.79f, 0.80f));
 
-	addWidgetToForm(mReviews.back().review);
-	addWidgetToForm(mReviews.back().score);
-	addWidgetToForm(mReviews.back().author);
-
 	_spacingReview(mReviews.size() - 1);
 }
 
-
-void FormReview::_increaseSize(unsigned int currentReview)
+void FormReview::_setFontSize(unsigned int currentReview, unsigned int fontSize)
 {
 	if (currentReview >= 0 && currentReview < mReviews.size())
 	{
-		mReviews[currentReview].fontSize = mReviews[currentReview].fontSize + 2;
-		mReviews[currentReview].review->setCaptionHeight(mReviews[currentReview].fontSize);
-		mReviews[currentReview].score->setCaptionHeight(mReviews[currentReview].fontSize);
-		mReviews[currentReview].author->setCaptionHeight(mReviews[currentReview].fontSize - 6);
-		_spacingReview(currentReview);
-		
-	}
-}
-
-void FormReview::_drecreaseSize(unsigned int currentReview)
-{
-	if (currentReview >= 0 && currentReview < mReviews.size())
-	{
-		mReviews[currentReview].fontSize = mReviews[currentReview].fontSize - 2;
-		mReviews[currentReview].review->setCaptionHeight(mReviews[currentReview].fontSize);
-		mReviews[currentReview].score->setCaptionHeight(mReviews[currentReview].fontSize);
-		mReviews[currentReview].author->setCaptionHeight(mReviews[currentReview].fontSize - 6);
+		mReviews[currentReview].fontSize = fontSize;
+		mReviews[currentReview].review->setCaptionHeight(fontSize);
+		mReviews[currentReview].score->setCaptionHeight(fontSize);
+		mReviews[currentReview].author->setCaptionHeight(fontSize - 6);
 		_spacingReview(currentReview);
 	}
 }
@@ -224,8 +266,8 @@ void FormReview::_moveReview(unsigned int currentReview, Ogre::Vector2 newPos)
 {
 	if (currentReview >= 0 && currentReview < mReviews.size())
 	{
-		mReviews[currentReview].left = newPos.x / mScreenSize.x;
-		mReviews[currentReview].top = newPos.y / mScreenSize.y;
+		mReviews[currentReview].left = newPos.x;
+		mReviews[currentReview].top = newPos.y;
 		_spacingReview(currentReview);
 	}
 }
@@ -254,42 +296,161 @@ void FormReview::_spacingReview(unsigned int currentReview)
 	}
 }
 
+void FormReview::_loadConfigWindowsReview(unsigned int currentReview, bool newReview /*= false*/)
+{
+	LineEdit* leReview = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormReview/LineEdit/Review"));
+	LineEdit* leScore = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormReview/LineEdit/Score"));
+	LineEdit* leAuthor = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormReview/LineEdit/Author"));
+	ItemSelector* selReview = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormReview/Selector/Review"));
+	SliderOptions* sdSize = dynamic_cast<SliderOptions*>(mTrayMgr->getWidget("FormReview/Slider/Size"));
+	SliderOptions* sdPosX = dynamic_cast<SliderOptions*>(mTrayMgr->getWidget("FormReview/Slider/PosX"));
+	SliderOptions* sdPosY = dynamic_cast<SliderOptions*>(mTrayMgr->getWidget("FormReview/Slider/PosY"));
+	Ogre::StringVector itemsReviews;
+	for (unsigned int i = 0; i < mReviews.size(); ++i)
+		itemsReviews.push_back(Ogre::StringConverter::toString(i));
+
+	if (mReviews.empty())
+	{
+		leReview->setText("");
+		leScore->setText("");
+		leAuthor->setText("");
+		itemsReviews.push_back("No reviews");
+		selReview->setItems(itemsReviews);
+		sdSize->setValue(12, false);
+		sdPosX->setValue(0, false);
+		sdPosY->setValue(0, false);
+	}
+	else if (newReview)
+	{
+		leReview->setText("Review");
+		leScore->setText("-/-");
+		leAuthor->setText("Author");
+		selReview->setItems(itemsReviews);
+		selReview->selectOption(Ogre::StringConverter::toString(mCurrentReview), false);
+		sdSize->setValue(21, false);
+		sdPosX->setValue(50, false); 
+		sdPosY->setValue(50, false);
+	}
+	else if (currentReview >= 0 && currentReview < mReviews.size())
+	{
+		leReview->setText(mReviews[currentReview].review->getText());
+		leScore->setText(mReviews[currentReview].score->getText());
+		leAuthor->setText(mReviews[currentReview].author->getText());
+		selReview->setItems(itemsReviews);
+		selReview->selectOption(Ogre::StringConverter::toString(mCurrentReview), false);
+		sdSize->setValue(mReviews[currentReview].fontSize, false);
+		sdPosX->setValue(mReviews[currentReview].left * 100.0f, false);
+		sdPosY->setValue(mReviews[currentReview].top * 100.0f, false);
+	}
+}
+
 
 
 void FormReview::hide()
 {
-	FormBase::hide();
+	for (unsigned int i = 0; i < mReviews.size(); ++i)
+	{
+		mReviews[i].review->hide();
+		mReviews[i].score->hide();
+		mReviews[i].author->hide();
+	}
 	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
 	if (logoGame) logoGame->hide();
+	hideAllOptions();
 }
 
 void FormReview::show()
 {
-	FormBase::show();
+	for (unsigned int i = 0; i < mReviews.size(); ++i)
+	{
+		mReviews[i].review->show();
+		mReviews[i].score->show();
+		mReviews[i].author->show();
+	}
 	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
 	if (logoGame) logoGame->show();
 }
 
-void FormReview::showOptions()
-{
-	if (!mTrayMgr->getWidget("FormReview/Button/EditReviews")) // is visible? 
-	{
-		//topButton=screenHeight - (num_buttons*sep_buttons) - set_buttons;
-		Ogre::Real sizeButton = 170, leftButton = 35, topButton = 0, sepButton = 40;
-		topButton = mScreenSize.y - (2 * sepButton) - sepButton;
 
-		mTrayMgr->createButton("FormReview/Button/EditReviews", "Edit Reviews", leftButton, topButton, sizeButton);
-		topButton += sepButton;
-		mTrayMgr->createButton("FormReview/Button/CloseOptions", "Close", leftButton, topButton, sizeButton);
-	}
+
+void FormReview::hideAllOptions()
+{
+	hideOptions();
+	hideOptionsReviews();
 }
 
 void FormReview::hideOptions()
 {
-	if (mTrayMgr->getWidget("FormReview/Button/EditReviews"))
+	if (mTrayMgr->getWidget("FormReview/Window/Options"))
 	{
-		mTrayMgr->destroyWidget("FormReview/Button/EditReviews");
+		mTrayMgr->destroyDialogWindow("FormReview/Window/Options");
+		mTrayMgr->destroyWidget("FormReview/Label/EditReviews");
+		mTrayMgr->destroyWidget("FormReview/Label/Help");
 		mTrayMgr->destroyWidget("FormReview/Button/CloseOptions");
+	}
+}
+
+void FormReview::showOptions()
+{
+	if (!mTrayMgr->getWidget("FormReview/Window/Options")) // menu is hidden
+	{
+		unsigned int numOptions = 3;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 350;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+
+		mTrayMgr->createDialogWindow("FormReview/Window/Options", "REVIEWS OPTIONS", left, top, width, height);	 top += sepOptions / 2;
+		mTrayMgr->createLabel("FormReview/Label/EditReviews", "EDIT REVIEWS", left, top, width, 23); top += sepOptions;
+		mTrayMgr->createLabel("FormReview/Label/Help", "HELP", left, top, width, 23); top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormReview/Button/CloseOptions", "BACK", left, top, 60);
+	}
+}
+
+void FormReview::hideOptionsReviews()
+{
+	if (mTrayMgr->getWidget("FormReview/Window/OptionsReview"))
+	{
+		mTrayMgr->destroyDialogWindow("FormReview/Window/OptionsReview");
+		mTrayMgr->destroyWidget("FormReview/LineEdit/Review");
+		mTrayMgr->destroyWidget("FormReview/LineEdit/Score");
+		mTrayMgr->destroyWidget("FormReview/LineEdit/Author");
+		mTrayMgr->destroyWidget("FormReview/Selector/Review");
+		mTrayMgr->destroyWidget("FormReview/Slider/Size");
+		mTrayMgr->destroyWidget("FormReview/Slider/PosX");
+		mTrayMgr->destroyWidget("FormReview/Slider/PosY");
+		mTrayMgr->destroyWidget("FormReview/Label/NewReview");
+		mTrayMgr->destroyWidget("FormReview/Label/DeleteReview");
+		mTrayMgr->destroyWidget("FormReview/Button/CloseOptionsReviews");
+	}
+}
+
+void FormReview::showOptionsReviews()
+{
+	if (!mTrayMgr->getWidget("FormReview/Window/OptionsReview")) // menu is hidden
+	{
+		unsigned int numOptions = 10;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 425;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+		Ogre::StringVector itemsReviews;
+
+		mTrayMgr->createDialogWindow("FormReview/Window/OptionsReview", "EDIT REVIEWS", left, top, width, height);	 top += sepOptions / 2;
+		mTrayMgr->createLineEdit("FormReview/LineEdit/Review", "Review", "", left, top, width); top += sepOptions;
+		mTrayMgr->createLineEdit("FormReview/LineEdit/Score", "Score  ", "", left, top, width); top += sepOptions;
+		mTrayMgr->createLineEdit("FormReview/LineEdit/Author", "Author", "", left, top, width); top += sepOptions;
+		mTrayMgr->createItemSelector("FormReview/Selector/Review", "Review", itemsReviews, left, top, width); top += sepOptions;
+		mTrayMgr->createSliderOptions("FormReview/Slider/Size", "Size", left, top, width, 12, 32, 100);	top += sepOptions;
+		mTrayMgr->createSliderOptions("FormReview/Slider/PosX", "Position X", left, top, width, 0, 100, 100);	top += sepOptions;
+		mTrayMgr->createSliderOptions("FormReview/Slider/PosY", "Position Y", left, top, width, 0, 100, 100);	top += sepOptions;
+		mTrayMgr->createLabel("FormReview/Label/NewReview", "NEW REVIEW", left, top, width, 23); top += sepOptions;
+		mTrayMgr->createLabel("FormReview/Label/DeleteReview", "DELETE REVIEW", left, top, width, 23); top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormReview/Button/CloseOptionsReviews", "BACK", left, top, 60);
+		
+		_loadConfigWindowsReview(0);
 	}
 }
 

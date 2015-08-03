@@ -5,8 +5,6 @@
 #include "GameInfo.h"
 #include "Widget.h"
 
-enum eFRstatus{ FR_VIEW, FR_EDIT, FR_MOVE };
-
 struct sInfoReview
 {
 	SimpleText* review;
@@ -33,13 +31,19 @@ public:
 	bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 
 	// GuiListener
-	void buttonHit(Button* button);
+	void buttonHit(Button* button); 
+	void labelHit(Label* label);
+	void itemChanged(ItemSelector* selector);
+	void sliderOptionsMoved(SliderOptions* slider);
 
 	// FormBase
 	void hide();
 	void show();
-	void showOptions();
+	void hideAllOptions();
 	void hideOptions();
+	void showOptions();
+	void hideOptionsReviews();
+	void showOptionsReviews();
 
 private:
 	void _createReview(const Ogre::String& name, const Ogre::String& textReview, const Ogre::String& textScore,
@@ -48,14 +52,13 @@ private:
 	bool _saveReviews(const Ogre::String& pathIni);
 	void _moveReview(unsigned int currentReview, Ogre::Vector2 newPos);
 	void _spacingReview(unsigned int currentReview);
-	void _increaseSize(unsigned int currentReview);
-	void _drecreaseSize(unsigned int currentReview);
+	void _setFontSize(unsigned int currentReview, unsigned int fontSize);
+	void _loadConfigWindowsReview(unsigned int currentReview, bool newReview = false);
 
 	GameInfo* mGameInfo;
 	std::vector<sInfoReview> mReviews;
 	Ogre::String mPathIni;
 	unsigned int mCurrentReview;
-	eFRstatus mStatus;
 };
 
 #endif // #ifndef _FORMREVIEW_H__
