@@ -706,3 +706,18 @@ material YgcGui/MiniPause/Down : SdkTrays/Base
         }
     }
 }
+
+
+material YgcGui/TextCursor : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+			texture_unit
+            {
+                texture sdk_text_cursor.png
+            }
+		}
+	}
+}

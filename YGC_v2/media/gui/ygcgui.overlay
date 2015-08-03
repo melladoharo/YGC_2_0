@@ -720,3 +720,56 @@ template container Panel(YgcGui/FileExplorer)
 		}
 	}
 }
+
+
+template container Panel(YgcGui/LineEdit)
+{
+	metrics_mode pixels
+	horz_align left
+	transparent true
+	height 28
+	material YgcGui/Thumbnail/Light/Transparent
+		
+	element TextArea(LineEditCaption)
+	{
+		metrics_mode pixels
+        horz_align left
+        font_name YgcFont/SemiBold/16
+		top 7
+        char_height 19
+        space_width 7
+        colour 0.96 0.95 0.97
+		left 12
+	}
+	
+	container Panel(LineEditMessage)
+	{
+		metrics_mode pixels
+		horz_align left
+		height 30
+		material YgcGui/Thumbnail/Light/Transparent
+		top -1
+			
+		element TextArea(LineEditMessageCaption)
+		{
+			metrics_mode pixels
+			horz_align left
+			font_name YgcFont/SemiBold/16
+			top 8
+			char_height 19
+			space_width 7
+			colour 0.96 0.95 0.97
+			left 9
+		}
+		
+		element Panel(LineEditCursor)
+		{
+			horz_align left
+			metrics_mode pixels
+			material YgcGui/TextCursor
+			top 3
+			height 22
+			width 16
+		}
+	}
+}

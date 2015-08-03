@@ -18,6 +18,7 @@
 #include "DialogWindows.h"
 #include "SliderOptions.h"
 #include "FileExplorer.h"
+#include "LineEdit.h"
 #include "DepthOfFieldEffect.h"
 
 class GuiManager : public GuiListener, public Ogre::ResourceGroupListener
@@ -324,6 +325,15 @@ public:
 		mTray->addChild(mWidgets.back()->getOverlayElement());
 		so->_assignListener(mListener);
 		return so;
+	}
+
+	LineEdit* createLineEdit(const Ogre::String& name, const Ogre::String& caption, const Ogre::String& message, Ogre::Real left, Ogre::Real top, Ogre::Real width)
+	{
+		LineEdit* le = new LineEdit(name, caption, message, left, top, width);
+		mWidgets.push_back(le);
+		mTray->addChild(mWidgets.back()->getOverlayElement());
+		le->_assignListener(mListener);
+		return le;
 	}
 
 	FileExplorer* createFileExplorer(const Ogre::String& name, const Ogre::String& path, Ogre::Real left, Ogre::Real top, Ogre::Real width, Ogre::Real height)

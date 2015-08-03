@@ -82,10 +82,10 @@ Ogre::Real Widget::sizeInPixels(const Ogre::String& text, const Ogre::String nam
 {
 	Ogre::Real textWidth = 0;
 	Ogre::FontPtr font = Ogre::FontManager::getSingleton().getByName(nameFont);
-	Ogre::Real sp = spaceWidth;
-	for (unsigned int i = 0; i < text.size(); ++i)
+	Ogre::Real sp = font->getCharacterSpacer() + font->getGlyphAspectRatio(' ');
+	for (unsigned int i = 0; i < text.size(); ++i) 
 	{
-		textWidth += (text[i] == 0x0020) ? sp : font->getGlyphAspectRatio(text[i]) * heightFont;
+		textWidth += (text[i] == ' ') ? sp : font->getGlyphAspectRatio(text[i]) * heightFont;
 	}
 	return textWidth;
 }
