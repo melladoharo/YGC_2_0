@@ -7,7 +7,8 @@ mGameInfo(gInfo),
 mState(FM_OVERVIEW),
 mTarget(0),
 mController(0),
-mCurrentIndex(0)
+mCurrentIndex(0),
+mCtrlPressed(false), mAltPressed(false), mShiftPressed(false)
 {
 	// create target
 	mTarget = mSceneMgr->getRootSceneNode()->createChildSceneNode();
@@ -37,6 +38,8 @@ mCurrentIndex(0)
 
 FormModels::~FormModels()
 {
+	hideAllOptions();
+
 	mSceneMgr->destroySceneNode(mTarget);
 	if (mController) delete mController;
 
@@ -59,6 +62,10 @@ bool FormModels::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
 bool FormModels::keyPressed(const OIS::KeyEvent &arg)
 {
+	if (arg.key == OIS::KC_LCONTROL)	mCtrlPressed = true;
+	else if (arg.key == OIS::KC_LMENU)	mAltPressed = true;
+	else if (arg.key == OIS::KC_LSHIFT)	mShiftPressed = true;
+
 	if (mCameraMan)
 		mCameraMan->injectKeyDown(arg);
 
@@ -70,6 +77,14 @@ bool FormModels::keyPressed(const OIS::KeyEvent &arg)
 
 bool FormModels::keyReleased(const OIS::KeyEvent &arg)
 {
+	if (arg.key == OIS::KC_LCONTROL)	mCtrlPressed = false;
+	else if (arg.key == OIS::KC_LMENU)	mAltPressed = false;
+	else if (arg.key == OIS::KC_LSHIFT)	mShiftPressed = false;
+	else if (arg.key == OIS::KC_C)
+	{
+		if (mState == FM_ZOOM) _setFormToZoom();
+	}
+
 	if (mCameraMan)
 		mCameraMan->injectKeyUp(arg);
 
@@ -83,30 +98,52 @@ bool FormModels::mouseMoved(const OIS::MouseEvent &arg)
 {
 	if (mTrayMgr->injectMouseMove(arg)) return true;
 
-	if (mCameraMan && (mState == FM_ZOOM || mState == FM_EDITCAMERA))
-		mCameraMan->injectMouseMove(arg);
-
 	if (mController)
 		mController->injectMouseMove(arg);
 
-	if (mLBPressed)
+	if (mLBPressed) // left button 
 	{
-		
+		if (mState == FM_ZOOM || mState == FM_EDITCAMERA)
+		{
+			if (mAltPressed) // left ALT...
+			{
+				if (mShiftPressed) // ...and left SHIFT are pressed? then move camera and mTarget
+				{
+					mDragging = true;
+					Ogre::Vector3 newPos =
+						(mCamera->getRight() * -arg.state.X.rel * 0.040f) +
+						(mCamera->getUp() * arg.state.Y.rel *0.025f);
+					mTarget->translate(newPos);
+					mCamera->move(newPos);
+				}
+				else if (mCtrlPressed) // ...and left CTRL are pressed? then zoom
+				{
+					Ogre::Real dist = (mCamera->getPosition() - mModels[mCurrentIndex].model->getNode()->_getDerivedPosition()).length();
+					mCamera->moveRelative(Ogre::Vector3(0, 0, arg.state.Y.rel * 0.0020f * dist));
+				}
+				else // ...is pressed (only left ALT)? then rotate camera around mTarget
+				{
+					if (mCameraMan)
+					{
+						mCameraMan->injectMouseMove(arg);
+						if (mCamera->getPosition().y < 0)
+							mCamera->moveRelative(Ogre::Vector3(0, -mCamera->getPosition().y, 0));
+					}
+				}
+			}
+			else if (mCtrlPressed) // only left CTRL is pressed?, yaw the dvdcase model
+			{
+				mModels[mCurrentIndex].model->getNode()->yaw(Ogre::Degree(arg.state.X.rel * 0.40f));
+			}
+		}
 	}
 	else if (mRBPressed)
 	{
-		mDragging = true;
+
 	}
 	else if (mMBPressed)
 	{
-		mDragging = true;
-		
-		if (mState == FM_ZOOM || mState == FM_EDITCAMERA)
-		{
-			Ogre::Vector3 targetTranslate(0, arg.state.Y.rel * 0.020f, 0);
-			mCameraMan->getTarget()->translate(targetTranslate);
-			mCamera->setPosition(mCamera->getPosition() + targetTranslate);
-		}
+
 	}
 
 	return FormBase::mouseMoved(arg);;
@@ -116,43 +153,13 @@ bool FormModels::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
 	if (mTrayMgr->injectMouseDown(arg, id)) return true;
 
-	if (mCameraMan)
+	if (mCameraMan && mAltPressed)
 		mCameraMan->injectMouseDown(arg, id);
 
 	if (mController)
 		mController->injectMouseDown(arg, id);
 
 	if (id == OIS::MouseButtonID::MB_Left)
-	{
-		mLBPressed = true;
-		if (mTimeDoubleClick > 0 && mTimeDoubleClick < 0.15f)
-		{
-			mDoubleClick = true;
-		}
-	}
-	else if (id == OIS::MouseButtonID::MB_Right)
-	{
-		mRBPressed = true;
-	}
-	else if (id == OIS::MouseButtonID::MB_Middle)
-	{
-		mMBPressed = true;
-	}
-
-	return FormBase::mousePressed(arg, id);;
-}
-
-bool FormModels::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
-{
-	if (mTrayMgr->injectMouseUp(arg, id)) return true;
-
-	if (mCameraMan)
-		mCameraMan->injectMouseUp(arg, id);
-
-	if (mController)
-		mController->injectMouseUp(arg, id);
-
-	if (mLBPressed)
 	{
 		// pass to the next view animation
 		if (mState == FM_DETAILS)
@@ -161,7 +168,7 @@ bool FormModels::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id
 			_playAnimation(mModels[mCurrentIndex]);
 		}
 
-		if (mDoubleClick)
+		if (mTimeDoubleClick > 0 && mTimeDoubleClick < 0.15f)
 		{
 			if (mState == FM_OVERVIEW)
 			{
@@ -174,7 +181,33 @@ bool FormModels::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id
 			}
 		}
 	}
-	else if (mRBPressed && !mDragging)
+	else if (id == OIS::MouseButtonID::MB_Right)
+	{
+		
+	}
+	else if (id == OIS::MouseButtonID::MB_Middle)
+	{
+		
+	}
+
+	return FormBase::mousePressed(arg, id);;
+}
+
+bool FormModels::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
+{
+	if (mTrayMgr->injectMouseUp(arg, id)) return true;
+
+	if (mCameraMan && mAltPressed)
+		mCameraMan->injectMouseUp(arg, id);
+
+	if (mController)
+		mController->injectMouseUp(arg, id);
+
+	if (mLBPressed)
+	{
+		
+	}
+	else if (mRBPressed)
 	{
 		if (mState == FM_ZOOM)
 		{
@@ -203,6 +236,7 @@ void FormModels::buttonHit(Button* button)
 		mController = 0;
 		_saveModelStatusFromIni(mModels[mCurrentIndex].simpleIni, "MODEL.INITIAL.STATUS",
 			mModels[mCurrentIndex].model, mModels[mCurrentIndex].pathIni);
+		mModels[mCurrentIndex].model->getNode()->setInitialState();
 		hideOptionEditModel();
 		showOptions();
 	}
@@ -364,6 +398,7 @@ void FormModels::showModel(unsigned int index)
 		
 		// show the model 
 		mModels[index].model->show();
+		mModels[mCurrentIndex].model->getNode()->resetToInitialState(); // restore default rotation if yaw the model in zoom view [ctrl + clic]
 		mTrayMgr->getWidget("FormModels/Title/" + mModels[index].name)->show();
 		mTrayMgr->getWidget("FormModels/Overview/" + mModels[index].name)->show();
 		if (mTrayMgr->getWidget("FormModels/DecorBar")) mTrayMgr->getWidget("FormModels/DecorBar")->show();
@@ -405,6 +440,7 @@ void FormModels::_loadModel(const sInfoResource& infoModel)
 	mModels.back().model->hide();
 	mModels.back().currentView = 0;	
 	_loadModelStatusFromIni(mModels.back().simpleIni, "MODEL.INITIAL.STATUS", mModels.back().model);
+	mModels.back().model->getNode()->setInitialState();
 	_loadCameraView(mModels.back());
 
 	// default values for new models
@@ -815,7 +851,7 @@ void FormModels::showOptionCamera()
 		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
 		Ogre::Real left = 50;
 		Ogre::Real width = 420;
-		Ogre::String descCamera = "To modify the camera position you must click and drag with the left mouse button. Use the right button to make zoom to object";
+		Ogre::String descCamera = "Modify the camera position click and dragging the left mouse button and pressing left alt key. Press left alt and left ctrl keys to make zoom to object.";
 		SimpleText* desc = mTrayMgr->createSimpleText("Desc/EditCamera", descCamera, "YgcFont/SemiBold/16", width - 30, 250, 19, 9);
 		Ogre::Real height = desc->getNumLines() * sepOptions;
 		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;

@@ -83,6 +83,7 @@ private:
 	Ogre::SceneNode* mTarget;
 	CModelController* mController;
 	unsigned int mCurrentIndex;
+	bool mCtrlPressed, mAltPressed, mShiftPressed;
 };
 
 #endif // #ifndef _FORMMODELS_H__
