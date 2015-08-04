@@ -366,6 +366,7 @@ void FormModels::sliderMoved(Slider* slider)
 {
 	if (mCurrentIndex != slider->getValue())
 	{
+		mTrayMgr->enableFadeEffect();
 		_showModel(slider->getValue());
 	}
 }
