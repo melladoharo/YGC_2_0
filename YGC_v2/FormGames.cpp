@@ -87,6 +87,7 @@ bool FormGames::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
 	if (mFormSelector && mFormSelector->isFinished())
 	{
+		mTrayMgr->enableFadeEffect();
 		if (mFormSelector) delete mFormSelector;
 		mFormSelector = 0;
 		mTrayMgr->assignListenerToMenuBar(mOldListener);

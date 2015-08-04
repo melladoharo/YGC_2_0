@@ -55,7 +55,10 @@ bool FormModels::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
 	// loop over the views of model playing the next animation view when the current ends
 	if (mState == FM_DETAILS && !mSceneMgr->hasAnimation("FormModels/Anim/CameraView"))
+	{
+		mTrayMgr->enableFadeEffect();
 		_playAnimation(mModels[mCurrentIndex]);
+	}
 
 	return FormBase::frameRenderingQueued(evt);
 }
@@ -165,6 +168,7 @@ bool FormModels::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 		if (mState == FM_DETAILS)
 		{
 			destroyAnim("FormModels/Anim/CameraView");
+			mTrayMgr->enableFadeEffect();
 			_playAnimation(mModels[mCurrentIndex]);
 		}
 
@@ -172,12 +176,16 @@ bool FormModels::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 		{
 			if (mState == FM_OVERVIEW)
 			{
+				mTrayMgr->enableFadeEffect();
 				_setFormToZoom();
 			}
 			else if (mState == FM_ZOOM)
 			{
 				if (!mModels[mCurrentIndex].views.empty())
+				{
+					mTrayMgr->enableFadeEffect();
 					_setFormToDetails();
+				}
 			}
 		}
 	}
@@ -211,10 +219,12 @@ bool FormModels::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id
 	{
 		if (mState == FM_ZOOM)
 		{
+			mTrayMgr->enableFadeEffect();
 			_setFormToOverview();	
 		}
 		else if (mState == FM_DETAILS)
 		{
+			mTrayMgr->enableFadeEffect();
 			_setFormToZoom();
 		}
 	}
@@ -651,7 +661,7 @@ void FormModels::_showCameraView(sModel& model)
 	if (model.currentView >= 0 && model.currentView < model.views.size())
 	{
 		mNodeCamera->setPosition(0, 0, 0);
-		//mNodeCamera->setOrientation(mCamera->getOrientation());
+		mNodeCamera->setOrientation(Ogre::Quaternion());
 		mCamera->setPosition(model.views[model.currentView].cameraPos);
 		mCamera->setOrientation(model.views[model.currentView].cameraRot);
 		mTarget->setPosition(model.views[model.currentView].targetPos);
