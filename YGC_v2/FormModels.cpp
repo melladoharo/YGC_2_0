@@ -13,24 +13,59 @@ mCtrlPressed(false), mAltPressed(false), mShiftPressed(false)
 	// create target
 	mTarget = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
-	// load models from path
+	// load models from resources paths
 	std::vector<sInfoResource> infoModels;
 	mGameInfo->findModelsResources(infoModels);
+	mGameInfo->findObjectsResources(infoModels);
 	for (unsigned int i = 0; i < infoModels.size(); ++i)
 		_loadModel(infoModels[i]);
 
+	// options
+	Ogre::Real padLeft = mScreenSize.x / 18.0f;
+	Ogre::Real padTop = mScreenSize.y / 36.0f;
+	Ogre::Real padRight = mScreenSize.x / 25.0f;
+	
+	// title
+	Ogre::Real titleWidth = (mScreenSize.x / 2.0f) + padLeft;
+	Ogre::Real titleCaptionSize = (mScreenSize.x > 1400) ? 44 : 32;
+	Ogre::Real titleHeight = titleCaptionSize + padTop;
+	SimpleText* stTitle = mTrayMgr->createSimpleText("FormModels/Text/Title", "", 
+		"YgcFont/SemiBold/16", titleWidth, titleHeight, titleCaptionSize, 1);
+	stTitle->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
+	stTitle->setTop(mScreenSize.y / 3.2f);
+	stTitle->setLeft(-titleWidth);
+	stTitle->hide();
+	addWidgetToForm(stTitle);
+
+	// decoration bar
+	DecorWidget* decorBar = mTrayMgr->createDecorWidget("FormModels/DecorBar", "YgcGui/DecorBar");
+	decorBar->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
+	decorBar->getOverlayElement()->setWidth((stTitle->getOverlayElement()->getWidth() - padRight) + 10);
+	decorBar->setTop(stTitle->getTop() + titleCaptionSize / 1.2f);
+	decorBar->setLeft(stTitle->getLeft() - 5);
+	decorBar->hide();
+	addWidgetToForm(decorBar);
+
+	// description
+	Ogre::Real overviewCaptionSize = (mScreenSize.x > 1400) ? 26 : 20;
+	SimpleText* stOverview = mTrayMgr->createSimpleText("FormModels/Text/Desc", "",
+		"YgcFont/SemiBold/16", titleWidth - padRight, 450, overviewCaptionSize, 8);
+	stOverview->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
+	stOverview->setTop(stTitle->getTop() + padTop * 3);
+	stOverview->setLeft(stTitle->getLeft());
+	stOverview->hide();
+	addWidgetToForm(stOverview);
+
 	// slider
-	if (mModels.size() > 1)
-	{
-		Ogre::Real minValue = 0;
-		Ogre::Real maxValue = mModels.size()-1;
-		Slider* sd = mTrayMgr->createSlider("FormModels/Slider", 370, minValue, maxValue, mModels.size());
-		sd->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
-		sd->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
-		sd->setLeft(-(sd->getWidth() / 2));
-		sd->setTop(-50);
-		addWidgetToForm(sd);
-	}
+	Ogre::Real minValue = 0;
+	Ogre::Real maxValue = mModels.size() - 1;
+	Slider* sd = mTrayMgr->createSlider("FormModels/Slider", 370, minValue, maxValue, mModels.size());
+	sd->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
+	sd->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
+	sd->setLeft(-(sd->getWidth() / 2));
+	sd->setTop(-50);
+	sd->hide();
+	addWidgetToForm(sd);
 
 	// set cam and view models
 	_setFormToOverview();
@@ -74,6 +109,22 @@ bool FormModels::keyPressed(const OIS::KeyEvent &arg)
 
 	if (mController)
 		mController->injectKeyDown(arg);
+
+	// update the lineEdit widgets
+	LineEdit* leName = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormModels/LineEdit/Name"));
+	if (leName)
+	{
+		leName->injectKeyPress(arg);
+		SimpleText* stTitle = dynamic_cast<SimpleText*>(mTrayMgr->getWidget("FormModels/Text/Title"));
+		if (stTitle) stTitle->setText(leName->getText());
+	}
+	LineEdit* leDesc = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormModels/LineEdit/Desc"));
+	if (leDesc)
+	{
+		leDesc->injectKeyPress(arg);
+		SimpleText* stDesc = dynamic_cast<SimpleText*>(mTrayMgr->getWidget("FormModels/Text/Desc"));
+		if (stDesc) stDesc->setText(leDesc->getText());
+	}
 
 	return FormBase::keyPressed(arg);
 }
@@ -176,8 +227,11 @@ bool FormModels::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 		{
 			if (mState == FM_OVERVIEW)
 			{
-				mTrayMgr->enableFadeEffect();
-				_setFormToZoom();
+				if (!mModels.empty())
+				{
+					mTrayMgr->enableFadeEffect();
+					_setFormToZoom();
+				}
 			}
 			else if (mState == FM_ZOOM)
 			{
@@ -242,30 +296,46 @@ void FormModels::buttonHit(Button* button)
 	}
 	else if (button->getName() == "FormModels/Button/CloseOptionsEditModel")
 	{
+		LineEdit* leName = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormModels/LineEdit/Name"));
+		LineEdit* leDesc = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormModels/LineEdit/Desc"));
+		if (leName) mModels[mCurrentIndex].simpleIni->SetValue("MODEL.INFO", "Name", leName->getText().c_str());
+		if (leDesc) mModels[mCurrentIndex].simpleIni->SetValue("MODEL.INFO", "Overview", leDesc->getText().c_str());
+		mModels[mCurrentIndex].simpleIni->SaveFile(mModels[mCurrentIndex].pathIni.c_str());
+		hideOptionEditModel();
+		showOptions();
+	}
+	else if (button->getName() == "FormModels/Button/CloseOptionsEditPosition")
+	{
 		if (mController) delete mController;
 		mController = 0;
 		_saveModelStatusFromIni(mModels[mCurrentIndex].simpleIni, "MODEL.INITIAL.STATUS",
 			mModels[mCurrentIndex].model, mModels[mCurrentIndex].pathIni);
 		mModels[mCurrentIndex].model->getNode()->setInitialState();
-		hideOptionEditModel();
+		hideOptionEditPosition();
 		showOptions();
 	}
-	else if (button->getName() == "FormModels/Button/WindowsEditModelHide")
+	else if (button->getName() == "FormModels/Button/WindowsEditPositionHide")
 	{
-		if (mTrayMgr->getWidget("FormModels/Window/EditModel")->isVisible())
+		if (mTrayMgr->getWidget("FormModels/Window/EditPosition")->isVisible())
 		{
-			mTrayMgr->getWidget("FormModels/Window/EditModel")->hide();
-			mTrayMgr->getWidget("Desc/EditModel")->hide();
-			Button* bttHide = dynamic_cast<Button*>(mTrayMgr->getWidget("FormModels/Button/WindowsEditModelHide"));
+			mTrayMgr->getWidget("FormModels/Window/EditPosition")->hide();
+			mTrayMgr->getWidget("FormModels/SimpleText/EditPosition")->hide();
+			Button* bttHide = dynamic_cast<Button*>(mTrayMgr->getWidget("FormModels/Button/WindowsEditPositionHide"));
 			bttHide->setCaption("SHOW");
 		}
 		else
 		{
-			mTrayMgr->getWidget("FormModels/Window/EditModel")->show();
-			mTrayMgr->getWidget("Desc/EditModel")->show();
-			Button* bttHide = dynamic_cast<Button*>(mTrayMgr->getWidget("FormModels/Button/WindowsEditModelHide"));
+			mTrayMgr->getWidget("FormModels/Window/EditPosition")->show();
+			mTrayMgr->getWidget("FormModels/SimpleText/EditPosition")->show();
+			Button* bttHide = dynamic_cast<Button*>(mTrayMgr->getWidget("FormModels/Button/WindowsEditPositionHide"));
 			bttHide->setCaption("HIDE");
 		}
+	}
+	else if (button->getName() == "FormModels/Button/EditPositionReset")
+	{
+		mModels[mCurrentIndex].model->getNode()->setPosition(Ogre::Vector3(-10, 0, -50));
+		mModels[mCurrentIndex].model->getNode()->setOrientation(Ogre::Quaternion());
+		mModels[mCurrentIndex].model->getNode()->setScale(1, 1, 1);
 	}
 	else if (button->getName() == "FormModels/Button/CloseOptionsViews")
 	{
@@ -296,7 +366,7 @@ void FormModels::sliderMoved(Slider* slider)
 {
 	if (mCurrentIndex != slider->getValue())
 	{
-		showModel(slider->getValue());
+		_showModel(slider->getValue());
 	}
 }
 
@@ -316,9 +386,20 @@ void FormModels::labelHit(Label* label)
 {
 	if (label->getName() == "FormModels/Label/EditModel")
 	{
-		mController = new CModelController(mModels[mCurrentIndex].model->getNode());
-		hideOptions();
-		showOptionEditModel();
+		if (!mModels.empty())
+		{
+			hideOptions();
+			showOptionEditModel();
+		}
+	}
+	else if (label->getName() == "FormModels/Label/EditPosition")
+	{
+		if (!mModels.empty())
+		{
+			mController = new CModelController(mModels[mCurrentIndex].model->getNode());
+			hideOptions();
+			showOptionEditPosition();
+		}
 	}
 	else if (label->getName() == "FormModels/Label/EditViews")
 	{
@@ -397,31 +478,10 @@ void FormModels::itemChanged(ItemSelector* selector)
 
 
 
-void FormModels::showModel(unsigned int index)
-{
-	if (index >= 0 && index < mModels.size())
-	{
-		// hide the current model, and its info
-		mModels[mCurrentIndex].model->hide();
-		mTrayMgr->getWidget("FormModels/Title/" + mModels[mCurrentIndex].name)->hide();
-		mTrayMgr->getWidget("FormModels/Overview/" + mModels[mCurrentIndex].name)->hide();
-		
-		// show the model 
-		mModels[index].model->show();
-		mModels[mCurrentIndex].model->getNode()->resetToInitialState(); // restore default rotation if yaw the model in zoom view [ctrl + clic]
-		mTrayMgr->getWidget("FormModels/Title/" + mModels[index].name)->show();
-		mTrayMgr->getWidget("FormModels/Overview/" + mModels[index].name)->show();
-		if (mTrayMgr->getWidget("FormModels/DecorBar")) mTrayMgr->getWidget("FormModels/DecorBar")->show();
-		if (mTrayMgr->getWidget("FormModels/Slider")) mTrayMgr->getWidget("FormModels/Slider")->show();
-		mCurrentIndex = index;
-	}
-}
-
 void FormModels::hide()
 {
 	// if menu bar changes from models to other form when the animation is playing, remove it
 	destroyAnim("FormModels/Anim/CameraView");
-	_setFormToOverview();
 	// hide (destroy) all the windows configuration visibles and effects applied to form
 	hideAllOptions();
 	mTrayMgr->setDofEffectEnable(false);
@@ -432,6 +492,7 @@ void FormModels::hide()
 
 void FormModels::show()
 {
+	// [see _showModel function]
 	_setFormToOverview();
 }
 
@@ -450,62 +511,41 @@ void FormModels::_loadModel(const sInfoResource& infoModel)
 	mModels.back().model->hide();
 	mModels.back().currentView = 0;	
 	_loadModelStatusFromIni(mModels.back().simpleIni, "MODEL.INITIAL.STATUS", mModels.back().model);
-	mModels.back().model->getNode()->setInitialState();
 	_loadCameraView(mModels.back());
 
 	// default values for new models
 	if (!boost::filesystem::is_regular_file(mModels.back().pathIni))
 	{
 		mModels.back().simpleIni->SetValue("MODEL.INFO", "Name", "Name");
-		mModels.back().simpleIni->SetValue("MODEL.INFO", "Overview", "Overview model");
-		mModels.back().simpleIni->SaveFile(mModels.back().pathIni.c_str());
-	}
-	if (mModels.back().model->getPosition() == Ogre::Vector3::ZERO)
+		mModels.back().simpleIni->SetValue("MODEL.INFO", "Overview", "Overview");
 		mModels.back().model->setPosition(Ogre::Vector3(-10, 0, -50));
-
-	// Options
-	Ogre::Real screenWidth = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualWidth();
-	Ogre::Real screenHeight = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
-	Ogre::Real padLeft = screenWidth / 18.0f;
-	Ogre::Real padTop = screenHeight / 36.0f;
-	Ogre::Real padRight = screenWidth / 25.0f;
-
-	// title
-	Ogre::Real titleWidth = (screenWidth / 2.0f) + padLeft;
-	Ogre::Real titleCaptionSize = (screenWidth > 1400) ? 44 : 32;
-	Ogre::Real titleHeight = titleCaptionSize + padTop;
-	Ogre::String tittleCaption = mModels.back().simpleIni->GetValue("MODEL.INFO", "Name", "Name");
-	Ogre::StringUtil::toUpperCase(tittleCaption);
-	SimpleText* stTitle = mTrayMgr->createSimpleText("FormModels/Title/" + mModels.back().name,
-		tittleCaption, "YgcFont/SemiBold/16", titleWidth, titleHeight, titleCaptionSize, 1);
-	stTitle->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
-	stTitle->setTop(screenHeight / 3.2f);
-	stTitle->setLeft(-titleWidth);
-	stTitle->hide();
-	addWidgetToForm(stTitle);
-
-	// decoration bar (only one for all models (the bar is the same for all models))
-	if (!mTrayMgr->getWidget("FormModels/DecorBar"))
-	{
-		DecorWidget* decorBar = mTrayMgr->createDecorWidget("FormModels/DecorBar", "YgcGui/DecorBar");
-		decorBar->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
-		decorBar->getOverlayElement()->setWidth((stTitle->getOverlayElement()->getWidth() - padRight) + 10);
-		decorBar->setTop(stTitle->getTop() + titleCaptionSize / 1.2f);
-		decorBar->setLeft(stTitle->getLeft() - 5);
-		addWidgetToForm(decorBar);
+		_saveModelStatusFromIni(mModels.back().simpleIni, "MODEL.INITIAL.STATUS", mModels.back().model, mModels.back().pathIni);
 	}
-	
-	// Overview
-	Ogre::Real overviewCaptionSize = (screenWidth > 1400) ? 26 : 20;
-	Ogre::String overviewCaption = mModels.back().simpleIni->GetValue("MODEL.INFO", "Overview", "Overview");
-	_correctCaption(overviewCaption);
-	SimpleText* stOverview = mTrayMgr->createSimpleText("FormModels/Overview/" + mModels.back().name, 
-		overviewCaption, "YgcFont/SemiBold/16", titleWidth - padRight, 450, overviewCaptionSize, 8);
-	stOverview->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
-	stOverview->setTop(stTitle->getTop() + padTop * 3);
-	stOverview->setLeft(stTitle->getLeft());
-	stOverview->hide();
-	addWidgetToForm(stOverview);
+
+	// save status model
+	mModels.back().model->getNode()->setInitialState();
+}
+
+void FormModels::_showModel(unsigned int index)
+{
+	if (index >= 0 && index < mModels.size())
+	{
+		// hide the current model
+		mModels[mCurrentIndex].model->hide();
+
+		// show the current model 
+		mModels[index].model->show();
+		mModels[index].model->getNode()->resetToInitialState(); // restore default rotation if yaw the model in zoom view [ctrl + clic]
+		SimpleText* stTitle = dynamic_cast<SimpleText*>(mTrayMgr->getWidget("FormModels/Text/Title"));
+		SimpleText* stDesc = dynamic_cast<SimpleText*>(mTrayMgr->getWidget("FormModels/Text/Desc"));
+		if (stTitle) { stTitle->show(); stTitle->setText(mModels[index].simpleIni->GetValue("MODEL.INFO", "Name", "Name")); }
+		if (stDesc) { stDesc->show(); stDesc->setText(mModels[index].simpleIni->GetValue("MODEL.INFO", "Overview", "Overview")); }
+		Widget* decorBar = mTrayMgr->getWidget("FormModels/DecorBar");
+		if (decorBar) decorBar->show();
+		Widget* slider = mTrayMgr->getWidget("FormModels/Slider");
+		if (slider) slider->show();
+		mCurrentIndex = index;
+	}
 }
 
 
@@ -546,7 +586,7 @@ void FormModels::_setFormToOverview()
 	mCamera->setPosition(0, 0, 0);
 	mCamera->setOrientation(mNodeCamera->getOrientation());
 	mNodeCamera->setPosition(0.0f, 12.0f, -5.0f);
-	showModel(mCurrentIndex);
+	_showModel(mCurrentIndex);
 	mState = FM_OVERVIEW;
 }
 
@@ -684,7 +724,6 @@ void FormModels::_loadConfigWindowsViews(sModel& model, bool newView /*= false*/
 		itemsViews.push_back("View " + Ogre::StringConverter::toString(i));
 	selViews->setItems(itemsViews);
 
-	
 	if (newView)
 	{
 		slFocus->setValue(0, false);
@@ -696,7 +735,7 @@ void FormModels::_loadConfigWindowsViews(sModel& model, bool newView /*= false*/
 	{
 		slFocus->setValue(0, false);
 		selDof->selectOption("Disable", false);
-		selViews->setNullOption("Empty views");
+		selViews->setNullOption("No views");
 	}
 	// show the current view options
 	else
@@ -714,9 +753,9 @@ void FormModels::_playAnimation(sModel& model)
 		// set the camera to current view
 		_showCameraView(model);
 		Ogre::Vector3 destCam = mNodeCamera->getPosition();
-		destCam.x += Ogre::Math::RangeRandom(-2, 2);
-		destCam.y += Ogre::Math::RangeRandom(-2, 2);
-		destCam.z += Ogre::Math::RangeRandom(-2, 2);
+		destCam += mCamera->getRight() * Ogre::Math::RangeRandom(1.75f, 2.05f) * (Ogre::Math::RangeRandom(0, 2) > 1 ? 1 : -1);
+		destCam += mCamera->getUp() * Ogre::Math::RangeRandom(0.1f, 0.3f) * (Ogre::Math::RangeRandom(0, 2) > 1 ? 1 : -1);
+		destCam += mCamera->getDirection() * Ogre::Math::RangeRandom(0.1f, 1.5f);
 		createAnimNode("FormModels/Anim/CameraView", Ogre::Math::RangeRandom(8, 12), mNodeCamera,
 			mNodeCamera->getPosition(), mNodeCamera->getOrientation(),
 			destCam, mNodeCamera->getOrientation());
@@ -731,6 +770,7 @@ void FormModels::hideAllOptions()
 {
 	hideOptions();
 	hideOptionEditModel();
+	hideOptionEditPosition();
 	hideOptionViews();
 	hideOptionTarget();
 	hideOptionCamera();
@@ -742,6 +782,7 @@ void FormModels::hideOptions()
 	{
 		mTrayMgr->destroyDialogWindow("FormModels/Window/Options");
 		mTrayMgr->destroyWidget("FormModels/Label/EditModel");
+		mTrayMgr->destroyWidget("FormModels/Label/EditPosition");
 		mTrayMgr->destroyWidget("FormModels/Label/EditViews");
 		mTrayMgr->destroyWidget("FormModels/Label/Help");
 		mTrayMgr->destroyWidget("FormModels/Button/CloseOptions");
@@ -757,18 +798,20 @@ void FormModels::showOptions()
 		_setFormToZoom(); 
 	}
 	
-	if (!mTrayMgr->getWidget("FormModels/Window/ViewsOptions") && // submenu is hidden?
-		!mTrayMgr->getWidget("FormModels/Window/Options")) // menu is hidden
+	// all submenu options are hiddens?
+	if (!mTrayMgr->isWindowDialogVisible())
 	{
-		Ogre::Real sepWidget = 40;
-		Ogre::Real height = 4 * sepWidget;
+		unsigned int numOptions = 5;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
 		Ogre::Real left = 50;
-		Ogre::Real top = mScreenSize.y - height - 50 - 30;
 		Ogre::Real width = 350;
-		mTrayMgr->createDialogWindow("FormModels/Window/Options", "MODELS OPTIONS", left, top, width, height);	top += sepWidget / 2;
-		mTrayMgr->createLabel("FormModels/Label/EditModel", "EDIT MODEL", left, top, width, 23);		top += sepWidget;
-		mTrayMgr->createLabel("FormModels/Label/EditViews", "EDIT VIEWS", left, top, width, 23);		top += sepWidget;
-		mTrayMgr->createLabel("FormModels/Label/Help", "HELP", left, top, width, 23);				top = mScreenSize.y - 50 - 30;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+		mTrayMgr->createDialogWindow("FormModels/Window/Options", "MODELS OPTIONS", left, top, width, height);	top += sepOptions / 2;
+		mTrayMgr->createLabel("FormModels/Label/EditModel", "EDIT MODEL", left, top, width, 23);			top += sepOptions;
+		mTrayMgr->createLabel("FormModels/Label/EditPosition", "EDIT POSITION", left, top, width, 23);	top += sepOptions;
+		mTrayMgr->createLabel("FormModels/Label/EditViews", "EDIT VIEWS", left, top, width, 23);			top += sepOptions;
+		mTrayMgr->createLabel("FormModels/Label/Help", "HELP", left, top, width, 23);	top = mScreenSize.y - sepWindow - sepButton;
 		mTrayMgr->createButton("FormModels/Button/CloseOptions", "BACK", left, top, 60);
 	}
 }
@@ -778,28 +821,64 @@ void FormModels::hideOptionEditModel()
 	if (mTrayMgr->getWidget("FormModels/Window/EditModel"))
 	{
 		mTrayMgr->destroyDialogWindow("FormModels/Window/EditModel");
-		mTrayMgr->destroyWidget("Desc/EditModel");
+		mTrayMgr->destroyWidget("FormModels/LineEdit/Name");
+		mTrayMgr->destroyWidget("FormModels/LineEdit/Desc");
 		mTrayMgr->destroyWidget("FormModels/Button/CloseOptionsEditModel");
-		mTrayMgr->destroyWidget("FormModels/Button/WindowsEditModelHide");
 	}
 }
 
 void FormModels::showOptionEditModel()
 {
-	if (!mTrayMgr->getWidget("FormModels/Window/EditModel"))
+	unsigned int numOptions = 3;
+	Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+	Ogre::Real left = 50;
+	Ogre::Real width = 425;
+	Ogre::Real height = numOptions * sepOptions;
+	Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+
+	mTrayMgr->createDialogWindow("FormModels/Window/EditModel", "EDIT MODEL", left, top, width, height);	 top += sepOptions / 2;
+	LineEdit* leName = mTrayMgr->createLineEdit("FormModels/LineEdit/Name", "Name       ", "", left, top, width); top += sepOptions;
+	LineEdit* leDesc = mTrayMgr->createLineEdit("FormModels/LineEdit/Desc", "Description", "", left, top, width); top = mScreenSize.y - sepWindow - sepButton;
+	mTrayMgr->createButton("FormModels/Button/CloseOptionsEditModel", "BACK", left, top, 60);
+
+	if (!mModels.empty())
+	{
+		leName->setText(mModels[mCurrentIndex].simpleIni->GetValue("MODEL.INFO", "Name", "Name"));
+		leDesc->setText(mModels[mCurrentIndex].simpleIni->GetValue("MODEL.INFO", "Overview", "Overview model"));
+	}
+}
+
+void FormModels::hideOptionEditPosition()
+{
+	if (mTrayMgr->getWidget("FormModels/Window/EditPosition"))
+	{
+		mTrayMgr->destroyDialogWindow("FormModels/Window/EditPosition");
+		mTrayMgr->destroyWidget("FormModels/SimpleText/EditPosition");
+		mTrayMgr->destroyWidget("FormModels/Button/CloseOptionsEditPosition");
+		mTrayMgr->destroyWidget("FormModels/Button/WindowsEditPositionHide");
+		mTrayMgr->destroyWidget("FormModels/Button/EditPositionReset");
+	}
+}
+
+void FormModels::showOptionEditPosition()
+{
+	if (!mTrayMgr->getWidget("FormModels/Window/EditPosition"))
 	{
 		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
 		Ogre::Real left = 50;
 		Ogre::Real width = 420;
-		Ogre::String descCamera = "To modify the model you must click and drag with the left mouse button. The keys G, R and S control the actions, translation, rotation and scale respectively, while the keys X, Y and Z control the axis.";
-		SimpleText* desc = mTrayMgr->createSimpleText("Desc/EditModel", descCamera, "YgcFont/SemiBold/16", width - 30, 250, 19, 9);
+		Ogre::String descCamera = 
+			"To modify the model you must click and drag with the left mouse button. "
+			"The keys G, R and S control the actions, translation, rotation and scale respectively, while the keys X, Y and Z control the axis.";
+		SimpleText* desc = mTrayMgr->createSimpleText("FormModels/SimpleText/EditPosition", descCamera, "YgcFont/SemiBold/16", width - 30, 250, 19, 9);
 		Ogre::Real height = desc->getNumLines() * sepOptions;
 		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
 
-		mTrayMgr->createDialogWindow("FormModels/Window/EditModel", "EDIT CAMERA POSITION", left, top, width, height);		top += sepOptions / 2;
+		mTrayMgr->createDialogWindow("FormModels/Window/EditPosition", "EDIT CAMERA POSITION", left, top, width, height);		top += sepOptions / 2;
 		desc->setLeft(left + 12); desc->setTop(top); top = mScreenSize.y - sepWindow - sepButton;
-		mTrayMgr->createButton("FormModels/Button/CloseOptionsEditModel", "ACCEPT", left, top, 60);
-		mTrayMgr->createButton("FormModels/Button/WindowsEditModelHide", "HIDE", left + 65, top, 60);
+		mTrayMgr->createButton("FormModels/Button/CloseOptionsEditPosition", "ACCEPT", left, top, 65);
+		mTrayMgr->createButton("FormModels/Button/WindowsEditPositionHide", "HIDE", left + 70, top, 60);
+		mTrayMgr->createButton("FormModels/Button/EditPositionReset", "RESET", left + 70 + 65, top, 65);
 	}
 }
 

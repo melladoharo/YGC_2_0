@@ -75,6 +75,10 @@ public:
 	{
 		_findGenericResource(infoModels, getPathGame() + "/Models/Characters/", FT_ZIP, "Model/Character/");
 	}
+	void findObjectsResources(std::vector<sInfoResource>& infoModels)
+	{
+		_findGenericResource(infoModels, getPathGame() + "/Models/Objects/", FT_ZIP, "Model/Object/");
+	}
 	void findIniReviews(sInfoResource& infoIni)
 	{
 		_findGenericResource(infoIni, getPathGame() + "/Reviews/", FT_INI);

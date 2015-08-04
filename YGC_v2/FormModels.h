@@ -49,12 +49,13 @@ public:
 	void show();
 
 	// FormModels
-	void showModel(unsigned int index);
 	void hideAllOptions();
 	void hideOptions();
 	void showOptions();
 	void hideOptionEditModel();
 	void showOptionEditModel();
+	void hideOptionEditPosition();
+	void showOptionEditPosition();
 	void hideOptionViews();
 	void showOptionViews(sModel& model);
 	void hideOptionCamera();
@@ -64,6 +65,7 @@ public:
 
 private:
 	void _loadModel(const sInfoResource& infoModel);
+	void _showModel(unsigned int index);
 	void _setOrbitCamera();
 	void _setFormToOverview();
 	void _setFormToZoom();
