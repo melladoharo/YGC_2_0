@@ -19,6 +19,12 @@ mVisible(true)
 	mNode = (mParentNode) ? mParentNode->createChildSceneNode() : mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	mNode->attachObject(mEnt);
 	mNode->setVisible(mVisible);
+
+	// default material
+	for (unsigned int i = 0; i < mEnt->getNumSubEntities(); i++)
+	{
+		mMatOriginal.push_back(mEnt->getSubEntity(i)->getMaterial());
+	}
 }
 
 
@@ -37,5 +43,10 @@ void CModel::applyNewText(const Ogre::String& newText, unsigned int subEnt)
 	mMat->getTechnique(0)->getPass(0)->createTextureUnitState(newText);
 	//mMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(newText);
 	mEnt->getSubEntity(subEnt)->setMaterial(mMat);
+}
+
+void CModel::restoreMaterial(unsigned int subEnt)
+{
+	mEnt->getSubEntity(subEnt)->setMaterial(mMatOriginal[subEnt]);
 }
 

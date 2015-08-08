@@ -20,6 +20,7 @@ public:
 	void removeItem(const Ogre::String& oldOption);
 	void selectOption(const Ogre::String& option, bool notifyListener = true);
 	Ogre::String getSelectedOption();
+	int getSelectedIndex();
 
 private:
 	void _spacingElements();

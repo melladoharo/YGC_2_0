@@ -19,13 +19,15 @@ public:
 	Ogre::Quaternion getOrientation() const { return (mNode) ? mNode->getOrientation() : Ogre::Quaternion::IDENTITY; }
 
 	void applyNewText(const Ogre::String& newText, unsigned int subEnt=0);
-	
+	void restoreMaterial(unsigned int subEnt);
+
 private:
 	Ogre::SceneManager* mSceneMgr;		// Default scene manager 
 	Ogre::Entity* mEnt;
 	Ogre::SceneNode* mNode;
 	Ogre::SceneNode* mParentNode;
 	Ogre::MaterialPtr mMat;
+	std::vector<Ogre::MaterialPtr> mMatOriginal;
 	bool mVisible;
 };
 

@@ -8,11 +8,10 @@
 
 struct sCollectorObject
 {
-	Ogre::String meshName;
-	Ogre::String textureName;
 	CModel* cmodel;
-	//std::vector<sView> views;
-	//unsigned int currentView;
+	Ogre::String meshName;
+	Ogre::StringVector textureName;
+	bool isYgcModel;
 };
 
 class FormCollector : public FormBase
@@ -32,36 +31,46 @@ public:
 
 	// GuiListener
 	void buttonHit(Button* button);
+	void labelHit(Label* label);
+	void itemChanged(ItemSelector* selector);
 
 	// FormBase
 	void hide();
 	void show();
-
-	// FormCollector
-	void showOptions();
+	void hideAllOptions();
 	void hideOptions();
-	void showOptionObject();
-	void hideOptionObject();
-	void showOptionsCamera();
+	void showOptions();
+	void hideOptionsItems();
+	void showOptionsItems();
 	void hideOptionsCamera();
+	void showOptionsCamera();
+	void hideOptionEditPosition();
+	void showOptionEditPosition();
 
 private:
+	void _resetCameraCollection();
 	void _setCameraCollection();
-	void _editModel(unsigned int index);
-	void _removeObject(unsigned int index);
-	void _resetObject(unsigned int index);
+	void _newItem();
+	void _removeItem(unsigned int index);
+	void _editItem(unsigned int index);
+	void _resetItem(unsigned int index);
+	void _loadConfigWindowsItem(unsigned int currentModel, bool newModel = false);
 	bool _loadCollection(const Ogre::String& pathIni);
 	bool _saveCollection(const Ogre::String& pathIni);
+	Ogre::String _getNameResText(const Ogre::String& nameText);
 
 	GameInfo* mGameInfo;
 	OgreBites::SdkCameraMan* mCameraMan;
+	std::vector<sInfoResource> mTextures;
+	std::vector<sInfoResource> mZipModels;
+	Ogre::StringVector mYgcModels;
 	std::vector<sCollectorObject> mModels;
 	sView mSceneView;
 	Ogre::SceneNode* mTarget;
 	CModelController* mController;
 	Ogre::String mPathIni;
 	unsigned int mCurrentIndex;
-	bool mEditCamera;
+	bool mCtrlPressed, mAltPressed, mShiftPressed;
 };
 
 #endif // #ifndef _FORMCOLLECTOR_H__

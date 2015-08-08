@@ -125,6 +125,14 @@ Ogre::String ItemSelector::getSelectedOption()
 	return Ogre::StringUtil::BLANK;
 }
 
+int ItemSelector::getSelectedIndex()
+{
+	if (mCurrentItem >= 0 && mCurrentItem < mItems.size())
+		return mCurrentItem;
+
+	return -1;
+}
+
 
 
 void ItemSelector::_spacingElements()
