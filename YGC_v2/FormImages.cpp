@@ -170,6 +170,9 @@ void FormImages::hide()
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->hide();
 	hideAllOptions();
+	// hide logo
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->hide();
 }
 
 void FormImages::show()
@@ -180,6 +183,9 @@ void FormImages::show()
 	FormBase::show();
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->show();
+
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->show();
 }
 
 

@@ -237,6 +237,8 @@ void FormVideos::hide()
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->hide();
 	hideAllOptions();
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->hide();
 }
 
 void FormVideos::show()
@@ -249,6 +251,8 @@ void FormVideos::show()
 	FormBase::show();
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->show();
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->show();
 }
 
 

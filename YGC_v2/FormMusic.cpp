@@ -189,6 +189,8 @@ void FormMusic::hide()
 {
 	FormBase::hide();
 	mDiscClose->hide();
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->hide();
 }
 
 void FormMusic::show()
@@ -200,6 +202,8 @@ void FormMusic::show()
 	mCamera->setPosition(0, 0, 0);
 	mCamera->setOrientation(mNodeCamera->getOrientation());
 	mNodeCamera->setPosition(0, 9, 0);
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->show();
 }
 
 void FormMusic::showOptions()

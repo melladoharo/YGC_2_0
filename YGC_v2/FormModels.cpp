@@ -489,12 +489,18 @@ void FormModels::hide()
 	// hide the rest of things
 	FormBase::hide();
 	if (!mModels.empty()) mModels[mCurrentIndex].model->hide();
+	// hide logo
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->hide();
 }
 
 void FormModels::show()
 {
 	// [see _showModel function]
 	_setFormToOverview();
+	// show logo
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->show();
 }
 
 

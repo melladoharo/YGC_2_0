@@ -310,6 +310,8 @@ void FormCollector::hide()
 	FormBase::hide();
 	for (unsigned int i = 0; i < mModels.size(); ++i)
 		mModels[i].cmodel->hide();
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->hide();
 }
 
 void FormCollector::show()
@@ -318,6 +320,8 @@ void FormCollector::show()
 	for (unsigned int i = 0; i < mModels.size(); ++i)
 		mModels[i].cmodel->show();
 	_setCameraCollection();
+	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
+	if (logoGame) logoGame->show();
 }
 
 

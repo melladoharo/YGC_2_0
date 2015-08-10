@@ -344,24 +344,28 @@ void FormOverview::_createOverview()
 	// find and load logo
 	sInfoResource infoLogo;
 	mGameInfo->findLogoResource(infoLogo);
-	if (!boost::filesystem::is_regular_file(infoLogo.pathThumb))
-		GameInfo::createThumbnail(infoLogo.path, infoLogo.pathThumb, 512);
-	GameInfo::loadImageFromDisk(infoLogo.pathThumb, infoLogo.nameThumb, mGameInfo->getGroupName(), 2);
+	if (boost::filesystem::is_regular_file(infoLogo.path))
+	{
+		if (!boost::filesystem::is_regular_file(infoLogo.pathThumb))
+			GameInfo::createThumbnail(infoLogo.path, infoLogo.pathThumb, 512);
+		GameInfo::loadImageFromDisk(infoLogo.pathThumb, infoLogo.nameThumb, mGameInfo->getGroupName(), 2);
 
-	// logo rigth bottom corner
-	DecorWidget* logo = mTrayMgr->createDecorWidget("FormOverview/Logo", "YgcGui/Logo");
-	Ogre::MaterialPtr matLogo = Ogre::MaterialManager::getSingleton().create("Mat/FormOverview/Logo/", mGameInfo->getGroupName());
-	matLogo->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-	matLogo->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-	matLogo->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-	matLogo->getTechnique(0)->getPass(0)->createTextureUnitState(infoLogo.nameThumb);
-	logo->getOverlayElement()->setMaterialName(matLogo->getName());
-	logo->_autoScale(120, matLogo);
-	logo->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
-	logo->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
-	logo->setTop(-(logo->getHeight() + padRight / 1.0f));
-	logo->setLeft(-(logo->getWidth() + padRight / 1.0f));
-
+		// logo rigth bottom corner
+		DecorWidget* logo = mTrayMgr->createDecorWidget("FormOverview/Logo", "YgcGui/Logo");
+		Ogre::MaterialPtr matLogo = Ogre::MaterialManager::getSingleton().create("Mat/FormOverview/Logo/", mGameInfo->getGroupName());
+		matLogo->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+		matLogo->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+		matLogo->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+		matLogo->getTechnique(0)->getPass(0)->createTextureUnitState(infoLogo.nameThumb);
+		logo->getOverlayElement()->setMaterialName(matLogo->getName());
+		logo->_autoScale(120, matLogo);
+		logo->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
+		logo->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
+		logo->setTop(-(logo->getHeight() + padRight / 1.0f));
+		logo->setLeft(-(logo->getWidth() + padRight / 1.0f));
+		addWidgetToForm(logo);
+	}
+	
 	// title
 	Ogre::Real titleWidth = (mScreenSize.x / 2.0f) + padLeft;
 	Ogre::Real titleCaptionSize = (mScreenSize.x > 1400) ? 44 : 32;
@@ -412,7 +416,6 @@ void FormOverview::_createOverview()
 
 	addWidgetToForm(stTitle);
 	addWidgetToForm(decorBar);
-	addWidgetToForm(logo);
 	addWidgetToForm(stHeader);
 	addWidgetToForm(stHeaderValues);
 	addWidgetToForm(stOverview);
