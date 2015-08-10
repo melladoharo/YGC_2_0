@@ -317,9 +317,4 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\License-ffmpeg-videoplayer.txt" />
-    <Text Include="..\License-ygc-2_0.txt" />
-    <Text Include="..\GNU-license.txt" />
-  </ItemGroup>
 </Project>

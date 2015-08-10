@@ -243,14 +243,13 @@ void FormVideos::hide()
 
 void FormVideos::show()
 {
-	mCamera->setPosition(0, 0, 0);
-	mCamera->setOrientation(Ogre::Quaternion(1, 0, 0, 0));
-	mNodeCamera->setPosition(0, 0, 0);
-	mNodeCamera->setOrientation(Ogre::Quaternion(1, 0, 0, 0));
+	// correct position to see this form correctly
+	resetCamera();
 
 	FormBase::show();
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->show();
+
 	Widget* logoGame = mTrayMgr->getWidget("FormOverview/Logo");
 	if (logoGame) logoGame->show();
 }

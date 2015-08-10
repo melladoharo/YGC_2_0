@@ -118,11 +118,6 @@
     <ClInclude Include="videostate.hpp" />
     <ClInclude Include="Widget.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\GNU-license.txt" />
-    <Text Include="..\License-ffmpeg-videoplayer.txt" />
-    <Text Include="..\License-ygc-2_0.txt" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{54B6D37D-8582-4C81-8180-7EE0941A77EA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
