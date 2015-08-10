@@ -75,7 +75,7 @@ material mat_CD_Trasero
 
             texture_unit 
             {
-                texture cd_tras.jpg
+                texture dvd_disk_bg.jpg
                 tex_address_mode wrap
                 scale 1.0 1.0
                 colour_op modulate

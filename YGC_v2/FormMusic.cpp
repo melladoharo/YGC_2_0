@@ -15,7 +15,7 @@ mCurrentIndex(0)
 	mCamera->setOrientation(mNodeCamera->getOrientation());
 	mNodeCamera->setPosition(0, 9, 0);
 
-	mDiscClose = new CModel("mesh_CD.mesh");
+	mDiscClose = new CModel("mesh_discDvd.mesh");
 	mDiscClose->getNode()->setPosition(-12, 7.6, -35);
 	mDiscClose->getNode()->pitch(Ogre::Degree(90));
 	mDiscClose->getNode()->roll(Ogre::Degree(-38));

@@ -20,8 +20,8 @@ mCtrlPressed(false), mAltPressed(false), mShiftPressed(false)
 	mGameInfo->findModelsCollector(mZipModels);
 
 	// add ygc models 
-	mYgcModels.push_back("Dvd_Case.mesh"); 
-	mYgcModels.push_back("mesh_CD.mesh");
+	mYgcModels.push_back("mesh_closeDvd.mesh"); 
+	mYgcModels.push_back("mesh_discDvd.mesh");
 	mYgcModels.push_back("mesh_openDvd.mesh");
 
 	// find the .ini config file

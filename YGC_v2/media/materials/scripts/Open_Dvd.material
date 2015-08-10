@@ -159,7 +159,7 @@ material mat_booklet
 
 			texture_unit
 			{
-				texture 
+				texture sdk_default_cover.png
 				tex_address_mode wrap
                 scale 1.0 1.0
                 colour_op modulate

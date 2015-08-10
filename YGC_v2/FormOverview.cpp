@@ -290,7 +290,7 @@ void FormOverview::_createOverview()
 		GameInfo::createThumbnail(infoCover.path, infoCover.pathThumb, 2048);
 	GameInfo::loadImageFromDisk(infoCover.pathThumb, infoCover.nameThumb, mGameInfo->getGroupName(), 2);
 	// Closed DVD model
-	mDvdClose = new CModel("Dvd_Case.mesh");
+	mDvdClose = new CModel("mesh_closeDvd.mesh");
 	mDvdClose->getNode()->translate(-18, 0, -48);
 	mDvdClose->getNode()->yaw(Ogre::Degree(50));
 	mDvdClose->applyNewText(infoCover.nameThumb);
@@ -305,7 +305,7 @@ void FormOverview::_createOverview()
 		GameInfo::loadImageFromDisk(infoDisc[i].pathThumb, infoDisc[i].nameThumb, mGameInfo->getGroupName(), 2);
 	}
 	// Closed DVD's disc [close dvd view]
-	mDiscClose = new CModel("mesh_CD.mesh", mDvdClose->getNode());
+	mDiscClose = new CModel("mesh_discDvd.mesh", mDvdClose->getNode());
 	mDiscClose->getNode()->translate(0, 11, 0);
 	mDiscClose->getNode()->pitch(Ogre::Degree(90));
 	mDiscClose->hide();
@@ -330,7 +330,7 @@ void FormOverview::_createOverview()
 	// all disc [open dvd view]
 	for (unsigned int i = 0; i < infoDisc.size(); ++i)
 	{
-		mDiscOpen.push_back(new CModel("mesh_CD.mesh"));
+		mDiscOpen.push_back(new CModel("mesh_discDvd.mesh"));
 		mDiscOpen.back()->hide();
 		mDiscOpen.back()->applyNewText(infoDisc[i].nameThumb);
 	}
