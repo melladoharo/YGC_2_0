@@ -150,6 +150,7 @@ public:
 		mMatRtt->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setAlphaOperation(
 			Ogre::LBX_SOURCE1, Ogre::LBS_MANUAL, Ogre::LBS_CURRENT, 1);
 		showBackdrop(mMatRtt->getName());
+		autoResizeBackdrop();
 		mFadeAmount = 1;
 	}
 
