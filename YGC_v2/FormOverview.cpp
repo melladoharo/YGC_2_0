@@ -347,8 +347,8 @@ void FormOverview::_createOverview()
 	if (boost::filesystem::is_regular_file(infoLogo.path))
 	{
 		if (!boost::filesystem::is_regular_file(infoLogo.pathThumb))
-			GameInfo::createThumbnail(infoLogo.path, infoLogo.pathThumb, 512);
-		GameInfo::loadImageFromDisk(infoLogo.pathThumb, infoLogo.nameThumb, mGameInfo->getGroupName(), 2);
+			GameInfo::createThumbnail(infoLogo.path, infoLogo.pathThumb, 200);
+		GameInfo::loadImageFromDisk(infoLogo.pathThumb, infoLogo.nameThumb, mGameInfo->getGroupName());
 
 		// logo rigth bottom corner
 		DecorWidget* logo = mTrayMgr->createDecorWidget("FormOverview/Logo", "YgcGui/Logo");
