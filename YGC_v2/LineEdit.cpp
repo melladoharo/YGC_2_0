@@ -71,7 +71,9 @@ void LineEdit::setText(const Ogre::String& text)
 	// right index cursor 
 	mRightIndexCursor = std::min(mEditString->getText().size(), mMaxCharacters);
 	// set caption
-	mTextAreaMessage->setCaption(text.substr(mLeftIndexMessage, (mRightIndexCursor - mLeftIndexMessage)));
+	Ogre::String strMessage = mEditString->getText();
+	removeEscapeCodes(strMessage);
+	mTextAreaMessage->setCaption(strMessage.substr(mLeftIndexMessage, (mRightIndexCursor - mLeftIndexMessage)));
 }
 
 void LineEdit::injectKeyPress(const OIS::KeyEvent &arg)
@@ -80,6 +82,7 @@ void LineEdit::injectKeyPress(const OIS::KeyEvent &arg)
 	{
 		mEditString->injectKeyPress(arg);
 		Ogre::String message = mEditString->getText();
+		removeEscapeCodes(message);
 
 		if (std::isgraph(arg.text) || std::isspace(arg.text)) // is alphanumeric or white-space?
 		{
@@ -201,6 +204,38 @@ void LineEdit::injectKeyPress(const OIS::KeyEvent &arg)
 		Ogre::Real sizeMessage = sizeInPixels(message.substr(mLeftIndexMessage, (mRightIndexMessage - mLeftIndexMessage)),
 			mTextAreaMessage->getFontName(), mTextAreaMessage->getCharHeight(), mTextAreaMessage->getSpaceWidth());
 		mCursor->setLeft(sizeMessage);
+	}
+}
+
+
+
+void LineEdit::removeEscapeCodes(Ogre::String& str)
+{
+	Ogre::String::size_type found = str.find_first_of("\r\n\t\v\f");
+	while (found != Ogre::String::npos)
+	{
+		str[found] = ' ';
+		found = str.find_first_of("\r\n\t\v\f", found + 1);
+	}
+}
+
+void LineEdit::replaceNewLineEscapeToINI(Ogre::String& str)
+{
+	Ogre::String::size_type found = str.find_first_of("\r\n");
+	while (found != Ogre::String::npos)
+	{ 
+		str.replace(found, 1, "\\n");
+		found = str.find_first_of("\r\n", found + 1);
+	}
+}
+
+void LineEdit::replaceNewLineEscapeFromINI(Ogre::String& str)
+{
+	Ogre::String::size_type found = str.find("\\n");
+	while (found != Ogre::String::npos)
+	{
+		str.replace(found, 2, "\n");
+		found = str.find("\\n", found + 1);
 	}
 }
 

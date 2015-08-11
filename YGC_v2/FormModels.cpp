@@ -298,8 +298,12 @@ void FormModels::buttonHit(Button* button)
 	{
 		LineEdit* leName = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormModels/LineEdit/Name"));
 		LineEdit* leDesc = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormModels/LineEdit/Desc"));
-		if (leName) mModels[mCurrentIndex].simpleIni->SetValue("MODEL.INFO", "Name", leName->getText().c_str());
-		if (leDesc) mModels[mCurrentIndex].simpleIni->SetValue("MODEL.INFO", "Overview", leDesc->getText().c_str());
+		Ogre::String strName = (leName) ? leName->getText() : Ogre::StringUtil::BLANK;
+		Ogre::String strDesc = (leDesc) ? leDesc->getText() : Ogre::StringUtil::BLANK;
+		LineEdit::replaceNewLineEscapeToINI(strName);
+		LineEdit::replaceNewLineEscapeToINI(strDesc);
+		mModels[mCurrentIndex].simpleIni->SetValue("MODEL.INFO", "Name", strName.c_str());
+		mModels[mCurrentIndex].simpleIni->SetValue("MODEL.INFO", "Overview", strDesc.c_str());
 		mModels[mCurrentIndex].simpleIni->SaveFile(mModels[mCurrentIndex].pathIni.c_str());
 		hideOptionEditModel();
 		showOptions();
@@ -545,8 +549,12 @@ void FormModels::_showModel(unsigned int index)
 		mModels[index].model->getNode()->resetToInitialState(); // restore default rotation if yaw the model in zoom view [ctrl + clic]
 		SimpleText* stTitle = dynamic_cast<SimpleText*>(mTrayMgr->getWidget("FormModels/Text/Title"));
 		SimpleText* stDesc = dynamic_cast<SimpleText*>(mTrayMgr->getWidget("FormModels/Text/Desc"));
-		if (stTitle) { stTitle->show(); stTitle->setText(mModels[index].simpleIni->GetValue("MODEL.INFO", "Name", "Name")); }
-		if (stDesc) { stDesc->show(); stDesc->setText(mModels[index].simpleIni->GetValue("MODEL.INFO", "Overview", "Overview")); }
+		Ogre::String strName = mModels[index].simpleIni->GetValue("MODEL.INFO", "Name", "Name");
+		Ogre::String strDesc = mModels[index].simpleIni->GetValue("MODEL.INFO", "Overview", "Overview");
+		LineEdit::replaceNewLineEscapeFromINI(strName);
+		LineEdit::replaceNewLineEscapeFromINI(strDesc);
+		if (stTitle) { stTitle->show(); stTitle->setText(strName); }
+		if (stDesc) { stDesc->show(); stDesc->setText(strDesc); }
 		Widget* decorBar = mTrayMgr->getWidget("FormModels/DecorBar");
 		if (decorBar) decorBar->show();
 		Widget* slider = mTrayMgr->getWidget("FormModels/Slider");
@@ -850,8 +858,10 @@ void FormModels::showOptionEditModel()
 
 	if (!mModels.empty())
 	{
-		leName->setText(mModels[mCurrentIndex].simpleIni->GetValue("MODEL.INFO", "Name", "Name"));
-		leDesc->setText(mModels[mCurrentIndex].simpleIni->GetValue("MODEL.INFO", "Overview", "Overview model"));
+		SimpleText* stTitle = dynamic_cast<SimpleText*>(mTrayMgr->getWidget("FormModels/Text/Title"));
+		SimpleText* stDesc = dynamic_cast<SimpleText*>(mTrayMgr->getWidget("FormModels/Text/Desc"));
+		leName->setText(stTitle ? stTitle->getText() : Ogre::StringUtil::BLANK);
+		leDesc->setText(stDesc ? stDesc->getText() : Ogre::StringUtil::BLANK);
 	}
 }
 

@@ -19,7 +19,15 @@ public:
 	Ogre::String getText() { return ((mEditString) ? mEditString->getText() : Ogre::StringUtil::BLANK); }
 	void injectKeyPress(const OIS::KeyEvent &arg);
 
+	// Escape codes are invalid in LineEdit widget, so replace them with a ' ' character.
+	static void removeEscapeCodes(Ogre::String& str);
+
+	// simple ini can´t save '\n' character, so replace character '\n' to string "\n".
+	static void replaceNewLineEscapeToINI(Ogre::String& str);
+	static void replaceNewLineEscapeFromINI(Ogre::String& str);
+
 private:
+
 	Ogre::OverlayElement* mMessage, *mCursor;
 	Ogre::TextAreaOverlayElement* mTextAreaCaption, *mTextAreaMessage;
 	EditString* mEditString;

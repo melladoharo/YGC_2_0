@@ -56,7 +56,7 @@ void SimpleText::setText(const Ogre::DisplayString& text)
 			firstWord = false;
 			lastSpace = i;
 		}
-		else if (current[i] == '\n')
+		else if (current[i] == '\n' || current[i] == '\r')
 		{
 			firstWord = true;
 			lineWidth = 0;

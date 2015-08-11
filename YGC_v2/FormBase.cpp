@@ -231,22 +231,6 @@ void FormBase::resetCamera()
 
 
 
-void FormBase::_correctCaption(Ogre::String& caption)
-{
-	if (caption.size() > 2)
-	{
-		for (unsigned int i = 0; i < caption.size() - 1; ++i)
-		{
-			if (caption[i] == '\\' && caption[i + 1] == 'n')
-			{
-				caption.erase(i + caption.begin());
-				caption.erase(i + caption.begin());
-				caption.insert(i, "\n");
-			}
-		}
-	}
-}
-
 void FormBase::_loadModelStatusFromIni(CSimpleIniA* simpleIni, const Ogre::String& sectionKey, CModel* model)
 {
 	Ogre::Vector3 posModel(

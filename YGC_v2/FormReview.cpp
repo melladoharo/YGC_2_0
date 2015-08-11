@@ -179,11 +179,11 @@ bool FormReview::_loadReviews(const Ogre::String& pathIni)
 				if (sectionName.find("GAME.REVIEW") != Ogre::String::npos)
 				{
 					Ogre::String review = simpleIni->GetValue(sectionName.c_str(), "Review", "");
-					_correctCaption(review);
+					LineEdit::replaceNewLineEscapeFromINI(review);
 					Ogre::String score = simpleIni->GetValue(sectionName.c_str(), "Score", "");
-					_correctCaption(score);
+					LineEdit::replaceNewLineEscapeFromINI(score);
 					Ogre::String author = simpleIni->GetValue(sectionName.c_str(), "Author", "");
-					_correctCaption(author);
+					LineEdit::replaceNewLineEscapeFromINI(author);
 					Ogre::Real left = simpleIni->GetDoubleValue(sectionName.c_str(), "Position_x", 50);
 					Ogre::Real top = simpleIni->GetDoubleValue(sectionName.c_str(), "Position_y", 50);
 					Ogre::Real charHeight = simpleIni->GetDoubleValue(sectionName.c_str(), "Font_Size", 20);
@@ -212,10 +212,15 @@ bool FormReview::_saveReviews(const Ogre::String& pathIni)
 			for (unsigned int i = 0; i < mReviews.size(); ++i)
 			{
 				Ogre::String sectionName = "GAME.REVIEW." + Ogre::StringConverter::toString(i);
-
-				simpleIni->SetValue(sectionName.c_str(), "Review", mReviews[i].review->getText().c_str());
-				simpleIni->SetValue(sectionName.c_str(), "Score", mReviews[i].score->getText().c_str());
-				simpleIni->SetValue(sectionName.c_str(), "Author", mReviews[i].author->getText().c_str());
+				Ogre::String strReview = mReviews[i].review->getText();
+				Ogre::String strScore = mReviews[i].score->getText();
+				Ogre::String strAuthor = mReviews[i].author->getText();
+				LineEdit::replaceNewLineEscapeToINI(strReview);
+				LineEdit::replaceNewLineEscapeToINI(strScore);
+				LineEdit::replaceNewLineEscapeToINI(strAuthor);
+				simpleIni->SetValue(sectionName.c_str(), "Review", strReview.c_str());
+				simpleIni->SetValue(sectionName.c_str(), "Score", strScore.c_str());
+				simpleIni->SetValue(sectionName.c_str(), "Author", strAuthor.c_str());
 				simpleIni->SetDoubleValue(sectionName.c_str(), "Position_x", mReviews[i].left);
 				simpleIni->SetDoubleValue(sectionName.c_str(), "Position_y", mReviews[i].top);
 				simpleIni->SetDoubleValue(sectionName.c_str(), "Font_Size", mReviews[i].fontSize);
@@ -392,7 +397,7 @@ void FormReview::hideOptions()
 
 void FormReview::showOptions()
 {
-	if (!mTrayMgr->getWidget("FormReview/Window/Options")) // menu is hidden
+	if (!mTrayMgr->isWindowDialogVisible())
 	{
 		unsigned int numOptions = 3;
 		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;

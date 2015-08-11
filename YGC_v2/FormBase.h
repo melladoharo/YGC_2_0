@@ -48,8 +48,6 @@ public:
 	void destroyAnim(const Ogre::String& nameAnim);
 	void resetCamera();
 
-	// Transform "\n" (size of 2) in '\n' (only one character)
-	static void _correctCaption(Ogre::String& caption);
 	static void _loadModelStatusFromIni(CSimpleIniA* simpleIni, const Ogre::String& sectionKey, CModel* model);
 	static bool _saveModelStatusFromIni(CSimpleIniA* simpleIni, const Ogre::String& sectionKey, CModel* model, const Ogre::String& pathIni);
 
