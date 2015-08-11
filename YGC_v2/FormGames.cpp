@@ -458,7 +458,7 @@ void FormGames::showOptionsThumbs()
 		mTrayMgr->createButton("FormGames/Button/DefaultThumbs", "DEFAULT", left + 68, top, 85);
 
 		selectorRows->selectOption(Ogre::StringConverter::toString(mGridThumbs.rows), false);
-		sliderTop->setValue(mGridThumbs.top, false);
+		sliderTop->setValue(-mGridThumbs.top, false);
 		sliderLeft->setValue(mGridThumbs.left, false);
 		sliderHorSep->setValue(mGridThumbs.horizontalSep, false);
 		sliderVerSep->setValue(mGridThumbs.verticalSep, false);
