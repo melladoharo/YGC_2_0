@@ -28,6 +28,7 @@
     <ClCompile Include="FormImages.cpp" />
     <ClCompile Include="FormModels.cpp" />
     <ClCompile Include="FormMusic.cpp" />
+    <ClCompile Include="FormNewGame.cpp" />
     <ClCompile Include="FormOptions.cpp" />
     <ClCompile Include="FormOverview.cpp" />
     <ClCompile Include="FormReview.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="FormImages.h" />
     <ClInclude Include="FormModels.h" />
     <ClInclude Include="FormMusic.h" />
+    <ClInclude Include="FormNewGame.h" />
     <ClInclude Include="FormOptions.h" />
     <ClInclude Include="FormOverview.h" />
     <ClInclude Include="FormReview.h" />

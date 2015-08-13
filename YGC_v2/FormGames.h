@@ -4,6 +4,7 @@
 #include "FormBase.h"
 #include "GameInfo.h"
 #include "FormSelectorGame.h"
+#include "FormNewGame.h"
 #include "Thumbnail3D.h"
 
 class FormGames : public FormBase
@@ -42,12 +43,15 @@ public:
 	void sliderOptionsMoved(SliderOptions* slider);
 
 private:
+	void _addNewGame(const Ogre::String& newGame);
 	void _removeThumbs();
 	void _adjustThumbs();
 	void _filterGamesAll();
 	void _filterGamesByInstalled();
 
 	FormSelectorGame* mFormSelector;
+	FormNewGame* mFormNewGame;
+	Ogre::String mPathGames;
 	std::vector<GameInfo*> mGameInfo;
 	std::vector<sInfoResource> mInfoHeader;
 	std::vector<Thumbnail3D*> mThumbs;

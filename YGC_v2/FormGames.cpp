@@ -5,6 +5,8 @@
 FormGames::FormGames(const Ogre::String& pathGames, GuiManager* tray, GuiListener* oldListener) :
 FormBase(tray, oldListener),
 mFormSelector(0),
+mFormNewGame(0),
+mPathGames(pathGames),
 mParentThumbs(mSceneMgr->getRootSceneNode()->createChildSceneNode()),
 mLastThumbOver(0)
 {
@@ -22,7 +24,7 @@ mLastThumbOver(0)
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("Group/FormGames");
 
 	// iterate over the main path game and add them 
-	for (boost::filesystem::directory_iterator it(pathGames), end; it != end; ++it)
+	for (boost::filesystem::directory_iterator it(mPathGames), end; it != end; ++it)
 	{
 		if (boost::filesystem::is_directory(it->path()))
 		{
@@ -72,6 +74,7 @@ mLastThumbOver(0)
 FormGames::~FormGames()
 {
 	if (mFormSelector) delete mFormSelector;
+	if (mFormNewGame) delete mFormNewGame;
 	for (unsigned int i = 0; i < mGameInfo.size(); ++i)
 		delete mGameInfo[i];
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
@@ -88,13 +91,22 @@ bool FormGames::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	if (mFormSelector && mFormSelector->isFinished())
 	{
 		mTrayMgr->enableFadeEffect();
-		if (mFormSelector) delete mFormSelector;
+		delete mFormSelector;
 		mFormSelector = 0;
 		mTrayMgr->assignListenerToMenuBar(mOldListener);
 		mTrayMgr->setListener(this);
 		mTrayMgr->setMouseEventCallback(this);
 		mTrayMgr->setKeyboardEventCallback(this);
 		mTrayMgr->loadMenuBarMain();
+		show();
+	}
+	if (mFormNewGame && mFormNewGame->isFinished())
+	{
+		_addNewGame(mFormNewGame->getName());
+		mTrayMgr->enableFadeEffect();
+		delete mFormNewGame;
+		mFormNewGame = 0;
+		enableForm();
 		show();
 	}
 
@@ -262,6 +274,15 @@ void FormGames::labelHit(Label* label)
 		hideOptions();
 		showOptionsThumbs();
 	}
+	else if (label->getName() == "FormGames/Label/NewGame")
+	{
+		hide();
+		mFormNewGame = new FormNewGame(mTrayMgr, this);
+	}
+	else if (label->getName() == "FormGames/Label/DeleteGame")
+	{
+		hideOptions();
+	}
 }
 
 void FormGames::itemChanged(ItemSelector* selector)
@@ -316,6 +337,40 @@ void FormGames::sliderOptionsMoved(SliderOptions* slider)
 }
 
 
+
+void FormGames::_addNewGame(const Ogre::String& newGame)
+{
+	// iterate over the main path game and add them 
+	unsigned int indexNewGame = 0;
+	for (boost::filesystem::directory_iterator it(mPathGames), end; it != end; ++it)
+	{
+		if (boost::filesystem::is_directory(it->path()) && it->path().filename().generic_string() == newGame)
+		{
+			mGameInfo.insert(mGameInfo.begin() + indexNewGame, new GameInfo(it->path().generic_string()));
+
+			// create (if not) and load the thumbnail header game
+			mInfoHeader.insert(mInfoHeader.begin() + indexNewGame, sInfoResource());
+			mGameInfo[indexNewGame]->findHeaderResource(mInfoHeader[indexNewGame]);
+			if (mInfoHeader[indexNewGame].path != Ogre::StringUtil::BLANK) // game has a header
+			{
+				if (!boost::filesystem::is_regular_file(mInfoHeader[indexNewGame].pathThumb))
+					GameInfo::createThumbnail(mInfoHeader[indexNewGame].path, mInfoHeader[indexNewGame].pathThumb, 256);
+				GameInfo::loadImageFromDisk(mInfoHeader[indexNewGame].pathThumb, mInfoHeader[indexNewGame].nameThumb, "Group/FormGames");
+			}
+			// create the 3d thumbnail widget
+			mThumbs.insert(mThumbs.begin() + indexNewGame, new Thumbnail3D(mParentThumbs, "FormGames/Thumb/Widget/" + Ogre::StringConverter::toString(mThumbs.size()),
+				"Group/FormGames", mGameInfo[indexNewGame]->getName(), mInfoHeader[indexNewGame].nameThumb));
+			mThumbs[indexNewGame]->setIndex(indexNewGame);
+			mThumbs[indexNewGame]->setScale(Ogre::Vector3(mGridThumbs.size, mGridThumbs.size, mGridThumbs.size));
+
+			// set thumbs in a grid
+			Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
+
+			break;
+		}
+		indexNewGame++;
+	}
+}
 
 void FormGames::_removeThumbs()
 {
@@ -395,6 +450,8 @@ void FormGames::hideOptions()
 	if (mTrayMgr->getWidget("FormGames/Window/Options"))
 	{
 		mTrayMgr->destroyDialogWindow("FormGames/Window/Options");
+		mTrayMgr->destroyWidget("FormGames/Label/NewGame");
+		mTrayMgr->destroyWidget("FormGames/Label/DeleteGame");
 		mTrayMgr->destroyWidget("FormGames/Label/EditThumbs");
 		mTrayMgr->destroyWidget("FormGames/Label/Help");
 		mTrayMgr->destroyWidget("FormGames/Button/CloseOptions");
@@ -403,15 +460,18 @@ void FormGames::hideOptions()
 
 void FormGames::showOptions()
 {
-	if (!mTrayMgr->getWidget("FormGames/Window/Options")) // menu is hidden
+	// all submenu options are hiddens?
+	if (!mTrayMgr->isWindowDialogVisible())
 	{
-		unsigned int numOptions = 3;
+		unsigned int numOptions = 5;
 		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
 		Ogre::Real left = 50;
-		Ogre::Real width = 450;
+		Ogre::Real width = 380;
 		Ogre::Real height = numOptions * sepOptions;
 		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
-		mTrayMgr->createDialogWindow("FormGames/Window/Options", "FORM GAMES OPTIONS", left, top, width, height);	top += sepOptions / 2;
+		mTrayMgr->createDialogWindow("FormGames/Window/Options", "GAMES OPTIONS", left, top, width, height);	top += sepOptions / 2;
+		mTrayMgr->createLabel("FormGames/Label/NewGame", "NEW GAME", left, top, width, 23);	top += sepOptions;
+		mTrayMgr->createLabel("FormGames/Label/DeleteGame", "DELETE GAME", left, top, width, 23);	top += sepOptions;
 		mTrayMgr->createLabel("FormGames/Label/EditThumbs", "EDIT THUMBNAILS", left, top, width, 23);	top += sepOptions;
 		mTrayMgr->createLabel("FormGames/Label/Help", "HELP", left, top, width, 23);		top = mScreenSize.y - sepWindow - sepButton;
 		mTrayMgr->createButton("FormGames/Button/CloseOptions", "BACK", left, top, 60);
