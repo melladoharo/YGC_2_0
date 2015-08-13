@@ -21,6 +21,7 @@ public:
 
 	// Escape codes are invalid in LineEdit widget, so replace them with a ' ' character.
 	static void removeEscapeCodes(Ogre::String& str);
+	static void removeSpecialCodes(Ogre::String& str);
 
 	// simple ini can´t save '\n' character, so replace character '\n' to string "\n".
 	static void replaceNewLineEscapeToINI(Ogre::String& str);

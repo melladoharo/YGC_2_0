@@ -219,6 +219,16 @@ void LineEdit::removeEscapeCodes(Ogre::String& str)
 	}
 }
 
+void LineEdit::removeSpecialCodes(Ogre::String& str)
+{
+	Ogre::String::size_type found = str.find_first_of("\\/:*\"<>|");
+	while (found != Ogre::String::npos)
+	{
+		str.erase(str.begin() + found);
+		found = str.find_first_of("\\/:*\"<>|", found + 1);
+	}
+}
+
 void LineEdit::replaceNewLineEscapeToINI(Ogre::String& str)
 {
 	Ogre::String::size_type found = str.find_first_of("\r\n");
