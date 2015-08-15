@@ -8,7 +8,8 @@ mFormSelector(0),
 mFormNewGame(0),
 mPathGames(pathGames),
 mParentThumbs(mSceneMgr->getRootSceneNode()->createChildSceneNode()),
-mLastThumbOver(0)
+mLastThumbOver(0),
+mQuestionDelete(Ogre::StringUtil::BLANK)
 {
 	resetCamera();
 	// load grid-thumbs values from .ini config file
@@ -177,8 +178,22 @@ bool FormGames::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 			mFormSelector = new FormSelectorGame(mGameInfo[index], mTrayMgr, this);
 		}
 	}
+	else if (id == OIS::MouseButtonID::MB_Right)
+	{
+		// clin on a thumbnail, then open the game selected
+		if (mLastThumbOver)
+		{
+			unsigned int index = mLastThumbOver->getIndex();
+			mLastThumbOver->setMouseUp();
+			
+			mQuestionDelete = "When you delete a game, all the resources like screenshots, 3d models, videos, etc "
+				"are removed too. Are you sure want to delete \"" + mGameInfo[index]->getName() + "\" "
+				"game from library?";
+			mTrayMgr->showYesNoDialog("DELETE GAME", mQuestionDelete);
+		}
+	}
 
-	return FormBase::mouseReleased(arg, id);;
+	return FormBase::mouseReleased(arg, id);
 }
 
 
@@ -214,6 +229,11 @@ void FormGames::buttonHit(Button* button)
 		hideOptionsThumbs();
 		showOptions();
 		ConfigReader::getSingletonPtr()->saveConfig();
+	}
+	else if (button->getName() == "FormGames/Button/DeleteClose")
+	{
+		hideOptionsDelete();
+		showOptions();
 	}
 	else if (button->getName() == "FormGames/Button/DefaultThumbs")
 	{
@@ -282,6 +302,7 @@ void FormGames::labelHit(Label* label)
 	else if (label->getName() == "FormGames/Label/DeleteGame")
 	{
 		hideOptions();
+		showOptionsDelete();
 	}
 }
 
@@ -336,6 +357,18 @@ void FormGames::sliderOptionsMoved(SliderOptions* slider)
 	}
 }
 
+void FormGames::yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit)
+{
+	if (question == mQuestionDelete)
+	{
+		if (yesHit)
+		{
+			if (mLastThumbOver) _removeGame(mLastThumbOver->getIndex());
+		}
+		mLastThumbOver = 0;
+	}
+}
+
 
 
 void FormGames::_addNewGame(const Ogre::String& newGame)
@@ -370,6 +403,25 @@ void FormGames::_addNewGame(const Ogre::String& newGame)
 		}
 		indexNewGame++;
 	}
+}
+
+void FormGames::_removeGame(unsigned int index)
+{
+	boost::filesystem::remove_all(mGameInfo[index]->getPathGame());
+	delete mGameInfo[index];
+	delete mThumbs[index];
+	mGameInfo.erase(mGameInfo.begin() + index);
+	mInfoHeader.erase(mInfoHeader.begin() + index);
+	mThumbs.erase(mThumbs.begin() + index);
+
+	// a very bad solution [index thumbs] [fix] :(
+	if (index < mThumbs.size())
+	{
+		for (unsigned int i = index; i < mThumbs.size(); ++i)
+			mThumbs[i]->setIndex(mThumbs[i]->getIndex() - 1);
+	}
+
+	Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
 }
 
 void FormGames::_removeThumbs()
@@ -443,6 +495,7 @@ void FormGames::hideAllOptions()
 {
 	hideOptions();
 	hideOptionsThumbs();
+	hideOptionsDelete();
 }
 
 void FormGames::hideOptions()
@@ -523,6 +576,34 @@ void FormGames::showOptionsThumbs()
 		sliderHorSep->setValue(mGridThumbs.horizontalSep, false);
 		sliderVerSep->setValue(mGridThumbs.verticalSep, false);
 		sliderSize->setValue(mGridThumbs.size, false);
+	}
+}
+
+void FormGames::hideOptionsDelete()
+{
+	if (mTrayMgr->getWidget("FormGames/Window/DeleteGame"))
+	{
+		mTrayMgr->destroyDialogWindow("FormGames/Window/DeleteGame");
+		mTrayMgr->destroyWidget("FormGames/Desc/InfoDelete");
+		mTrayMgr->destroyWidget("FormGames/Button/DeleteClose");
+	}
+}
+
+void FormGames::showOptionsDelete()
+{
+	if (!mTrayMgr->getWidget("FormGames/Window/DeleteGame"))
+	{
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 450;
+		Ogre::String infoCaption = "To delete a game from library you must click on the game you want to delete with the right mouse button.";
+		SimpleText* infoText = mTrayMgr->createSimpleText("FormGames/Desc/InfoDelete", infoCaption, "YgcFont/SemiBold/16", width - 30, 250, 19, 9);
+		Ogre::Real height = infoText->getNumLines() * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+
+		mTrayMgr->createDialogWindow("FormGames/Window/DeleteGame", "DELETE GAME", left, top, width, height); top += sepOptions / 2;
+		infoText->setLeft(left + 12); infoText->setTop(top + 8); top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormGames/Button/DeleteClose", "BACK", left, top, 60);
 	}
 }
 

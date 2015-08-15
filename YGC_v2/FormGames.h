@@ -33,6 +33,8 @@ public:
 	void showOptions();
 	void hideOptionsThumbs();
 	void showOptionsThumbs();
+	void hideOptionsDelete();
+	void showOptionsDelete();
 
 	// GuiListener
 	void buttonHit(Button* button);
@@ -41,9 +43,11 @@ public:
 	void labelHit(Label* label);
 	void itemChanged(ItemSelector* selector);
 	void sliderOptionsMoved(SliderOptions* slider);
+	void yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit);
 
 private:
 	void _addNewGame(const Ogre::String& newGame);
+	void _removeGame(unsigned int index);
 	void _removeThumbs();
 	void _adjustThumbs();
 	void _filterGamesAll();
@@ -58,6 +62,7 @@ private:
 	Ogre::SceneNode* mParentThumbs;
 	Thumbnail3D* mLastThumbOver;
 	sGridThumbs mGridThumbs;
+	Ogre::DisplayString mQuestionDelete;
 };
 
 #endif // #ifndef _FORMGAMES_H__

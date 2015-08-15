@@ -46,7 +46,6 @@ void MenuBar::createMenuMain()
 	Ogre::Real currLeft = sizeInPixels("       ", mFont->getName(), 21, 7);
 	_createNewOption("mbw_main_games", "Games", currLeft);
 	_createNewOption("mbw_main_sagas", "Sagas", currLeft);
-	_createNewOption("mbw_main_library", "Library", currLeft);
 	_createNewOption("mbw_main_options", "Options", currLeft);
 	currLeft = Ogre::Real(mElement->getWidth() - sizeInPixels(" Exit        ", mFont->getName(), 21, 7));
 	_createNewOption("mbw_main_exit", " Exit ", currLeft);
