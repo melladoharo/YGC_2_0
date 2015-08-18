@@ -79,6 +79,23 @@ void FormOptions::buttonHit(Button* button)
 		hideOptionsGraphics();
 		showOptions();
 	}
+	else if (button->getName() == "FormOptions/Button/CloseAdvancedGraphics")
+	{
+		ItemSelector* selFsaa = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/Fsaa"));
+		if (selFsaa) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "FSAA", selFsaa->getSelectedOption().c_str());
+		ItemSelector* selShadows = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/EnableShadows"));
+		if (selShadows) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Shadows", selShadows->getSelectedOption().c_str());
+		ItemSelector* selResShadows = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResShadows"));
+		if (selResShadows) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Shadows_resolution", selResShadows->getSelectedOption().c_str());
+		ItemSelector* selBlurShadows = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/BlurShadows"));
+		if (selBlurShadows) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Blur_shadows", selBlurShadows->getSelectedOption().c_str());
+		ItemSelector* selFilterMode = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/FilterMode"));
+		if (selFilterMode) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Filtering_mode", selFilterMode->getSelectedOption().c_str());
+		ItemSelector* selAnisoFilter = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/Anisotropic"));
+		if (selAnisoFilter) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Anisotropic_filter", selAnisoFilter->getSelectedOption().c_str());
+		hideOptionsAdvancedGraphics();
+		showOptionsGraphics();
+	}
 	else if (button->getName() == "FormOptions/Button/ClosePathGames")
 	{
 		hideEditPathGames();
@@ -112,6 +129,11 @@ void FormOptions::labelHit(Label* label)
 	{
 		hideOptions();
 		showOptionsGraphics();
+	}
+	else if (label->getName() == "FormOptions/Label/AdvancedGraphics")
+	{
+		hideOptionsGraphics();
+		showOptionsAdvancedGraphics();
 	}
 	else if (label->getName() == "FormOptions/Label/EditGamesPath")
 	{
@@ -148,6 +170,7 @@ void FormOptions::hideAllOptions()
 	hideOptions();
 	hideOptionsGeneral();
 	hideOptionsGraphics();
+	hideOptionsAdvancedGraphics();
 }
 
 void FormOptions::hideOptions()
@@ -164,7 +187,7 @@ void FormOptions::hideOptions()
 
 void FormOptions::showOptions()
 {
-	if (!mTrayMgr->getWidget("FormOptions/Window/Options")) // menu is hidden
+	if (!mTrayMgr->isWindowDialogVisible()) // menu is hidden?
 	{
 		unsigned int numOptions = 5;
 		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
@@ -247,7 +270,7 @@ void FormOptions::showOptionsGraphics()
 		mTrayMgr->createDialogWindow("FormOptions/Window/Graphics", "GRAPHICS OPTIONS", left, top, width, height);	 top += sepOptions / 2;
 		ItemSelector* selFullScreen = mTrayMgr->createItemSelector("FormOptions/Selector/Fullscreen", "Fullscreen", itemsYesNo, left, top, width); top += sepOptions;
 		ItemSelector* selVsync = mTrayMgr->createItemSelector("FormOptions/Selector/Vsync", "Sync Every Frame", itemsYesNo, left, top, width); top += sepOptions;
-		ItemSelector* selRatio = mTrayMgr->createItemSelector("FormOptions/Selector/AspectRatio", "Monitor Aspect ratio", itemsAspect, left, top, width); top += sepOptions;
+		ItemSelector* selRatio = mTrayMgr->createItemSelector("FormOptions/Selector/AspectRatio", "Monitor Aspect Ratio", itemsAspect, left, top, width); top += sepOptions;
 		ItemSelector* selResolution = mTrayMgr->createItemSelector("FormOptions/Selector/Resolution", "Render Resolution", itemsResolution, left, top, width); top += sepOptions;
 		mTrayMgr->createLabel("FormOptions/Label/AdvancedGraphics", "ADVANCED GRAPHICS", left, top, width, 23); top = mScreenSize.y - sepWindow - sepButton;
 		mTrayMgr->createButton("FormOptions/Button/CloseOptionsGraphics", "BACK", left, top, 60);
@@ -257,6 +280,66 @@ void FormOptions::showOptionsGraphics()
 		selVsync->selectOption(vsyncValue, false);
 		selRatio->selectOption(ratioValue, false);
 		selResolution->selectOption(resolutionValue, false);
+	}
+}
+
+void FormOptions::hideOptionsAdvancedGraphics()
+{
+	if (mTrayMgr->getWidget("FormOptions/Window/AdvancedGraphics"))
+	{
+		mTrayMgr->destroyDialogWindow("FormOptions/Window/AdvancedGraphics");
+		mTrayMgr->destroyWidget("FormOptions/Selector/Fsaa");
+		mTrayMgr->destroyWidget("FormOptions/Selector/EnableShadows");
+		mTrayMgr->destroyWidget("FormOptions/Selector/BlurShadows");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResShadows");
+		mTrayMgr->destroyWidget("FormOptions/Selector/FilterMode");
+		mTrayMgr->destroyWidget("FormOptions/Selector/Anisotropic");
+		mTrayMgr->destroyWidget("FormOptions/Button/CloseAdvancedGraphics");
+		mTrayMgr->destroyWidget("FormOptions/Button/ApplyAdvancedGraphics");
+	}
+}
+
+void FormOptions::showOptionsAdvancedGraphics()
+{
+	if (!mTrayMgr->getWidget("FormOptions/Window/AdvancedGraphics")) // menu is hidden
+	{
+		unsigned int numOptions = 7;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 420;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+
+		Ogre::String fsaaValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "FSAA", "0");
+		Ogre::String enableShadowsValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Shadows", "Yes");
+		Ogre::String resShadowValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Shadows_resolution", "1024");
+		Ogre::String blurShadowValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Blur_shadows", "Yes");
+		Ogre::String filterModeValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Filtering_mode", "Anisotropic");
+		Ogre::String anisotropicFilter = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Anisotropic_filter", "1");
+		Ogre::StringVector itemsYesNo; itemsYesNo.push_back("Yes"); itemsYesNo.push_back("No");
+		Ogre::StringVector itemsResText; itemsResText.push_back("512"); itemsResText.push_back("1024"); itemsResText.push_back("2048");
+		Ogre::StringVector itemsFiltering; itemsFiltering.push_back("Bilineal"); itemsFiltering.push_back("Trilineal"); itemsFiltering.push_back("Anisotropic");
+		Ogre::StringVector itemsAniLevel; itemsAniLevel.push_back("1"); itemsAniLevel.push_back("2"); itemsAniLevel.push_back("4"); itemsAniLevel.push_back("8"); itemsAniLevel.push_back("16");
+		Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystemByName("Direct3D9 Rendering Subsystem");
+		Ogre::StringVector& itemsFsaa = rs->getConfigOptions()["FSAA"].possibleValues;
+		
+		mTrayMgr->createDialogWindow("FormOptions/Window/AdvancedGraphics", "ADVANCED GRAPHICS", left, top, width, height);	 top += sepOptions / 2;
+		ItemSelector* selFsaa = mTrayMgr->createItemSelector("FormOptions/Selector/Fsaa", "FSAA", itemsFsaa, left, top, width); top += sepOptions;
+		ItemSelector* selShadows = mTrayMgr->createItemSelector("FormOptions/Selector/EnableShadows", "Enable Shadows", itemsYesNo, left, top, width); top += sepOptions;
+		ItemSelector* selResShadows = mTrayMgr->createItemSelector("FormOptions/Selector/ResShadows", "Shadows Resolution", itemsResText, left, top, width); top += sepOptions;
+		ItemSelector* selBlurShadows = mTrayMgr->createItemSelector("FormOptions/Selector/BlurShadows", "Blur Shadows", itemsYesNo, left, top, width); top += sepOptions;
+		ItemSelector* selTextFiltering = mTrayMgr->createItemSelector("FormOptions/Selector/FilterMode", "Filtering Mode", itemsFiltering, left, top, width); top += sepOptions;
+		ItemSelector* selAnistropic = mTrayMgr->createItemSelector("FormOptions/Selector/Anisotropic", "Anisotropic Filter", itemsAniLevel, left, top, width); top += sepOptions;
+		top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormOptions/Button/CloseAdvancedGraphics", "BACK", left, top, 60);
+		mTrayMgr->createButton("FormOptions/Button/ApplyAdvancedGraphics", "APPLY", left + 65, top, 80);
+
+		selFsaa->selectOption(fsaaValue, false);
+		selShadows->selectOption(enableShadowsValue, false);
+		selResShadows->selectOption(resShadowValue, false);
+		selBlurShadows->selectOption(blurShadowValue, false);
+		selTextFiltering->selectOption(filterModeValue, false);
+		selAnistropic->selectOption(anisotropicFilter, false);
 	}
 }
 

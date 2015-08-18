@@ -43,17 +43,14 @@ private:
     void windowResized(Ogre::RenderWindow* rw);
     void windowClosed(Ogre::RenderWindow* rw);
 
-	// GuiListener
-	void buttonHit(Button* button);
-
 	// Ogre 
     Ogre::Root *mRoot;
     Ogre::Camera* mCamera;
+	Ogre::SceneNode* mNodeCamera;
     Ogre::SceneManager* mSceneMgr;
     Ogre::RenderWindow* mWindow;
     Ogre::String mResourcesCfg;
     Ogre::String mPluginsCfg;
-	OgreBites::SdkCameraMan* mCameraMan; // basic camera controller
     bool mShutDown;
 
     // OIS Input devices
@@ -63,24 +60,20 @@ private:
 
 	// YGC 
 	GuiManager* mTrayMgr;
+	DOFManager* mDofEffect;
+	Background* mBackground;
+	Ground* mGround;
+	GameInfo* mGameInfo;
 	FormSelectorMain* mFormSelector;
+	FormGames* mFormGames;
+	FormOptions* mFormOptions;
 	FormOverview* mFormOverview;
 	FormReview* mFormReview;
 	FormImages* mFormImages;
-	FormGames* mFormGames;
-	FormModels* mFormModels;
 	FormMusic* mFormMusic;
 	FormVideos* mFormVideos;
+	FormModels* mFormModels;
 	FormCollector* mFormCollector;
-	FormOptions* mFormOptions;
-	Ground* mGround;
-	Background* mBackground;
-	DOFManager* mDofEffect;
-	Ogre::SceneNode* mNodeCamera;
-
-	Ogre::Entity* entImg;
-	Ogre::SceneNode* nodoImg, *nodoLight;
-	GameInfo* mGameInfo;
 };
 
 #endif // #ifndef _BASEAPP_H__

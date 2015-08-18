@@ -31,6 +31,12 @@ SI_Error ConfigReader::_createDefaultConfig()
 	mReader->SetValue("SYSTEM.GRAPHICS", "VSync", "Yes");
 	mReader->SetValue("SYSTEM.GRAPHICS", "Aspect_Ratio", "Auto");
 	mReader->SetValue("SYSTEM.GRAPHICS", "Resolution", "1024 x 768 @ 32-bit colour");
+	mReader->SetValue("SYSTEM.GRAPHICS", "FSAA", "0");
+	mReader->SetValue("SYSTEM.GRAPHICS", "Shadows", "Yes");
+	mReader->SetValue("SYSTEM.GRAPHICS", "Shadows_resolution", "1024");
+	mReader->SetValue("SYSTEM.GRAPHICS", "Blur_shadows", "Yes");
+	mReader->SetValue("SYSTEM.GRAPHICS", "Filtering_mode", "Anisotropic");
+	mReader->SetValue("SYSTEM.GRAPHICS", "Anisotropic_filter", "2");
 	mReader->SetDoubleValue("FORM_GAMES", "Thumbs_Rows", 3);
 	mReader->SetDoubleValue("FORM_GAMES", "Thumbs_Size", 2.77f);
 	mReader->SetDoubleValue("FORM_GAMES", "Thumbs_Top", 3);

@@ -28,6 +28,8 @@ public:
 	void showOptionsGeneral();
 	void hideOptionsGraphics();
 	void showOptionsGraphics();
+	void hideOptionsAdvancedGraphics();
+	void showOptionsAdvancedGraphics();
 	void hideEditPathGames();
 	void showEditPathGames();
 

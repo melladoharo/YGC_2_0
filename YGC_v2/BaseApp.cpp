@@ -20,12 +20,13 @@
 
 //-------------------------------------------------------------------------------------
 BaseApp::BaseApp()
-	: mRoot(0), mCamera(0), mSceneMgr(0), mWindow(0),
+	: mRoot(0), mCamera(0), mNodeCamera(0), mSceneMgr(0), mWindow(0),
 	mResourcesCfg(Ogre::StringUtil::BLANK), mPluginsCfg(Ogre::StringUtil::BLANK),
 	mShutDown(false),
-	mInputManager(0), mMouse(0), mKeyboard(0), mTrayMgr(0), mGround(0), mBackground(0), mDofEffect(0),
-	mFormSelector(0), mFormGames(0), mFormOverview(0), mFormReview(0), mFormImages(0), mFormModels(0),
-	mFormMusic(0), mFormVideos(0), mFormCollector(0), mGameInfo(0), mFormOptions(0)
+	mInputManager(0), mMouse(0), mKeyboard(0), 
+	mTrayMgr(0), mDofEffect(0), mBackground(0), mGround(0), mGameInfo(0),
+	mFormSelector(0), mFormGames(0), mFormOptions(0), mFormOverview(0), mFormReview(0), 
+	mFormImages(0), mFormMusic(0), mFormVideos(0), mFormModels(0), mFormCollector(0)
 {
 	srand(time(NULL));
 }
@@ -39,15 +40,14 @@ BaseApp::~BaseApp()
 	if (mFormOverview) delete mFormOverview;
 	if (mFormReview) delete mFormReview;
 	if (mFormImages) delete mFormImages;
-	if (mFormModels) delete mFormModels;
 	if (mFormMusic) delete mFormMusic;
 	if (mFormVideos) delete mFormVideos;
+	if (mFormModels) delete mFormModels;
 	if (mFormCollector) delete mFormCollector;
 	if (mGameInfo) delete mGameInfo;
 	if (mGround) delete mGround;
 	if (mDofEffect) delete mDofEffect;
 	if (mBackground) delete mBackground;
-	if (mCameraMan) delete mCameraMan;
 	if (mTrayMgr) delete mTrayMgr;
 
 	//Remove ourself as a Window listener
@@ -119,11 +119,11 @@ bool BaseApp::go(void)
 
 	// configure our RenderSystem
 	rs->setConfigOption("Allow NVPerfHUD", "No");
-	//rs->setConfigOption("FSAA", mConfig->fsaa);
+	rs->setConfigOption("FSAA", ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "FSAA", "0"));
 	rs->setConfigOption("Fixed Pipeline Enabled", "Yes");
-	rs->setConfigOption("Floating-point mode", "Fastest");
+	rs->setConfigOption("Floating-point mode", "Consistent");
 	rs->setConfigOption("Full Screen", ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Fullscreen", "Yes"));
-	rs->setConfigOption("Multi device memory hint", "Use minimun system memory");
+	rs->setConfigOption("Multi device memory hint", "Auto hardware buffers management");
 	rs->setConfigOption("Resource Creation Policy", "Create on all devices");
 	const Ogre::StringVector& rDevice = rs->getConfigOptions()["Rendering Device"].possibleValues;
 	if (!rDevice.empty()) rs->setConfigOption("Rendering Device", rDevice.back());
@@ -143,25 +143,9 @@ bool BaseApp::go(void)
 	//-------------------------------------------------------------------------------------
 	// create camera
 	mCamera = mSceneMgr->createCamera("YGC2/Camera");
-
 	mCamera->lookAt(Ogre::Vector3(0, 0, -1));
 	mCamera->setNearClipDistance(1);
 	mCamera->setFarClipDistance(1000);
-	//mCamera->setPosition(0, 14, 0);
-	//mCamera->setPosition(0, 26, -5); // Modo 1
-	//mCamera->setPosition(-67, 26, -49); // Modo 2
-	//mCamera->yaw(Ogre::Degree(-66)); // Modo 2
-	//mCamera->pitch(Ogre::Degree(-16));
-	mCameraMan = new OgreBites::SdkCameraMan(mCamera);   // create a default camera controller
-	mCameraMan->setStyle(OgreBites::CS_ORBIT);
-	//mCameraMan->setTopSpeed(8);
-	
-	/*
-	mCameraMan->setStyle(OgreBites::CS_ORBIT);
-	Ogre::SceneNode* nodoObjetivo=mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	nodoObjetivo->setPosition(0,13,0);
-	mCameraMan->setTarget(nodoObjetivo);
-	*/
 
 	//-------------------------------------------------------------------------------------
 	// create viewports
@@ -173,11 +157,13 @@ bool BaseApp::go(void)
 
 	//-------------------------------------------------------------------------------------
 	// Set default mipmap level (NB some APIs ignore this)
-	//Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(0);
-	//Ogre::MaterialManager::getSingleton().setDefaultTextureFiltering(Ogre::TFO_TRILINEAR);
-	Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(2);
-	Ogre::MaterialManager::getSingleton().setDefaultTextureFiltering(Ogre::TFO_ANISOTROPIC);
-	Ogre::MaterialManager::getSingleton().setDefaultAnisotropy(8);
+	Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(1);
+	Ogre::String filterMode = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Filtering_mode", "Anisotropic");
+	if (filterMode == "Anisotropic") Ogre::MaterialManager::getSingleton().setDefaultTextureFiltering(Ogre::TFO_ANISOTROPIC);
+	else if (filterMode == "Trilineal") Ogre::MaterialManager::getSingleton().setDefaultTextureFiltering(Ogre::TFO_TRILINEAR);
+	else Ogre::MaterialManager::getSingleton().setDefaultTextureFiltering(Ogre::TFO_BILINEAR);
+	Ogre::String aniFilter = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Anisotropic_filter", "Anisotropic");
+	Ogre::MaterialManager::getSingleton().setDefaultAnisotropy(Ogre::StringConverter::parseInt(aniFilter));
 
 	//-------------------------------------------------------------------------------------
 	// Create any resource listeners (for loading screens)
@@ -202,13 +188,24 @@ bool BaseApp::go(void)
 	// Set ambient light
 	//mSceneMgr->setAmbientLight(Ogre::ColourValue(0.93f, 0.94f, 0.95f));
 	//mSceneMgr->setAmbientLight(Ogre::ColourValue(0.85f, 0.85f, 0.87f));
-	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.73f, 0.74f, 0.75f));
 	//mSceneMgr->setAmbientLight(Ogre::ColourValue(0,0,0));
-	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_MODULATIVE);
+	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.73f, 0.74f, 0.75f));
+	Ogre::String enableShadows = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Shadows", "Yes");
+	(enableShadows == "Yes")
+		? mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_MODULATIVE)
+		: mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_NONE);
 	mSceneMgr->setShadowColour(Ogre::ColourValue(0.91f, 0.90f, 0.89f));
 	mSceneMgr->setShadowFarDistance(200.0f);
 	//mSceneMgr->setShadowTextureCount(1);
-	mSceneMgr->setShadowTextureSize(1024);
+	Ogre::Real shadowsSize = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("SYSTEM.GRAPHICS", "Shadows_resolution", 1024);
+	mSceneMgr->setShadowTextureSize((unsigned short)shadowsSize);
+	Ogre::String blurShadows = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM.GRAPHICS", "Blur_shadows", "Yes");
+	if (blurShadows == "Yes")
+	{
+		Ogre::Viewport* shadowMapViewport = mSceneMgr->getShadowTexture(0)->getBuffer()->getRenderTarget()->getViewport(0);
+		Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport, "BlurTexture");
+		Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport, "BlurTexture", true);
+	}
 		
 	// Fixed light, dim
 	Ogre::Light* mSunLight = mSceneMgr->createLight("SunLight");
@@ -222,41 +219,9 @@ bool BaseApp::go(void)
 	mSunLight->setDirection(dir);
 	mSunLight->setDiffuseColour(1,1,1);
 	mSunLight->setSpecularColour(1,1,1);
-	Ogre::Viewport* shadowMapViewport = mSceneMgr->getShadowTexture(0)->getBuffer()->getRenderTarget()->getViewport(0);
-	Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport, "BlurTexture");
-	Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport, "BlurTexture", true);
-
-	/*
-	// Create a light
-	Ogre::Light* l = mSceneMgr->createLight("MainLight");
-	l->setType(Ogre::Light::LT_POINT);
-	l->setPosition(80, 150, 100);
-	l->setCastShadows(true);
-	l->setDiffuseColour(Ogre::ColourValue(0.33f, 0.34f, 0.35f));
-	l->setSpecularColour(Ogre::ColourValue(0.23f, 0.24f, 0.25f));
-	Ogre::Viewport* shadowMapViewport = mSceneMgr->getShadowTexture(0)->getBuffer()->getRenderTarget()->getViewport(0);
-	Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport, "BlurTexture");
-	Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport, "BlurTexture", true);
-	*/
-	/*
-	// Create a second light
-	Ogre::Light* l2 = mSceneMgr->createLight("MainLight2");
-	l2->setType(Ogre::Light::LT_POINT);
-	l2->setPosition(-40, 340, -65);
-	l2->setCastShadows(true);
-	l2->setDiffuseColour(Ogre::ColourValue(0.33f, 0.34f, 0.35f));
-	l2->setSpecularColour(Ogre::ColourValue(0.23f, 0.24f, 0.25f));
-	Ogre::Viewport* shadowMapViewport2=mSceneMgr->getShadowTexture(1)->getBuffer()->getRenderTarget()->getViewport(0);
-	Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport2, "BlurTexture");
-	Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport2, "BlurTexture", true);
-	*/
-	//nodoLight = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	//nodoLight->attachObject(l);
 	
 	mNodeCamera = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	mNodeCamera->attachObject(mCamera);
-	//mNodeCamera->setPosition(0, 26, -5);
-	//mNodeCamera->pitch(Ogre::Degree(-16));
 
 	//-------------------------------------------------------------------------------------
 	//create FrameListener
@@ -322,9 +287,7 @@ bool BaseApp::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	//Need to capture/update each device
 	mKeyboard->capture();
 	mMouse->capture();
-
 	mTrayMgr->frameRenderingQueued(evt);
-	if( mCameraMan) mCameraMan->frameRenderingQueued(evt);
 
 	// finish ygc 2.0
 	if (mFormSelector && mFormSelector->isFinished())
@@ -340,7 +303,6 @@ bool BaseApp::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 bool BaseApp::keyPressed(const OIS::KeyEvent &arg)
 {
-	if (mCameraMan) mCameraMan->injectKeyDown(arg);
 	if (arg.key == OIS::KC_SYSRQ)   // take a screenshot
 	{
 		mWindow->writeContentsToTimestampedFile("screenshot", ".jpg");
@@ -356,7 +318,6 @@ bool BaseApp::keyPressed(const OIS::KeyEvent &arg)
 //-------------------------------------------------------------------------------------
 bool BaseApp::keyReleased(const OIS::KeyEvent &arg)
 {
-	if (mCameraMan) mCameraMan->injectKeyUp(arg);
 	return true;
 }
 
@@ -364,7 +325,6 @@ bool BaseApp::keyReleased(const OIS::KeyEvent &arg)
 bool BaseApp::mouseMoved(const OIS::MouseEvent &arg)
 {
 	if (mTrayMgr->injectMouseMove(arg)) return true;
-	if (mCameraMan) mCameraMan->injectMouseMove(arg);
 	return true;
 }
 
@@ -372,7 +332,6 @@ bool BaseApp::mouseMoved(const OIS::MouseEvent &arg)
 bool BaseApp::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
 	if (mTrayMgr->injectMouseDown(arg, id)) return true;
-	if (mCameraMan) mCameraMan->injectMouseDown(arg, id);
 	return true;
 }
 
@@ -380,7 +339,6 @@ bool BaseApp::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 bool BaseApp::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
 	if (mTrayMgr->injectMouseUp(arg, id)) return true;
-	if (mCameraMan) mCameraMan->injectMouseUp(arg, id);
 	return true;
 }
 
@@ -415,13 +373,7 @@ void BaseApp::windowClosed(Ogre::RenderWindow* rw)
 	}
 }
 
-void BaseApp::buttonHit(Button* button)
-{
-	if (button->getName() == "bttExit")
-	{
-		mShutDown = true;
-	}
-}
+
 
 INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
 {
@@ -432,8 +384,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
 	}
 	catch (Ogre::Exception& e)
 	{
-		MessageBox(NULL, e.getFullDescription().c_str(), "An exception has occured!",
-			MB_OK | MB_ICONERROR | MB_TASKMODAL);
+		MessageBox(NULL, e.getFullDescription().c_str(), "An exception has occured!", MB_OK | MB_ICONERROR | MB_TASKMODAL);
 	}
 }
 
