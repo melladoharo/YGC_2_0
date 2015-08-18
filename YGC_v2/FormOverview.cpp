@@ -135,7 +135,8 @@ bool FormOverview::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID i
 				mTrayMgr->enableFadeEffect();
 				mDvdClose->getNode()->setOrientation(Ogre::Quaternion(Ogre::Degree(0), Ogre::Vector3::UNIT_Y));
 				FormBase::hide();
-				mTrayMgr->getWidget("FormOverview/Logo")->show();
+				Widget* logo = mTrayMgr->getWidget("FormOverview/Logo");
+				if (logo) logo->show();
 				_setCameraDvdZoom();
 				mCurrentState = FO_ZOOM;
 			}
