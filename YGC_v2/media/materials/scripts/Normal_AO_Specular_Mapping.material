@@ -1,0 +1,110 @@
+material normal_base_material
+{
+    set $diffuseCol "1 1 1 1"
+    set $specularCol "1 1 1"
+    set $shininess "32"
+ 
+    technique
+    {
+        pass
+        {
+            illumination_stage ambient
+ 
+            ambient 1 1 1 1
+            diffuse $diffuseCol
+            specular 0 0 0 0
+            emissive 0 0 0 0
+
+            vertex_program_ref ambient_vs
+            {
+            }
+ 
+            fragment_program_ref ambient_ps
+            {
+            }
+ 
+            texture_unit diffuseMap
+            {
+                texture white.png
+            }
+ 
+            texture_unit aoMap
+            {
+                texture white.png
+            }
+        }
+		pass
+        {
+            illumination_stage per_light
+ 
+            scene_blend add
+ 
+            vertex_program_ref diffuse_vs
+            {
+            }
+ 
+            fragment_program_ref diffuse_ps
+            {
+            }
+ 
+            diffuse $diffuseCol
+            specular $specularCol $shininess
+            ambient 0 0 0 0
+ 
+            texture_unit diffuseMap
+            {
+                texture white.png
+            }
+ 
+            texture_unit specMap
+            {
+                texture white.png
+            }
+ 
+            texture_unit normalMap
+            {
+                texture flat_n.png
+            }
+        }
+    }
+}
+ 
+// examples (require the appropriate [[textures]])
+material example1 : normal_base_material
+{
+    set_texture_alias diffuseMap text_d.tga
+    set_texture_alias specMap text_s.tga
+    set_texture_alias normalMap text_n.tga
+	set_texture_alias aoMap text_l.tga
+	
+	set $diffuseCol "1 1 1"
+    set $specularCol "1 1 1"
+    set $shininess "128"
+}
+// example TRANSPARENT (use this way in transparent materials like hair)
+material example2 : normal_base_material
+{
+    set_texture_alias diffuseMap text_d.tga
+    set_texture_alias specMap text_s.tga
+    set_texture_alias normalMap text_n.tga
+	set_texture_alias aoMap text_l.tga
+	
+	set $diffuseCol "1 1 1"
+    set $specularCol "1 1 1"
+    set $shininess "128"
+	
+	technique
+    {
+        pass
+        {
+			scene_blend alpha_blend
+			cull_hardware none
+			cull_software none
+			
+			fragment_program_ref ambient_ps
+            {
+				param_named alphaVal float 0.88
+            }
+		}
+	}
+}

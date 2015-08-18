@@ -9,9 +9,9 @@ material mat_CD_Delantero
     {
         pass mat_CD_Delantero
         {
-            ambient 0.8006435632705688 0.8006435632705688 0.8006435632705688 1.0
-            diffuse 0.6405148601608701 0.6405148601608701 0.6405148601608701 1.0
-            specular 0.5 0.5 0.5 1.0 12.5
+            ambient 1 1 1 1
+            diffuse 1 1 1 1
+            specular 0.5 0.5 0.5 1 110
             emissive 0.0 0.0 0.0 1.0
 
             alpha_to_coverage off
@@ -51,9 +51,9 @@ material mat_CD_Trasero
     {
         pass mat_CD_Trasero
         {
-            ambient 0.8006435632705688 0.8006435632705688 0.8006435632705688 1.0
-            diffuse 0.6405148601608701 0.6405148601608701 0.6405148601608701 1.0
-            specular 0.5 0.5 0.5 1.0 12.5
+            ambient 1 1 1 1
+            diffuse 1 1 1 1
+            specular 0.5 0.5 0.5 1 110
             emissive 0.0 0.0 0.0 1.0
 
             alpha_to_coverage off

@@ -205,10 +205,10 @@ bool BaseApp::go(void)
 	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.73f, 0.74f, 0.75f));
 	//mSceneMgr->setAmbientLight(Ogre::ColourValue(0,0,0));
 	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_MODULATIVE);
-	mSceneMgr->setShadowColour(Ogre::ColourValue(0.88f, 0.87f, 0.897f));
+	mSceneMgr->setShadowColour(Ogre::ColourValue(0.91f, 0.90f, 0.89f));
 	mSceneMgr->setShadowFarDistance(200.0f);
 	//mSceneMgr->setShadowTextureCount(1);
-	//mSceneMgr->setShadowTextureSize(512);
+	mSceneMgr->setShadowTextureSize(1024);
 		
 	// Fixed light, dim
 	Ogre::Light* mSunLight = mSceneMgr->createLight("SunLight");
@@ -220,8 +220,8 @@ bool BaseApp::go(void)
 	dir = -mSunLight->getPosition();
 	dir.normalise();
 	mSunLight->setDirection(dir);
-	mSunLight->setDiffuseColour(0.42f, 0.42f, 0.49f);
-	mSunLight->setSpecularColour(0.22f, 0.22f, 0.29f);
+	mSunLight->setDiffuseColour(1,1,1);
+	mSunLight->setSpecularColour(1,1,1);
 	Ogre::Viewport* shadowMapViewport = mSceneMgr->getShadowTexture(0)->getBuffer()->getRenderTarget()->getViewport(0);
 	Ogre::CompositorManager::getSingleton().addCompositor(shadowMapViewport, "BlurTexture");
 	Ogre::CompositorManager::getSingleton().setCompositorEnabled(shadowMapViewport, "BlurTexture", true);

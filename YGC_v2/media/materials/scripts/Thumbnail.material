@@ -1,21 +1,6 @@
 
-material _missing_material_
-{
-    receive_shadows off
-    technique
-    {
-        pass
-        {
-            ambient 0.1 0.1 0.1 1.0
-            diffuse 0.8 0.0 0.0 1.0
-            specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.3 0.3 0.3 1.0
-        }
-    }
-}
 
 // mat_thumb_ext genrated by blender2ogre 0.6.0
-
 material mat_thumb_ext 
 {
     receive_shadows on 
@@ -24,8 +9,8 @@ material mat_thumb_ext
     {
         pass mat_thumb_ext
         {
-            ambient 1 1 1 1.0
-            diffuse 1 1 1 1.0
+            ambient 1 1 1 1
+            diffuse 1 1 1 1
             specular 0.5 0.5 0.5 1.0 12.5
             emissive 0.0 0.0 0.0 1.0
 
@@ -53,8 +38,8 @@ material mat_thumb_int
     {
         pass mat_thumb_int
         {
-            ambient 1.0 1.0 1.0 1.0
-            diffuse 0.800000011920929 0.800000011920929 0.800000011920929 1.0
+            ambient 1 1 1 1
+            diffuse 1 1 1 1
             specular 0.5 0.5 0.5 1.0 12.5
             emissive 0.0 0.0 0.0 1.0
 
@@ -74,8 +59,6 @@ material mat_thumb_int
             scene_blend_op add
             shading gouraud
             transparent_sorting on
-
-			
         }
     }
 }
