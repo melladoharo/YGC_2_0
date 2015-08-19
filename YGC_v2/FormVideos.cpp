@@ -466,11 +466,12 @@ void FormVideos::playVideo(unsigned int index, bool fullscreen /*= true*/)
 void FormVideos::_createThumbFromVideo(const Ogre::String& pathVideo, const Ogre::String& pathThumb, unsigned int thumbHeight)
 {
 	// Comprueba que existe el ffmpeg, si no muestra un mensaje de error
-	if (boost::filesystem::is_regular_file("C:/Librerias/ogre_sdk_vs120/bin/debug/ffmpeg.exe"))
+	boost::filesystem::path pathffmpeg("./ffmpeg.exe");
+	if (boost::filesystem::is_regular_file(pathffmpeg))
 	{
 		//...ffmpeg.exe -ss 15 -i video.mp4 -vf scale=512:-1 -vframes 1 OutputFile.jpg
-		Ogre::String sizeThumb = "scale=-1:" + Ogre::StringConverter::toString(thumbHeight);
-		Ogre::String processToStart("C:/Librerias/ogre_sdk_vs120/bin/debug/ffmpeg.exe");
+		Ogre::String sizeThumb = "scale=" + Ogre::StringConverter::toString(thumbHeight) + ":-1";
+		Ogre::String processToStart("ffmpeg.exe");
 		Ogre::String processParams("-ss 5 -i \"" + pathVideo + "\" -vf " + sizeThumb + " -vframes 1 \"" + pathThumb +"\"");
 
 		SHELLEXECUTEINFO shellExInfo;
