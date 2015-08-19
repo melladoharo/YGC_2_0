@@ -66,6 +66,26 @@ void FormOptions::buttonHit(Button* button)
 		hideOptionsGeneral();
 		showOptions();
 	}
+	else if (button->getName() == "FormOptions/Button/CloseThumbnails")
+	{
+		ItemSelector* selResGames = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResGames"));
+		if (selResGames) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.GAMES", "Thumbs_Resolution", selResGames->getSelectedOption().c_str());
+		ItemSelector* selResImages = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResImages"));
+		if (selResImages) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.IMAGES", "Thumbs_Resolution", selResImages->getSelectedOption().c_str());
+		ItemSelector* selResVideos = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResVideos"));
+		if (selResVideos) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.VIDEOS", "Thumbs_Resolution", selResVideos->getSelectedOption().c_str());
+		ItemSelector* selResCover = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResCover"));
+		if (selResCover) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.OVERVIEW", "Cover_Resolution", selResCover->getSelectedOption().c_str());
+		ItemSelector* selResDisc = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResDisc"));
+		if (selResDisc) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.OVERVIEW", "Disc_Resolution", selResDisc->getSelectedOption().c_str());
+		ItemSelector* selResLogo = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResLogo"));
+		if (selResLogo) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.OVERVIEW", "Logo_Resolution", selResLogo->getSelectedOption().c_str());
+		ItemSelector* selBoxArt = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResBoxArt"));
+		if (selBoxArt) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.OVERVIEW", "BoxArt_Resolution", selBoxArt->getSelectedOption().c_str());
+		ConfigReader::getSingletonPtr()->saveConfig();
+		hideOptionsThumbnails();
+		showOptions();
+	}
 	else if (button->getName() == "FormOptions/Button/CloseOptionsGraphics")
 	{
 		ItemSelector* selFullscreen = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/Fullscreen"));
@@ -76,6 +96,7 @@ void FormOptions::buttonHit(Button* button)
 		if (selRatio) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Aspect_Ratio", selRatio->getSelectedOption().c_str());
 		ItemSelector* selResolution = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/Resolution"));
 		if (selResolution) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Resolution", selResolution->getSelectedOption().c_str());
+		ConfigReader::getSingletonPtr()->saveConfig();
 		hideOptionsGraphics();
 		showOptions();
 	}
@@ -93,13 +114,9 @@ void FormOptions::buttonHit(Button* button)
 		if (selFilterMode) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Filtering_mode", selFilterMode->getSelectedOption().c_str());
 		ItemSelector* selAnisoFilter = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/Anisotropic"));
 		if (selAnisoFilter) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM.GRAPHICS", "Anisotropic_filter", selAnisoFilter->getSelectedOption().c_str());
+		ConfigReader::getSingletonPtr()->saveConfig();
 		hideOptionsAdvancedGraphics();
 		showOptionsGraphics();
-	}
-	else if (button->getName() == "FormOptions/Button/ClosePathGames")
-	{
-		hideEditPathGames();
-		showOptionsGeneral();
 	}
 	else if (button->getName() == "FormOptions/Button/SelectPathGames")
 	{
@@ -124,6 +141,17 @@ void FormOptions::labelHit(Label* label)
 	{
 		hideOptions();
 		showOptionsGeneral();
+	}
+	else if (label->getName() == "FormOptions/Label/Thumbs")
+	{
+		hideOptions();
+		showOptionsThumbnails();
+	}
+	else if (label->getName() == "FormOptions/Label/ResetThumbnails")
+	{
+		_resetThumbnails();
+		mTrayMgr->showOkDialog("RESET THUMBNAILS", "All thumbnails created with YGC2 have been erased. "
+			"You must restart the application to see the new thumbnails.");
 	}
 	else if (label->getName() == "FormOptions/Label/Graphics")
 	{
@@ -171,6 +199,7 @@ void FormOptions::hideAllOptions()
 	hideOptionsGeneral();
 	hideOptionsGraphics();
 	hideOptionsAdvancedGraphics();
+	hideOptionsThumbnails();
 }
 
 void FormOptions::hideOptions()
@@ -179,6 +208,7 @@ void FormOptions::hideOptions()
 	{
 		mTrayMgr->destroyDialogWindow("FormOptions/Window/Options");
 		mTrayMgr->destroyWidget("FormOptions/Label/General");
+		mTrayMgr->destroyWidget("FormOptions/Label/Thumbs");
 		mTrayMgr->destroyWidget("FormOptions/Label/Graphics");
 		mTrayMgr->destroyWidget("FormOptions/Label/Sound");
 		mTrayMgr->destroyWidget("FormOptions/Label/Video");
@@ -189,15 +219,16 @@ void FormOptions::showOptions()
 {
 	if (!mTrayMgr->isWindowDialogVisible()) // menu is hidden?
 	{
-		unsigned int numOptions = 5;
+		unsigned int numOptions = 6;
 		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
 		Ogre::Real left = 50;
 		Ogre::Real width = 280;
 		Ogre::Real height = numOptions * sepOptions;
 		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
 
-		mTrayMgr->createDialogWindow("FormOptions/Window/Options", "OPTIONS", left, top, width, height);	 top += sepOptions / 2;
+		mTrayMgr->createDialogWindow("FormOptions/Window/Options", "  OPTIONS  ", left, top, width, height);	 top += sepOptions / 2;
 		mTrayMgr->createLabel("FormOptions/Label/General", "GENERAL", left, top, width, 23); top += sepOptions;
+		mTrayMgr->createLabel("FormOptions/Label/Thumbs", "THUMBNAILS", left, top, width, 23); top += sepOptions;
 		mTrayMgr->createLabel("FormOptions/Label/Graphics", "GRAPHICS", left, top, width, 23); top += sepOptions;
 		mTrayMgr->createLabel("FormOptions/Label/Sound", "SOUND", left, top, width, 23); top += sepOptions;
 		mTrayMgr->createLabel("FormOptions/Label/Video", "VIDEO", left, top, width, 23); top += sepOptions;
@@ -230,6 +261,66 @@ void FormOptions::showOptionsGeneral()
 		mTrayMgr->createLabel("FormOptions/Label/EditGamesPath", "EDIT GAMES PATH", left, top, width, 23); top += sepOptions;
 		mTrayMgr->createLabel("FormOptions/Label/EditSagasPath", "EDIT SAGAS PATH", left, top, width, 23); top = mScreenSize.y - sepWindow - sepButton;
 		mTrayMgr->createButton("FormOptions/Button/CloseOptionsGeneral", "BACK", left, top, 60);
+	}
+}
+
+void FormOptions::hideOptionsThumbnails()
+{
+	if (mTrayMgr->getWidget("FormOptions/Window/Thumbnails"))
+	{
+		mTrayMgr->destroyDialogWindow("FormOptions/Window/Thumbnails");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResGames");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResImages");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResVideos");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResCover");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResDisc");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResLogo");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResBoxArt");
+		mTrayMgr->destroyWidget("FormOptions/Label/ResetThumbnails");
+		mTrayMgr->destroyWidget("FormOptions/Button/CloseThumbnails");
+	}
+}
+
+void FormOptions::showOptionsThumbnails()
+{
+	if (!mTrayMgr->getWidget("FormOptions/Window/Thumbnails")) // menu is hidden
+	{
+		unsigned int numOptions = 9;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 420;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+
+		Ogre::StringVector itemsRes; 
+		itemsRes.push_back("128"); itemsRes.push_back("256"); itemsRes.push_back("512"); 
+		itemsRes.push_back("1024"); itemsRes.push_back("2048"); itemsRes.push_back("Source Size");
+
+		mTrayMgr->createDialogWindow("FormOptions/Window/Thumbnails", "THUMBNAILS OPTIONS", left, top, width, height);	 top += sepOptions / 2;
+		ItemSelector* selResGames = mTrayMgr->createItemSelector("FormOptions/Selector/ResGames", "Form Games Resolution", itemsRes, left, top, width); top += sepOptions;
+		ItemSelector* selResImages = mTrayMgr->createItemSelector("FormOptions/Selector/ResImages", "Form Images Resolution", itemsRes, left, top, width); top += sepOptions;
+		ItemSelector* selResVideos = mTrayMgr->createItemSelector("FormOptions/Selector/ResVideos", "Form Videos Resolution", itemsRes, left, top, width); top += sepOptions;
+		ItemSelector* selResCover = mTrayMgr->createItemSelector("FormOptions/Selector/ResCover", "Cover Resolution", itemsRes, left, top, width); top += sepOptions;
+		ItemSelector* selResDisc = mTrayMgr->createItemSelector("FormOptions/Selector/ResDisc", "Discs Resolution", itemsRes, left, top, width); top += sepOptions;
+		ItemSelector* selResLogo = mTrayMgr->createItemSelector("FormOptions/Selector/ResLogo", "Logo Resolution", itemsRes, left, top, width); top += sepOptions;
+		ItemSelector* selBoxArt = mTrayMgr->createItemSelector("FormOptions/Selector/ResBoxArt", "BoxArt Resolution", itemsRes, left, top, width); top += sepOptions;
+		mTrayMgr->createLabel("FormOptions/Label/ResetThumbnails", "RESET THUMBNAILS", left, top, width, 23); top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormOptions/Button/CloseThumbnails", "BACK", left, top, 60);	
+
+		Ogre::String gameValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.GAMES", "Thumbs_Resolution", "0");
+		selResGames->selectOption(gameValue, false);
+		Ogre::String imagesValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.IMAGES", "Thumbs_Resolution", "0");
+		selResImages->selectOption(imagesValue, false);
+		Ogre::String videoValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.VIDEOS", "Thumbs_Resolution", "0");
+		selResVideos->selectOption(videoValue, false);
+		Ogre::String coverValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Cover_Resolution", "0");
+		selResCover->selectOption(coverValue, false);
+		Ogre::String discValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Disc_Resolution", "0");
+		selResDisc->selectOption(discValue, false);
+		Ogre::String logoValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Logo_Resolution", "0");
+		selResLogo->selectOption(logoValue, false);
+		Ogre::String boxArtValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "BoxArt_Resolution", "0");
+		selBoxArt->selectOption(boxArtValue, false);
 	}
 }
 
@@ -406,5 +497,21 @@ Ogre::StringVector FormOptions::_getResolutionModes(const Ogre::String& aspectRa
 	}
 	
 	return allRes;
+}
+
+void FormOptions::_resetThumbnails()
+{
+	Ogre::String pathGames = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Games", "./Games");
+	// ../Games
+	for (boost::filesystem::directory_iterator it(pathGames), end; it != end; ++it)
+	{
+		// ..Game1/Images/Thumbs
+		Ogre::String pathThumbs = it->path().generic_string() + "/Images/Thumbs";
+		if (boost::filesystem::is_directory(pathThumbs))
+		{
+			boost::filesystem::remove_all(pathThumbs);
+			boost::filesystem::create_directory(pathThumbs);
+		}
+	}
 }
 

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "FormOverview.h"
+#include "ConfigReader.h"
 
 FormOverview::FormOverview(GameInfo* gInfo, GuiManager* tray, GuiListener* oldListener /*= 0*/) :
 FormBase(tray, oldListener),
@@ -287,9 +288,16 @@ void FormOverview::_createOverview()
 	// find and load cover
 	sInfoResource infoCover;
 	mGameInfo->findCoverResource(infoCover);
-	if (!boost::filesystem::is_regular_file(infoCover.pathThumb))
-		GameInfo::createThumbnail(infoCover.path, infoCover.pathThumb, 2048);
-	GameInfo::loadImageFromDisk(infoCover.pathThumb, infoCover.nameThumb, mGameInfo->getGroupName(), 2);
+	Ogre::String resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Cover_Resolution", 0);
+	if (resThumb == "Source Size") // load the original image
+		GameInfo::loadImageFromDisk(infoCover.path, infoCover.nameThumb, mGameInfo->getGroupName(), 2);
+	else // load the thumbnail
+	{
+		unsigned int resThumbValue = Ogre::StringConverter::parseInt(resThumb);
+		if (!boost::filesystem::is_regular_file(infoCover.pathThumb))
+			GameInfo::createThumbnail(infoCover.path, infoCover.pathThumb, resThumbValue);
+		GameInfo::loadImageFromDisk(infoCover.pathThumb, infoCover.nameThumb, mGameInfo->getGroupName(), 2);
+	}
 	// Closed DVD model
 	mDvdClose = new CModel("mesh_closeDvd.mesh");
 	mDvdClose->getNode()->translate(-18, 0, -48);
@@ -299,11 +307,18 @@ void FormOverview::_createOverview()
 	// find and load discs
 	std::vector<sInfoResource> infoDisc;
 	mGameInfo->findDiscResource(infoDisc);
+	resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Disc_Resolution", 0);
 	for (unsigned int i = 0; i < infoDisc.size(); ++i)
 	{
-		if (!boost::filesystem::is_regular_file(infoDisc[i].pathThumb))
-			GameInfo::createThumbnail(infoDisc[i].path, infoDisc[i].pathThumb, 1024);
-		GameInfo::loadImageFromDisk(infoDisc[i].pathThumb, infoDisc[i].nameThumb, mGameInfo->getGroupName(), 2);
+		if (resThumb == "Source Size") // load the original image
+			GameInfo::loadImageFromDisk(infoDisc[i].path, infoDisc[i].nameThumb, mGameInfo->getGroupName(), 2);
+		else // load the thumbnail
+		{
+			unsigned int resThumbValue = Ogre::StringConverter::parseInt(resThumb);
+			if (!boost::filesystem::is_regular_file(infoDisc[i].pathThumb))
+				GameInfo::createThumbnail(infoDisc[i].path, infoDisc[i].pathThumb, resThumbValue);
+			GameInfo::loadImageFromDisk(infoDisc[i].pathThumb, infoDisc[i].nameThumb, mGameInfo->getGroupName(), 2);
+		}
 	}
 	// Closed DVD's disc [close dvd view]
 	mDiscClose = new CModel("mesh_discDvd.mesh", mDvdClose->getNode());
@@ -315,9 +330,15 @@ void FormOverview::_createOverview()
 	// find and load boxart resource
 	sInfoResource infoBoxArt;
 	mGameInfo->findBoxArtResource(infoBoxArt);
-	if (!boost::filesystem::is_regular_file(infoBoxArt.pathThumb))
-		GameInfo::createThumbnail(infoBoxArt.path, infoBoxArt.pathThumb, 1024);
-	GameInfo::loadImageFromDisk(infoBoxArt.pathThumb, infoBoxArt.nameThumb, mGameInfo->getGroupName(), 2);
+	resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Disc_Resolution", 0);
+	if (resThumb == "Source Size") // load the original image
+		GameInfo::loadImageFromDisk(infoBoxArt.path, infoBoxArt.nameThumb, mGameInfo->getGroupName(), 2);
+	else // load the thumbnail
+	{
+		if (!boost::filesystem::is_regular_file(infoBoxArt.pathThumb))
+			GameInfo::createThumbnail(infoBoxArt.path, infoBoxArt.pathThumb, 1024);
+		GameInfo::loadImageFromDisk(infoBoxArt.pathThumb, infoBoxArt.nameThumb, mGameInfo->getGroupName(), 2);
+	}
 
 	// Open DVD model
 	mDvdOpen = new CModel("mesh_openDvd.mesh");
@@ -347,9 +368,15 @@ void FormOverview::_createOverview()
 	mGameInfo->findLogoResource(infoLogo);
 	if (boost::filesystem::is_regular_file(infoLogo.path))
 	{
-		if (!boost::filesystem::is_regular_file(infoLogo.pathThumb))
-			GameInfo::createThumbnail(infoLogo.path, infoLogo.pathThumb, 200);
-		GameInfo::loadImageFromDisk(infoLogo.pathThumb, infoLogo.nameThumb, mGameInfo->getGroupName());
+		resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Logo_Resolution", 0);
+		if (resThumb == "Source Size") // load the original image
+			GameInfo::loadImageFromDisk(infoLogo.path, infoLogo.nameThumb, mGameInfo->getGroupName());
+		else // load the thumbnail
+		{
+			if (!boost::filesystem::is_regular_file(infoLogo.pathThumb))
+				GameInfo::createThumbnail(infoLogo.path, infoLogo.pathThumb, 200);
+			GameInfo::loadImageFromDisk(infoLogo.pathThumb, infoLogo.nameThumb, mGameInfo->getGroupName());
+		}
 
 		// logo rigth bottom corner
 		DecorWidget* logo = mTrayMgr->createDecorWidget("FormOverview/Logo", "YgcGui/Logo");

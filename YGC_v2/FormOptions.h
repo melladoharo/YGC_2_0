@@ -26,6 +26,8 @@ public:
 	void showOptions();
 	void hideOptionsGeneral();
 	void showOptionsGeneral();
+	void hideOptionsThumbnails();
+	void showOptionsThumbnails();
 	void hideOptionsGraphics();
 	void showOptionsGraphics();
 	void hideOptionsAdvancedGraphics();
@@ -39,6 +41,7 @@ public:
 	void itemChanged(ItemSelector* selector);
 
 private:
+	void _resetThumbnails();
 	Ogre::StringVector _getResolutionModes(const Ogre::String& aspectRatio);
 };
 

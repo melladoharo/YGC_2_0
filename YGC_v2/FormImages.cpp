@@ -10,12 +10,13 @@ mLastThumbOver(0)
 {
 	resetCamera();
 	// load grid-thumbs values from .ini config file
-	mGridThumbs.rows = Ogre::StringConverter::parseInt(ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM_IMAGES", "Thumbs_Rows", "1"));
-	mGridThumbs.top = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Top", 0);
-	mGridThumbs.left = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Left", 0);
-	mGridThumbs.horizontalSep = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Horizontal_Sep", 0);
-	mGridThumbs.verticalSep = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Vertial_Sep", 0);
-	mGridThumbs.size = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM_IMAGES", "Thumbs_Size", 0);
+	mGridThumbs.rows = Ogre::StringConverter::parseInt(ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.IMAGES", "Thumbs_Rows", "1"));
+	mGridThumbs.top = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM.IMAGES", "Thumbs_Top", 0);
+	mGridThumbs.left = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM.IMAGES", "Thumbs_Left", 0);
+	mGridThumbs.horizontalSep = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM.IMAGES", "Thumbs_Horizontal_Sep", 0);
+	mGridThumbs.verticalSep = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM.IMAGES", "Thumbs_Vertial_Sep", 0);
+	mGridThumbs.size = ConfigReader::getSingletonPtr()->getReader()->GetDoubleValue("FORM.IMAGES", "Thumbs_Size", 0);
+	Ogre::String resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.IMAGES", "Thumbs_Resolution", 0);
 
 	// find all images of the game
 	mGameInfo->findScreenshotsResources(mImages);
@@ -28,9 +29,17 @@ mLastThumbOver(0)
 	// load thumbnails...
 	for (unsigned int i = 0; i < mImages.size(); ++i)
 	{
-		if (!boost::filesystem::is_regular_file(mImages[i].pathThumb))
-			GameInfo::createThumbnail(mImages[i].path, mImages[i].pathThumb, 256);
-		GameInfo::loadImageFromDisk(mImages[i].pathThumb, mImages[i].nameThumb, mGameInfo->getGroupName(), 0);
+		if (resThumb == "Source Size") // load the original image
+		{
+			GameInfo::loadImageFromDisk(mImages[i].path, mImages[i].nameThumb, mGameInfo->getGroupName(), 0);
+		}
+		else // load the thumbnail
+		{
+			unsigned int resThumbValue = Ogre::StringConverter::parseInt(resThumb);
+			if (!boost::filesystem::is_regular_file(mImages[i].pathThumb))
+				GameInfo::createThumbnail(mImages[i].path, mImages[i].pathThumb, resThumbValue);
+			GameInfo::loadImageFromDisk(mImages[i].pathThumb, mImages[i].nameThumb, mGameInfo->getGroupName(), 0);
+		}
 		mThumbs.push_back(new Thumbnail3D(mParentThumbs, "FormImages/Thumb/" + Ogre::StringConverter::toString(i),
 			mGameInfo->getGroupName(), mImages[i].filename, mImages[i].nameThumb));
 		mThumbs.back()->setIndex(mThumbs.size() - 1);
@@ -226,12 +235,12 @@ void FormImages::buttonHit(Button* button)
 		if (sliderHorSep) sliderHorSep->setValue(mGridThumbs.horizontalSep, false);
 		if (sliderVerSep) sliderVerSep->setValue(mGridThumbs.verticalSep, false);
 		if (sliderSize) sliderSize->setValue(mGridThumbs.size, false);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Rows", mGridThumbs.rows);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Size", mGridThumbs.size);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Top", mGridThumbs.top);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Left", mGridThumbs.left);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Horizontal_Sep", mGridThumbs.horizontalSep);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Vertial_Sep", mGridThumbs.verticalSep);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Rows", mGridThumbs.rows);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Size", mGridThumbs.size);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Top", mGridThumbs.top);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Left", mGridThumbs.left);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Horizontal_Sep", mGridThumbs.horizontalSep);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Vertial_Sep", mGridThumbs.verticalSep);
 		Slider* sd = dynamic_cast<Slider*>(mTrayMgr->getWidget("FormImages/Slider"));
 		sd->setRange(0, (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0), 1000, false);
 	}
@@ -277,7 +286,7 @@ void FormImages::itemChanged(ItemSelector* selector)
 	{
 		mGridThumbs.rows = Ogre::StringConverter::parseInt(selector->getSelectedOption());
 		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Rows", mGridThumbs.rows);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Rows", mGridThumbs.rows);
 		Slider* sd = dynamic_cast<Slider*>(mTrayMgr->getWidget("FormImages/Slider"));
 		sd->setRange(0, (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0), 1000, false);
 	}
@@ -290,19 +299,19 @@ void FormImages::sliderOptionsMoved(SliderOptions* slider)
 		mGridThumbs.size = slider->getValue();
 		for (unsigned int i = 0; i < mThumbs.size(); ++i)
 			mThumbs[i]->setScale(Ogre::Vector3(mGridThumbs.size, mGridThumbs.size, mGridThumbs.size));
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Size", mGridThumbs.size);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Size", mGridThumbs.size);
 	}
 	else if (slider->getName() == "FormImages/Slider/Top")
 	{
 		mGridThumbs.top = -slider->getValue();
 		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Top", mGridThumbs.top);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Top", mGridThumbs.top);
 	}
 	else if (slider->getName() == "FormImages/Slider/Left")
 	{
 		mGridThumbs.left = slider->getValue();
 		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Left", mGridThumbs.left);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Left", mGridThumbs.left);
 		Slider* sd = dynamic_cast<Slider*>(mTrayMgr->getWidget("FormImages/Slider"));
 		sd->setRange(0, (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0), 1000, false);
 	}
@@ -310,7 +319,7 @@ void FormImages::sliderOptionsMoved(SliderOptions* slider)
 	{
 		mGridThumbs.horizontalSep = slider->getValue();
 		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Horizontal_Sep", mGridThumbs.horizontalSep);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Horizontal_Sep", mGridThumbs.horizontalSep);
 		Slider* sd = dynamic_cast<Slider*>(mTrayMgr->getWidget("FormImages/Slider"));
 		sd->setRange(0, (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0), 1000, false);
 	}
@@ -318,7 +327,7 @@ void FormImages::sliderOptionsMoved(SliderOptions* slider)
 	{
 		mGridThumbs.verticalSep = slider->getValue();
 		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
-		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM_IMAGES", "Thumbs_Vertial_Sep", mGridThumbs.verticalSep);
+		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.IMAGES", "Thumbs_Vertial_Sep", mGridThumbs.verticalSep);
 	}
 }
 
