@@ -141,7 +141,7 @@ void ItemSelector::_spacingElements()
 	Ogre::Real sizeOption = sizeInPixels(mTextAreaOption->getCaption(), mTextAreaOption->getFontName(), mTextAreaOption->getCharHeight(), mTextAreaOption->getSpaceWidth());
 	Ogre::Real sizePanel = 19;
 	mNextItem->setWidth((sizeOption / 2) + sizePanel);
-	mPreviousItem->setWidth(mElement->getWidth() - sizeCaption - sizeOption - sizePanel);
+	mPreviousItem->setWidth(mNextItem->getWidth());
 
 	mNextItem->setLeft(-mNextItem->getWidth() - 12);
 	mTextAreaOption->setLeft(-sizeOption - sizePanel - 7 - 12);
