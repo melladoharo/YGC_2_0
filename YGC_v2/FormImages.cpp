@@ -26,6 +26,10 @@ mLastThumbOver(0)
 	mGameInfo->findConceptArtResources(mImages);
 	mIndexConceptArt = std::make_pair(mIndexWallpapers.second, mImages.size());
 
+	// remove default wall from images
+	if (mImages.size() == 1 && mImages.back().name == "sdk_default_wall.png")
+		mImages.clear();
+
 	// load thumbnails...
 	for (unsigned int i = 0; i < mImages.size(); ++i)
 	{
@@ -190,6 +194,10 @@ void FormImages::show()
 	resetCamera();
 
 	FormBase::show();
+	// show slider if images are not empty
+	if (mImages.size() < mGridThumbs.rows * 2)
+		mTrayMgr->getWidget("FormImages/Slider")->hide();
+
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->show();
 

@@ -558,7 +558,7 @@ void FormModels::_showModel(unsigned int index)
 		Widget* decorBar = mTrayMgr->getWidget("FormModels/DecorBar");
 		if (decorBar) decorBar->show();
 		Widget* slider = mTrayMgr->getWidget("FormModels/Slider");
-		if (slider) slider->show();
+		if (slider && mModels.size() > 1) slider->show();
 		mCurrentIndex = index;
 	}
 }

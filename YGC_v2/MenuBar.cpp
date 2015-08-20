@@ -66,7 +66,7 @@ void MenuBar::createMenuGame()
 	_createNewOption("mbw_game_music", "Music", currLeft);
 	_createNewOption("mbw_game_models", "Models", currLeft);
 	_createNewOption("mbw_game_collector", "Collector", currLeft);
-	_createNewOption("mbw_game_play", " Play ", currLeft);
+	_createNewOption("mbw_game_play", "Play", currLeft);
 	currLeft = Ogre::Real(mElement->getWidth() - sizeInPixels("Games       ", mFont->getName(), 21, 7));
 	_createNewOption("mbw_game_home", "Games", currLeft);
 

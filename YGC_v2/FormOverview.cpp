@@ -330,13 +330,14 @@ void FormOverview::_createOverview()
 	// find and load boxart resource
 	sInfoResource infoBoxArt;
 	mGameInfo->findBoxArtResource(infoBoxArt);
-	resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Disc_Resolution", 0);
+	resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "BoxArt_Resolution", 0);
 	if (resThumb == "Source Size") // load the original image
 		GameInfo::loadImageFromDisk(infoBoxArt.path, infoBoxArt.nameThumb, mGameInfo->getGroupName(), 2);
 	else // load the thumbnail
 	{
+		unsigned int resThumbValue = Ogre::StringConverter::parseInt(resThumb);
 		if (!boost::filesystem::is_regular_file(infoBoxArt.pathThumb))
-			GameInfo::createThumbnail(infoBoxArt.path, infoBoxArt.pathThumb, 1024);
+			GameInfo::createThumbnail(infoBoxArt.path, infoBoxArt.pathThumb, resThumbValue);
 		GameInfo::loadImageFromDisk(infoBoxArt.pathThumb, infoBoxArt.nameThumb, mGameInfo->getGroupName(), 2);
 	}
 
@@ -373,8 +374,9 @@ void FormOverview::_createOverview()
 			GameInfo::loadImageFromDisk(infoLogo.path, infoLogo.nameThumb, mGameInfo->getGroupName());
 		else // load the thumbnail
 		{
+			unsigned int resThumbValue = Ogre::StringConverter::parseInt(resThumb);
 			if (!boost::filesystem::is_regular_file(infoLogo.pathThumb))
-				GameInfo::createThumbnail(infoLogo.path, infoLogo.pathThumb, 200);
+				GameInfo::createThumbnail(infoLogo.path, infoLogo.pathThumb, resThumbValue);
 			GameInfo::loadImageFromDisk(infoLogo.pathThumb, infoLogo.nameThumb, mGameInfo->getGroupName());
 		}
 
@@ -386,11 +388,11 @@ void FormOverview::_createOverview()
 		matLogo->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 		matLogo->getTechnique(0)->getPass(0)->createTextureUnitState(infoLogo.nameThumb);
 		logo->getOverlayElement()->setMaterialName(matLogo->getName());
-		logo->_autoScale(120, matLogo);
+		logo->_autoScale(110, matLogo);
 		logo->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
 		logo->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
-		logo->setTop(-(logo->getHeight() + padRight / 1.0f));
-		logo->setLeft(-(logo->getWidth() + padRight / 1.0f));
+		logo->setTop(-(logo->getHeight() + padRight / 2.0f));
+		logo->setLeft(-(logo->getWidth() + padRight / 1.7f));
 		addWidgetToForm(logo);
 	}
 	

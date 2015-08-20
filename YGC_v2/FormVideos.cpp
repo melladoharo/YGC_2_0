@@ -43,10 +43,10 @@ mCurrentIndex(0)
 	// ... and set them in a grid
 	Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
 
-	// slider [only exists if more than 10 items]
+	// slider 
 	Ogre::Real minValue = 0;
 	Ogre::Real maxValue = (!mThumbs.empty() ? mThumbs.back()->getPosition().x : 0);
-	Slider* sd = mTrayMgr->createSlider("FormVideos/Slider", 370, minValue, maxValue, maxValue + 100);
+	Slider* sd = mTrayMgr->createSlider("FormVideos/Slider", 370, minValue, maxValue, 500);
 	sd->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
 	sd->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
 	sd->setLeft(-(sd->getWidth() / 2));
@@ -249,6 +249,10 @@ void FormVideos::show()
 	resetCamera();
 
 	FormBase::show();
+	// show slider if images are not empty
+	if (mVideos.size() < mGridThumbs.rows * 2)
+		mTrayMgr->getWidget("FormVideos/Slider")->hide();
+
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->show();
 
