@@ -44,6 +44,7 @@
     <ClCompile Include="libavwrapper.cpp" />
     <ClCompile Include="LineEdit.cpp" />
     <ClCompile Include="MediaPlayer.cpp" />
+    <ClCompile Include="MediaPlayerMini.cpp" />
     <ClCompile Include="MenuBar.cpp" />
     <ClCompile Include="CModel.cpp" />
     <ClCompile Include="ModelController.cpp" />
@@ -100,6 +101,7 @@
     <ClInclude Include="Lens.h" />
     <ClInclude Include="LineEdit.h" />
     <ClInclude Include="MediaPlayer.h" />
+    <ClInclude Include="MediaPlayerMini.h" />
     <ClInclude Include="MenuBar.h" />
     <ClInclude Include="CModel.h" />
     <ClInclude Include="ModelController.h" />

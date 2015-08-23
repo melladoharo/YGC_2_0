@@ -26,6 +26,7 @@ class Slider;
 class SelectMenu;
 class TrackList;
 class MediaPlayer;
+class MediaPlayerMini;
 class Label;
 class CheckBox;
 class SliderOptions;
@@ -44,7 +45,8 @@ public:
 	virtual void sliderMoved(Slider* slider) {}
 	virtual void itemSelected(SelectMenu* menu) {}
 	virtual void trackListHit(TrackList* track) {}
-	virtual void medialPlayerHit(MediaPlayer* player) {}
+	virtual void mediaPlayerHit(MediaPlayer* player) {}
+	virtual void mediaPlayerMiniHit(MediaPlayerMini* miniPlayer) {}
 	virtual void labelHit(Label* label) {}
 	virtual void checkBoxToggled(CheckBox* box) {}
 	virtual void sliderOptionsMoved(SliderOptions* slider) {}

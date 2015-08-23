@@ -64,8 +64,8 @@ mShutDown(false)
 	mMenuBar->_assignListener(mListener);
 
 	// create media player
-	mMediaPlayer = createMediaPlayer("GuiManager/MediaPlayer");
-	mMediaPlayer->hide();
+	//mMediaPlayer = createMediaPlayer("GuiManager/MediaPlayer");
+	//mMediaPlayer->hide();
 
 	// render texture [fade effect]
 	mTextRtt = Ogre::TextureManager::getSingleton().createManual("GuiManager/Texture/Rtt", 

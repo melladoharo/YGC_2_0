@@ -8,7 +8,8 @@ mDragging(false),
 mValue(0.0f),
 mMinValue(0.0f),
 mMaxValue(0.0f),
-mInterval(0.0f)
+mInterval(0.0f),
+mDisableBackground(false)
 {
 	mElement = Ogre::OverlayManager::getSingleton().createOverlayElementFromTemplate("YgcGui/SliderOption", "Panel", name);
 	Ogre::OverlayContainer* c = (Ogre::OverlayContainer*)mElement;
@@ -39,8 +40,11 @@ SliderOptions::~SliderOptions()
 
 void SliderOptions::_cursorMoved(const Ogre::Vector2& cursorPos)
 {
-	if (isCursorOver(mElement, cursorPos)) mElement->setParameter("transparent", "false");
-	else mElement->setParameter("transparent", "true");
+	if (!mDisableBackground)
+	{
+		if (isCursorOver(mElement, cursorPos)) mElement->setParameter("transparent", "false");
+		else mElement->setParameter("transparent", "true");
+	}
 	
 	if (mDragging)
 	{

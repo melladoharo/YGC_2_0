@@ -12,6 +12,7 @@
 #include "TrackList.h"
 #include "ProgressBar.h"
 #include "MediaPlayer.h"
+#include "MediaPlayerMini.h"
 #include "CheckBox.h"
 #include "ItemSelector.h"
 #include "Label.h"
@@ -372,6 +373,14 @@ public:
 		mTray->addChild(mWidgets.back()->getOverlayElement());
 		mp->_assignListener(mListener);
 		return mp;
+	}
+
+	MediaPlayerMini* createMediaPlayerMini()
+	{
+		MediaPlayerMini* mpm = new MediaPlayerMini;
+		mWidgets.push_back(mpm);
+		mTray->addChild(mWidgets.back()->getOverlayElement());
+		return mpm;
 	}
 
 	DialogWindows* createDialogWindow(const Ogre::String& name, const Ogre::DisplayString& caption, Ogre::Real left, Ogre::Real top, Ogre::Real width, Ogre::Real height)

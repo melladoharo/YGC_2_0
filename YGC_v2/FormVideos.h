@@ -38,7 +38,7 @@ public:
 	void buttonHit(Button* button);
 	void sliderMoved(Slider* slider);
 	void itemSelected(SelectMenu* menu);
-	void medialPlayerHit(MediaPlayer* player);
+	void mediaPlayerHit(MediaPlayer* player);
 	void labelHit(Label* label);
 	void itemChanged(ItemSelector* selector);
 	void sliderOptionsMoved(SliderOptions* slider);

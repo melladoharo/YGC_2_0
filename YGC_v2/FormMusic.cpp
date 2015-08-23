@@ -127,7 +127,7 @@ void FormMusic::trackListHit(TrackList* track)
 	playTrack(mCurrentIndex);
 }
 
-void FormMusic::medialPlayerHit(MediaPlayer* player)
+void FormMusic::mediaPlayerHit(MediaPlayer* player)
 {
 	if (player->getCurrentAction() == "Play")
 	{

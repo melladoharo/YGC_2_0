@@ -110,6 +110,19 @@ material YgcGui/IconHome/Mat : SdkTrays/Base
 		}
 	}
 }
+material YgcGui/IconVol/Mat : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+			texture_unit
+            {
+                texture sdk_icon_volume.png
+            }
+		}
+	}
+}
 
 material YgcGui/DecorBar/Mat : SdkTrays/Base
 {
@@ -626,47 +639,6 @@ material YgcGui/MiniPrevious/Down : SdkTrays/Base
     }
 }
 
-material YgcGui/MiniVol/Up : SdkTrays/Base
-{
-    technique
-    {
-        pass
-        {
-            texture_unit
-            {
-                texture sdk_mini_vol_up.png
-            }
-        }
-    }
-}
-material YgcGui/MiniVol/Over : SdkTrays/Base
-{
-    technique
-    {
-        pass
-        {
-            texture_unit
-            {
-                texture sdk_mini_vol_over.png
-            }
-        }
-    }
-}
-material YgcGui/MiniVol/Down : SdkTrays/Base
-{
-    technique
-    {
-        pass
-        {
-            texture_unit
-            {
-                texture sdk_mini_vol_down.png
-            }
-        }
-    }
-}
-
-
 material YgcGui/MiniPause/Up : SdkTrays/Base
 {
     technique
@@ -706,6 +678,206 @@ material YgcGui/MiniPause/Down : SdkTrays/Base
         }
     }
 }
+
+material YgcGui/MiniList/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_list_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniList/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_list_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniList/Down : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_list_down.png
+            }
+        }
+    }
+}
+
+material YgcGui/MiniVolume/Disable/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_volume_disable_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniVolume/Disable/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_volume_disable_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniVolume/Enable/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_volume_enable_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniVolume/Enable/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_volume_enable_over.png
+            }
+        }
+    }
+}
+
+material YgcGui/MiniRepeat/Disable/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_repeat_disable_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniRepeat/Disable/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_repeat_disable_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniRepeat/Enable/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_repeat_enable_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniRepeat/Enable/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_repeat_enable_over.png
+            }
+        }
+    }
+}
+
+material YgcGui/MiniRandom/Disable/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_random_disable_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniRandom/Disable/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_random_disable_over.png
+            }
+        }
+    }
+}
+material YgcGui/MiniRandom/Enable/Up : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_random_enable_up.png
+            }
+        }
+    }
+}
+material YgcGui/MiniRandom/Enable/Over : SdkTrays/Base
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture sdk_mini_random_enable_over.png
+            }
+        }
+    }
+}
+
 
 
 material YgcGui/TextCursor : SdkTrays/Base

@@ -200,16 +200,16 @@ void MediaPlayer::_cursorReleased(const Ogre::Vector2& cursorPos)
 			mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Down");
 		}
 		setState(BS_OVER, mBttPlay);
-		if (mListener) mListener->medialPlayerHit(this); 
+		if (mListener) mListener->mediaPlayerHit(this); 
 	}
 	if (mBttStop.currentState == BS_DOWN)
-		{ setState(BS_OVER, mBttStop); if (mListener) mListener->medialPlayerHit(this); }
+		{ setState(BS_OVER, mBttStop); if (mListener) mListener->mediaPlayerHit(this); }
 	if (mBttPrevious.currentState == BS_DOWN)
-		{ setState(BS_OVER, mBttPrevious); if (mListener) mListener->medialPlayerHit(this); }
+		{ setState(BS_OVER, mBttPrevious); if (mListener) mListener->mediaPlayerHit(this); }
 	if (mBttNext.currentState == BS_DOWN)
-		{ setState(BS_OVER, mBttNext); if (mListener) mListener->medialPlayerHit(this); }
+		{ setState(BS_OVER, mBttNext); if (mListener) mListener->mediaPlayerHit(this); }
 	if (mBttVolume.currentState == BS_DOWN)
-		{ setState(BS_OVER, mBttVolume); if (mListener) mListener->medialPlayerHit(this); }
+		{ setState(BS_OVER, mBttVolume); if (mListener) mListener->mediaPlayerHit(this); }
 }
 
 void MediaPlayer::setState(const ButtonState& bs, sMiniButton& button)

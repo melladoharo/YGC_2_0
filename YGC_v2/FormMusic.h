@@ -27,7 +27,7 @@ public:
 	// GuiListener
 	void sliderMoved(Slider* slider);
 	void trackListHit(TrackList* track);
-	void medialPlayerHit(MediaPlayer* player);
+	void mediaPlayerHit(MediaPlayer* player);
 
 	// FormBase
 	void hide();

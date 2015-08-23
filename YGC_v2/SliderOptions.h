@@ -17,6 +17,12 @@ public:
 	void setRange(Ogre::Real minValue, Ogre::Real maxValue, unsigned int snaps, bool notifyListener = true);
 	void setValue(Ogre::Real value, bool notifyListener = true);
 	Ogre::Real getValue() { return mValue; }
+	void disableElements() 
+	{
+		mHandle->setParameter("transparent", "true");
+		mElement->setParameter("transparent", "true");
+		mDisableBackground = true; 
+	}
 
 private:
 	Ogre::Real _getSnappedValue(Ogre::Real percentage);
@@ -30,6 +36,7 @@ private:
 	Ogre::Real mMinValue;
 	Ogre::Real mMaxValue;
 	Ogre::Real mInterval;
+	bool mDisableBackground;
 };
 
 #endif // #ifndef _SLIDEROPTIONS_H__

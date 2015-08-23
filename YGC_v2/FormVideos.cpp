@@ -338,7 +338,7 @@ void FormVideos::itemSelected(SelectMenu* menu)
 	}
 }
 
-void FormVideos::medialPlayerHit(MediaPlayer* player)
+void FormVideos::mediaPlayerHit(MediaPlayer* player)
 {
 	if (player->getCurrentAction() == "Play")
 	{
