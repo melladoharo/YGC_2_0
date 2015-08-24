@@ -1,10 +1,9 @@
 #include "stdafx.h"
 #include "MediaPlayerMini.h"
 
-MediaPlayerMini::MediaPlayerMini() : 
-mNamePlayer("YgcGui/MediaPlayerMini"),
-mCurrentAction(Ogre::StringUtil::BLANK),
-mFont(Ogre::FontManager::getSingletonPtr()->getByName("YgcFont/SemiBold/21")),
+MediaPlayerMini::MediaPlayerMini(const Ogre::String& name, Ogre::Real left, Ogre::Real top) :
+mNamePlayer(name),
+mSelectedAction(MP_STOP),
 mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 {
 	// create background for elements
@@ -15,8 +14,8 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mElement->setHeight(70 + 33);
 	mElement->setHorizontalAlignment(Ogre::GHA_LEFT);
 	mElement->setVerticalAlignment(Ogre::GVA_TOP);
-	mElement->setTop(60 + 40);
-	mElement->setLeft(10);
+	mElement->setTop(top);
+	mElement->setLeft(left);
 	mElement->setMaterialName("YgcGui/Thumbnail/Dark");
 	Ogre::OverlayContainer* c = (Ogre::OverlayContainer*)mElement;
 
@@ -31,20 +30,20 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mDecorVol->setMaterialName("YgcGui/IconVol/Mat");
 	c->addChild(mDecorVol);
 
-	mTextTime = (Ogre::TextAreaOverlayElement*)om.createOverlayElement("TextArea", mNamePlayer + "/TextArea/CaptionMedia");
-	mTextTime->setMetricsMode(Ogre::GMM_PIXELS);
-	mTextTime->setCaption("No media");
-	mTextTime->setFontName(mFont->getName());
-	mTextTime->setCharHeight(20);
-	mTextTime->setColour(Ogre::ColourValue(0.84f, 0.85f, 0.84f));
-	mTextTime->setTop(12);
-	mTextTime->setLeft(10);
-	c->addChild(mTextTime);
+	mCaptionMedia = (Ogre::TextAreaOverlayElement*)om.createOverlayElement("TextArea", mNamePlayer + "/TextArea/CaptionMedia");
+	mCaptionMedia->setMetricsMode(Ogre::GMM_PIXELS);
+	mCaptionMedia->setCaption("No media");
+	mCaptionMedia->setFontName("YgcFont/SemiBold/21");
+	mCaptionMedia->setCharHeight(20);
+	mCaptionMedia->setColour(Ogre::ColourValue(0.84f, 0.85f, 0.84f));
+	mCaptionMedia->setTop(12);
+	mCaptionMedia->setLeft(10);
+	c->addChild(mCaptionMedia);
 
 	mTextTime = (Ogre::TextAreaOverlayElement*)om.createOverlayElement("TextArea", mNamePlayer + "/TextArea/Time");
 	mTextTime->setMetricsMode(Ogre::GMM_PIXELS);
 	mTextTime->setCaption("99:99/99:99");
-	mTextTime->setFontName(mFont->getName());
+	mTextTime->setFontName("YgcFont/SemiBold/21");
 	mTextTime->setCharHeight(18);
 	mTextTime->setColour(Ogre::ColourValue(0.84f, 0.85f, 0.84f));
 	mTextTime->setTop(46);
@@ -64,7 +63,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttVolume.panel->setLeft(mElement->getWidth() - 38);
 	mBttVolume.panel->setMaterialName(mSilence ? "YgcGui/MiniVolume/Disable/Up" : "YgcGui/MiniVolume/Enable/Up");
 	mBttVolume.currentState = BS_UP;
-	mBttVolume.action = "Volume";
+	mBttVolume.action = MP_VOLUME;
 	c->addChild(mBttVolume.panel);
 
 	mBttRandom.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Random");
@@ -75,7 +74,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttRandom.panel->setLeft(mBttVolume.panel->getLeft() - 40 - 0.5f);
 	mBttRandom.panel->setMaterialName(mRandomMedia ? "YgcGui/MiniRandom/Enable/Up" : "YgcGui/MiniRandom/Disable/Up");
 	mBttRandom.currentState = BS_UP;
-	mBttRandom.action = "Random";
+	mBttRandom.action = MP_RANDOM;
 	c->addChild(mBttRandom.panel);
 
 	mBttRepeat.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Repeat");
@@ -86,7 +85,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttRepeat.panel->setLeft(mBttRandom.panel->getLeft() - 40 - 0.5f);
 	mBttRepeat.panel->setMaterialName(mRepeatMedia ? "YgcGui/MiniRepeat/Enable/Up" : "YgcGui/MiniRepeat/Disable/Up");
 	mBttRepeat.currentState = BS_UP;
-	mBttRepeat.action = "Repeat";
+	mBttRepeat.action = MP_REPEAT;
 	c->addChild(mBttRepeat.panel);
 
 	mBttList.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniList/Next");
@@ -100,7 +99,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttList.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniList/Down");
 	mBttList.panel->setMaterialName(mBttList.matUp->getName());
 	mBttList.currentState = BS_UP;
-	mBttList.action = "Next";
+	mBttList.action = MP_TRACKLIST;
 	c->addChild(mBttList.panel);
 
 	mBttNext.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Next");
@@ -114,7 +113,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttNext.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniNext/Down");
 	mBttNext.panel->setMaterialName(mBttNext.matUp->getName());
 	mBttNext.currentState = BS_UP;
-	mBttNext.action = "Next";
+	mBttNext.action = MP_NEXT;
 	c->addChild(mBttNext.panel);
 
 	mBttStop.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Pause");
@@ -128,7 +127,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttStop.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniStop/Down");
 	mBttStop.panel->setMaterialName(mBttStop.matUp->getName());
 	mBttStop.currentState = BS_UP;
-	mBttStop.action = "Stop";
+	mBttStop.action = MP_STOP;
 	c->addChild(mBttStop.panel);
 
 	mBttPlay.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Play");
@@ -142,7 +141,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Down");
 	mBttPlay.panel->setMaterialName(mBttPlay.matUp->getName());
 	mBttPlay.currentState = BS_UP;
-	mBttPlay.action = "Play";
+	mBttPlay.action = MP_PLAY;
 	c->addChild(mBttPlay.panel);
 
 	mBttPrevious.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Previous");
@@ -156,7 +155,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttPrevious.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPrevious/Down");
 	mBttPrevious.panel->setMaterialName(mBttPrevious.matUp->getName());
 	mBttPrevious.currentState = BS_UP;
-	mBttPrevious.action = "Previous";
+	mBttPrevious.action = MP_PREVIOUS;
 	c->addChild(mBttPrevious.panel);
 }
 
@@ -286,14 +285,14 @@ void MediaPlayerMini::_cursorReleased(const Ogre::Vector2& cursorPos)
 	{
 		if (mBttPlay.matDown->getName() == "YgcGui/MiniPlay/Down")
 		{
-			mBttPlay.action = "Pause";
+			mBttPlay.action = MP_PAUSE;
 			mBttPlay.matUp = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Up");
 			mBttPlay.matOver = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Over");
 			mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Down");
 		}
 		else
 		{
-			mBttPlay.action = "Play";
+			mBttPlay.action = MP_PLAY;
 			mBttPlay.matUp = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Up");
 			mBttPlay.matOver = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Over");
 			mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Down");
@@ -315,12 +314,12 @@ void MediaPlayerMini::_cursorReleased(const Ogre::Vector2& cursorPos)
 	}
 	if (mBttList.currentState == BS_DOWN)
 	{
-		setState(BS_OVER, mBttList);
+		setState(BS_OVER, mBttList); if (mListener) mListener->mediaPlayerMiniHit(this);
 	}
 }
 
 
-void MediaPlayerMini::setState(const ButtonState& bs, sMiniButton& button)
+void MediaPlayerMini::setState(const ButtonState& bs, sMiniPlayerButton& button)
 {
 	if (bs == BS_OVER)
 	{
@@ -333,7 +332,7 @@ void MediaPlayerMini::setState(const ButtonState& bs, sMiniButton& button)
 	else
 	{
 		button.panel->setMaterialName(button.matDown->getName());
-		mCurrentAction = button.action;
+		mSelectedAction = button.action;
 	}
 
 	button.currentState = bs;
