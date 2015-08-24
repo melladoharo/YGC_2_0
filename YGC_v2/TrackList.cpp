@@ -1,84 +1,80 @@
 #include "stdafx.h"
 #include "TrackList.h"
 
-TrackList::TrackList(const Ogre::String& name, const Ogre::StringVector& tracks, Ogre::Real left, Ogre::Real top) :
-mFont(Ogre::FontManager::getSingletonPtr()->getByName("YgcFont/SemiBold/21")),
-mColourSelect(0.96f, 0.95f, 0.97f),
-mColourDeselect(0.76f, 0.75f, 0.77f),
-mIndexOver(0),
-mIndexSelected(0),
-mMaxRows(6),
-mCurrentPage(0)
+TrackList::TrackList(const Ogre::String& name, const Ogre::StringVector& tracks, Ogre::Real left, Ogre::Real top) : 
+mNameWidget(name),
+mTracks(tracks),
+mDisplayIndex(0),
+mSelectionIndex(-1),
+mDragging(false),
+mDragOffset(0.0f)
 {
-	// create main element
+	// create background for elements
 	Ogre::OverlayManager& om = Ogre::OverlayManager::getSingleton();
-	mElement = om.createOverlayElement("Panel", name);
+	mElement = om.createOverlayElement("Panel", mNameWidget);
 	mElement->setMetricsMode(Ogre::GMM_PIXELS);
-
-	Ogre::Real screenWidth = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualWidth();
-	Ogre::Real screenHeight = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
-	Ogre::Real currentTop = top, currentLeft = left;
-	Ogre::Real sepTop = screenHeight / 90, sepLeft = ((screenWidth - currentLeft) / 2) -10;
-	unsigned int currentRow = 0, currentCol = 0;
-	for (unsigned int i = 0; i < tracks.size(); ++i)
-	{
-		_createNewTrack(name + "/" + tracks[i], tracks[i], currentLeft, currentTop, sepLeft);
-		currentTop += mItems.back().panel->getHeight() + sepTop;
-		currentRow++;
-		if (currentRow >= mMaxRows)
-		{
-			currentRow = 0;
-			currentTop = top;
-			currentLeft += sepLeft;
-			currentCol++;
-		}
-		if (currentCol >= 2)
-		{
-			currentCol = 0;
-			currentLeft = left;
-		}
-	}
-	mIndexSelected = 0;
-	mIndexOver = 0;
-	_viewPage(mCurrentPage);
-	
-	// create the previous and next mini button
+	mElement->setWidth(400);
+	mElement->setHeight(100);
+	mElement->setHorizontalAlignment(Ogre::GHA_LEFT);
+	mElement->setVerticalAlignment(Ogre::GVA_TOP);
+	mElement->setTop(top);
+	mElement->setLeft(left);
+	mElement->setMaterialName("YgcGui/Thumbnail/Dark");
 	Ogre::OverlayContainer* c = (Ogre::OverlayContainer*)mElement;
-	mBttPrevious.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", name + "/miniButton/Previous");
-	mBttPrevious.panel->setMetricsMode(Ogre::GMM_PIXELS);
-	mBttPrevious.panel->setWidth(32);
-	mBttPrevious.panel->setHeight(32);
-	mBttPrevious.panel->setTop(top + ( (40 + sepTop) * mMaxRows) + 5);
-	mBttPrevious.panel->setLeft(left + sepLeft - 32 - 10);
-	mBttPrevious.panel->hide();
-	mBttPrevious.matUp = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPrevious/Up");
-	mBttPrevious.matOver = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPrevious/Over");
-	mBttPrevious.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPrevious/Down");
-	mBttPrevious.panel->setMaterialName(mBttPrevious.matUp->getName());
-	mBttPrevious.currentState = BS_UP;
-	mBttPrevious.action = "Previous";
-	c->addChild(mBttPrevious.panel);
 
-	mBttNext.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", name + "/miniButton/Next");
-	mBttNext.panel->setMetricsMode(Ogre::GMM_PIXELS);
-	mBttNext.panel->setWidth(32);
-	mBttNext.panel->setHeight(32);
-	mBttNext.panel->setTop(mBttPrevious.panel->getTop());
-	mBttNext.panel->setLeft(mBttPrevious.panel->getLeft() + mBttPrevious.panel->getWidth() + 7);
-	mBttNext.panel->hide();
-	mBttNext.matUp = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniNext/Up");
-	mBttNext.matOver = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniNext/Over");
-	mBttNext.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniNext/Down");
-	mBttNext.panel->setMaterialName(mBttNext.matUp->getName());
-	mBttNext.currentState = BS_UP;
-	mBttNext.action = "Next";
-	c->addChild(mBttNext.panel);
+	mTextCaption = (Ogre::TextAreaOverlayElement*)om.createOverlayElement("TextArea", mNameWidget + "/TextArea/Caption");
+	mTextCaption->setMetricsMode(Ogre::GMM_PIXELS);
+	mTextCaption->setCaption("TRACKS");
+	mTextCaption->setFontName("YgcFont/SemiBold/21");
+	mTextCaption->setCharHeight(20);
+	mTextCaption->setColour(Ogre::ColourValue(0.84f, 0.85f, 0.84f));
+	mTextCaption->setTop(12);
+	mTextCaption->setLeft(10);
+	c->addChild(mTextCaption);
 
-	if (mItems.size() > (mMaxRows * 2))
-	{
-		mBttPrevious.panel->show();
-		mBttNext.panel->show();
-	}
+	mSeparator = om.createOverlayElement("Panel", mNameWidget + "/Element/LineSeparator");
+	mSeparator->setMetricsMode(Ogre::GMM_PIXELS);
+	mSeparator->setWidth(mElement->getWidth() - 18);
+	mSeparator->setHeight(2);
+	mSeparator->setHorizontalAlignment(Ogre::GHA_LEFT);
+	mSeparator->setVerticalAlignment(Ogre::GVA_TOP);
+	mSeparator->setTop(12 + 18);
+	mSeparator->setLeft(9);
+	mSeparator->setMaterialName("YgcGui/SliderOption/Track/Back");
+	c->addChild(mSeparator);
+
+	mTrackFront = (Ogre::BorderPanelOverlayElement*)om.createOverlayElement("Panel", mNameWidget + "/Slider");
+	mTrackFront->setMetricsMode(Ogre::GMM_PIXELS);
+	mTrackFront->setWidth(7);
+	mTrackFront->setHorizontalAlignment(Ogre::GHA_LEFT);
+	mTrackFront->setVerticalAlignment(Ogre::GVA_TOP);
+	mTrackFront->setTop(40 + 5);
+	mTrackFront->setLeft(mElement->getWidth() - mTrackFront->getWidth() - 14);
+	mTrackFront->setMaterialName("YgcGui/SliderOption/Track/Back");
+	c->addChild(mTrackFront);
+
+	mHandle = om.createOverlayElement("Panel", mNameWidget + "/Slider/Handle");
+	mHandle->setMetricsMode(Ogre::GMM_PIXELS);
+	mHandle->setWidth(mTrackFront->getWidth() + 6);
+	mHandle->setHeight(20);
+	mHandle->setLeft(-3);
+	mHandle->setHorizontalAlignment(Ogre::GHA_LEFT);
+	mHandle->setVerticalAlignment(Ogre::GVA_TOP);
+	mHandle->setMaterialName("YgcGui/SliderOption/Track/Front");
+	mTrackFront->addChild(mHandle);
+
+	mDecorVol = om.createOverlayElement("Panel", mNameWidget + "/Element/DecorVol");
+	mDecorVol->setMetricsMode(Ogre::GMM_PIXELS);
+	mDecorVol->setWidth(24);
+	mDecorVol->setHeight(19);
+	mDecorVol->setHorizontalAlignment(Ogre::GHA_LEFT);
+	mDecorVol->setVerticalAlignment(Ogre::GVA_TOP);
+	mDecorVol->setTop(43);
+	mDecorVol->setMaterialName("YgcGui/IconVol/Mat");
+	mDecorVol->hide();
+	c->addChild(mDecorVol);
+
+	setTracks(mTracks);
 }
 
 TrackList::~TrackList()
@@ -87,170 +83,180 @@ TrackList::~TrackList()
 
 
 
-void TrackList::setStateTrack(const ButtonState& bs, int index)
-{
-	if (bs == BS_OVER)
-	{
-		mItems[index].textArea->setColour(mColourSelect);
-	}
-	else if (bs == BS_UP)
-	{
-		mItems[index].textArea->setColour(mColourDeselect);
-	}
-	else if (bs == BS_DOWN)
-	{
-		mItems[mIndexSelected].textArea->setColour(mColourDeselect);
-		mItems[mIndexSelected].currentState = BS_UP;
-		mItems[index].textArea->setColour(mColourSelect);
-		mIndexSelected = index;
-	}
-	else // if (bs==BS_SELECTED)
-	{
-		mItems[index].textArea->setColour(mColourSelect);
-	}
-
-	mItems[index].currentState = bs;
-}
-
-void TrackList::setStateButton(const ButtonState& bs, sMiniButton& button)
-{
-	if (bs == BS_OVER)		
-		button.panel->setMaterialName(button.matOver->getName());
-	else if (bs == BS_UP)	
-		button.panel->setMaterialName(button.matUp->getName());
-	else					
-		button.panel->setMaterialName(button.matDown->getName());
-
-	button.currentState = bs;
-}
-
 void TrackList::_cursorMoved(const Ogre::Vector2& cursorPos)
 {
-	for (unsigned int i = 0; i < mItems.size(); ++i) // look for the item cursor is over it
+	if (mDragging)
 	{
-		if (mItems[i].currentState != BS_SELECTED && mItems[i].panel->isVisible())
+		Ogre::Vector2 co = Widget::cursorOffset(mHandle, cursorPos);
+		Ogre::Real newTop = mHandle->getTop() + co.y - mDragOffset;
+		Ogre::Real lowerBoundary = mTrackFront->getHeight() - mHandle->getHeight();
+		mHandle->setTop(Ogre::Math::Clamp<int>((int)newTop, 0, (int)lowerBoundary));
+
+		Ogre::Real scrollPercentage = Ogre::Math::Clamp<Ogre::Real>(newTop / lowerBoundary, 0, 1);
+		int newIndex = (int)(scrollPercentage * (mTracks.size() - mItems.size()) + 0.5);
+		if (newIndex != mDisplayIndex) _setDisplayIndex(newIndex);
+		
+	}
+
+	for (unsigned int i = 0; i < mItemsShown; ++i)
+	{
+		if (i != mSelectionIndex)
 		{
-			if (isCursorOver(mItems[i].panel, cursorPos))
-			{
-				if (mItems[i].currentState == BS_UP)
-				{
-					mIndexOver = i;
-					setStateTrack(BS_OVER, i);
-				}
-			}
+			if (isCursorOver(mItems[i], cursorPos))
+				mItems[i]->setParameter("transparent", "false");
 			else
-			{
-				if (mItems[i].currentState != BS_UP) setStateTrack(BS_UP, i);
-			}
+				mItems[i]->setParameter("transparent", "true");
 		}
 	}
-
-	if (isCursorOver(mBttPrevious.panel, cursorPos))
-	{
-		if (mBttPrevious.currentState == BS_UP) 
-			setStateButton(BS_OVER, mBttPrevious);
-	}
-	else
-	{
-		if (mBttPrevious.currentState != BS_UP) 
-			setStateButton(BS_UP, mBttPrevious);
-	}
-
-	if (isCursorOver(mBttNext.panel, cursorPos))
-	{
-		if (mBttNext.currentState == BS_UP) 
-			setStateButton(BS_OVER, mBttNext);
-	}
-	else
-	{
-		if (mBttNext.currentState != BS_UP) 
-			setStateButton(BS_UP, mBttNext);
-	}
 }
+
 void TrackList::_cursorPressed(const Ogre::Vector2& cursorPos)
 {
-	if (isCursorOver(mItems[mIndexOver].panel, cursorPos)) setStateTrack(BS_DOWN, mIndexOver);
-	if (isCursorOver(mBttPrevious.panel, cursorPos)) setStateButton(BS_DOWN, mBttPrevious);
-	if (isCursorOver(mBttNext.panel, cursorPos)) setStateButton(BS_DOWN, mBttNext);
+	Ogre::Vector2 co = Widget::cursorOffset(mHandle, cursorPos);
+
+	if (co.squaredLength() <= 81)
+	{
+		mDragging = true;
+		mDragOffset = co.y;
+		return;
+	}
+	else if (Widget::isCursorOver(mTrackFront, cursorPos, -10))
+	{
+		Ogre::Real newTop = mHandle->getTop() + co.y;
+		Ogre::Real lowerBoundary = mTrackFront->getHeight() - mHandle->getHeight();
+		mHandle->setTop(Ogre::Math::Clamp<int>((int)newTop, 0, (int)lowerBoundary));
+
+		Ogre::Real scrollPercentage = Ogre::Math::Clamp<Ogre::Real>(newTop / lowerBoundary, 0, 1);
+		_setDisplayIndex((unsigned int)(scrollPercentage * (mTracks.size() - mItems.size()) + 0.5));
+		return;
+	}
 }
 
 void TrackList::_cursorReleased(const Ogre::Vector2& cursorPos)
 {
-	if (mItems[mIndexOver].currentState == BS_DOWN)
+	mDragging = false;
+
+	for (unsigned int i = 0; i < mItemsShown; ++i)
 	{
-		setStateTrack(BS_SELECTED, mIndexOver);
-		if (mListener)
+		if (mItems[i]->getParameter("transparent") == "false" && i != mSelectionIndex)
+		{
+			// deselect previous item selected
+			if (mSelectionIndex != -1)
+				mItems[mSelectionIndex]->setParameter("transparent", "true");
+
+			mSelectionIndex = i;
+			Ogre::OverlayContainer* ic = (Ogre::OverlayContainer*)mItems[mSelectionIndex];
+			Ogre::TextAreaOverlayElement* textArea = (Ogre::TextAreaOverlayElement*)ic->getChild(ic->getName() + "/ItemFileExplorerCaption");
+			mSelectionString = textArea->getCaption();
+			mDecorVol->show();
+			mDecorVol->setTop(mItems[mSelectionIndex]->getTop() + 5);
 			mListener->trackListHit(this);
-	}
-	if (mBttPrevious.currentState == BS_DOWN)
-	{
-		setStateButton(BS_OVER, mBttPrevious);
-		mCurrentPage = (mCurrentPage > 0) ? mCurrentPage - 1 : mCurrentPage;
-		_viewPage(mCurrentPage);
-	}
-	if (mBttNext.currentState == BS_DOWN)
-	{
-		setStateButton(BS_OVER, mBttNext);
-		mCurrentPage = (((mCurrentPage + 1) * mMaxRows * 2) < mItems.size()) ? mCurrentPage + 1 : mCurrentPage;
-		_viewPage(mCurrentPage);
+			return;
+		}
 	}
 }
 
 
 
-void TrackList::_createNewTrack(const Ogre::String& namePanel, const Ogre::String& caption, Ogre::Real leftTrack, Ogre::Real topTrack, Ogre::Real widthTrack)
+void TrackList::setTracks(const Ogre::StringVector& tracks)
 {
-	Ogre::OverlayManager& om = Ogre::OverlayManager::getSingleton();
+	mTracks = tracks;
+	mSelectionIndex = -1;
+	mSelectionString = Ogre::StringUtil::BLANK;
+	mDecorVol->hide();
+	_destroyItems();
 
-	mItems.push_back(sItemTrack());
-	mItems.back().panel = (Ogre::PanelOverlayElement*)om.createOverlayElement("Panel", namePanel);
-	mItems.back().textArea = static_cast<Ogre::TextAreaOverlayElement*>(om.createOverlayElement("TextArea", "TrackList/Caption" + namePanel));
-	mItems.back().currentState = BS_UP;
-	mItems.back().panel->addChild(mItems.back().textArea);
+	// height widget
+	Ogre::Real screenHeight = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
+	unsigned int maxItems = (screenHeight - mElement->getTop() - 40 - 60)/30;
+	mElement->setHeight(std::min<int>((40 + (mTracks.size() * 30) + 5), (40 + (maxItems * 30) + 5)));
+	mMaxItemsShown = (mElement->getHeight() - 40) / 30;
+	mItemsShown = std::max<int>(0, std::min<int>(mMaxItemsShown, mTracks.size()));
+	// show or hide slider
+	if (mMaxItemsShown == mTracks.size())
+	{
+		mTrackFront->hide();
+		mHandle->hide();
+		mDecorVol->setLeft(mElement->getWidth() - 24 - 12 - 10);
+	}
+	else // spacing elements
+	{
+		mTrackFront->show();
+		mHandle->show();
+		mTrackFront->setTop(mSeparator->getTop() + 10);
+		mTrackFront->setHeight(mElement->getHeight() - 40 - 10);
+		mHandle->setTop(0);
+		mDecorVol->setLeft(mElement->getWidth() - 24 - 12 - 10 - 18);
+	}
+
+	// create all the item elements
+	unsigned int topItems = mSeparator->getTop() + 10;
 	Ogre::OverlayContainer* c = (Ogre::OverlayContainer*)mElement;
-	c->addChild(mItems.back().panel);
-	
-	//mItems.back().panel->setMaterialName("YgcGui/MenuBar");
-	mItems.back().panel->setMetricsMode(Ogre::GMM_PIXELS);
-	mItems.back().panel->setWidth(widthTrack);
-	mItems.back().panel->setHeight(40);
-	mItems.back().panel->setLeft(leftTrack);
-	mItems.back().panel->setTop(topTrack);
-	mItems.back().textArea->setMetricsMode(Ogre::GMM_PIXELS);
-	mItems.back().textArea->setCaption(caption);
-	mItems.back().textArea->setFontName(mFont->getName());
-	mItems.back().textArea->setCharHeight(21);
-	mItems.back().textArea->setTop(-8);
-	mItems.back().textArea->setVerticalAlignment(Ogre::GVA_CENTER);
-	mItems.back().textArea->setHorizontalAlignment(Ogre::GHA_LEFT);
-	mItems.back().textArea->setAlignment(Ogre::TextAreaOverlayElement::Left);
-	mItems.back().textArea->setColour(Ogre::ColourValue(mColourDeselect));
-	Widget::fitCaptionToArea(caption, mItems.back().textArea, widthTrack + 10);
-}
-
-void TrackList::_destroyAllItems()
-{
-	for (unsigned int i = 0; i < mItems.size(); ++i)
-		Widget::nukeOverlayElement(mItems[i].panel);
-
-	mItems.clear();
-}
-
-void TrackList::_viewPage(unsigned int index)
-{
-	unsigned int minItem = index * mMaxRows * 2;
-	unsigned int maxItem = (index+1) * mMaxRows * 2;
-
-	for (unsigned int i = 0; i < mItems.size(); ++i)
+	for (unsigned int i = 0; i < mItemsShown; i++)   
 	{
-		if (i >= minItem && i < maxItem)
+		Ogre::String nameItem = mNameWidget + "/TextArea/TrackItem_" + Ogre::StringConverter::toString(i);
+		mItems.push_back(Ogre::OverlayManager::getSingleton().createOverlayElementFromTemplate("ItemFileExplorer", "Panel", nameItem));
+		mItems.back()->setTop(topItems);
+		mItems.back()->setWidth(mElement->getWidth() - (mTrackFront->isVisible() ? (mTrackFront->getWidth() + 12 + 14) : 12));
+		Ogre::OverlayContainer* ic = (Ogre::OverlayContainer*)mItems.back();
+		Ogre::TextAreaOverlayElement* textArea = (Ogre::TextAreaOverlayElement*)ic->getChild(ic->getName() + "/ItemFileExplorerCaption");
+		textArea->setLeft(20);
+		fitCaptionToArea(tracks[i], textArea, mItems.back()->getWidth() - 50);
+		c->addChild(mItems.back());
+
+		topItems += 30;
+	}
+}
+
+
+
+void TrackList::_setDisplayIndex(unsigned int index)
+{
+	mDisplayIndex = std::min<int>(index, mTracks.size() - mItems.size());
+
+	Ogre::Real newSelIndex = -1;
+	Ogre::OverlayContainer* ie;
+	Ogre::TextAreaOverlayElement* ta;
+	for (int i = 0; i < (int)mItems.size(); i++)
+	{
+		ie = (Ogre::OverlayContainer*)mItems[i];
+		ta = (Ogre::TextAreaOverlayElement*)ie->getChild(ie->getName() + "/ItemFileExplorerCaption");
+		fitCaptionToArea(mTracks[mDisplayIndex + i], ta, mItems.back()->getWidth() - 50);
+
+		// move the selected item
+		if (ta->getCaption() == mSelectionString)
 		{
-			mItems[i].panel->show();
-		}
-		else
-		{
-			mItems[i].panel->hide();
+			// deselect previous item selected
+			if (mSelectionIndex != -1)
+				mItems[mSelectionIndex]->setParameter("transparent", "true");
+
+			newSelIndex = mSelectionIndex = i;
+			mItems[mSelectionIndex]->setParameter("transparent", "false");
+			mDecorVol->show();
+			mDecorVol->setTop(mItems[mSelectionIndex]->getTop() + 5);
 		}
 	}
+	// if selected item is not in the mItems then hide it
+	if (mSelectionString != Ogre::StringUtil::BLANK && newSelIndex==-1)
+	{
+		// deselect previous item selected
+		if (mSelectionIndex != -1)
+		{
+			mItems[mSelectionIndex]->setParameter("transparent", "true");
+			mDecorVol->hide();
+		}
+		mSelectionIndex = -1;
+	}
+}
+
+void TrackList::_destroyItems()
+{
+	Ogre::OverlayContainer* c = (Ogre::OverlayContainer*)mElement;
+	for (unsigned int i = 0; i < mItems.size(); ++i)
+	{
+		c->removeChild(mItems[i]->getName());
+		Widget::nukeOverlayElement(mItems[i]);
+	}
+	mItems.clear();
 }
 

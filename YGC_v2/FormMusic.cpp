@@ -123,7 +123,6 @@ bool FormMusic::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 
 void FormMusic::trackListHit(TrackList* track)
 {
-	mCurrentIndex = track->getTrackIndex();
 	playTrack(mCurrentIndex);
 }
 
@@ -139,7 +138,6 @@ void FormMusic::mediaPlayerHit(MediaPlayer* player)
 	}
 	else if (player->getCurrentAction() == "Stop")
 	{
-		mTrackList->deselectTrack(mCurrentIndex);
 		mAudioPlayer->Stop();
 		mTrayMgr->hideMediaPlayer();
 		delete mAudioPlayer;
@@ -149,13 +147,11 @@ void FormMusic::mediaPlayerHit(MediaPlayer* player)
 	{
 		mCurrentIndex = (mCurrentIndex == 0) ? mInfoTracks.size() - 1 : mCurrentIndex - 1;
 		playTrack(mCurrentIndex);
-		mTrackList->selectTrack(mCurrentIndex);
 	}
 	else if (player->getCurrentAction() == "Next")
 	{
 		mCurrentIndex = (mCurrentIndex == mInfoTracks.size() - 1) ? 0 : mCurrentIndex + 1;
 		playTrack(mCurrentIndex);
-		mTrackList->selectTrack(mCurrentIndex);
 	}
 }
 

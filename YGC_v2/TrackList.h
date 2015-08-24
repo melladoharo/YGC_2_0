@@ -3,14 +3,6 @@
 
 #include "Widget.h"
 
-// Item option
-struct sItemTrack
-{
-	Ogre::OverlayContainer* panel;
-	Ogre::TextAreaOverlayElement* textArea;
-	ButtonState currentState;
-};
-
 class TrackList : public Widget
 {
 public:
@@ -18,29 +10,31 @@ public:
 	~TrackList();
 
 	// mouse managment
+	void _cursorMoved(const Ogre::Vector2& cursorPos);
 	void _cursorPressed(const Ogre::Vector2& cursorPos);
 	void _cursorReleased(const Ogre::Vector2& cursorPos);
-	void _cursorMoved(const Ogre::Vector2& cursorPos);
-	void _focusLost(){ setStateTrack(BS_UP, mIndexOver); }
-	void setStateTrack(const ButtonState& bs, int index);
-	void setStateButton(const ButtonState& bs, sMiniButton& button);
-
-	void selectTrack(unsigned int index) { setStateTrack(BS_UP, mIndexSelected); mIndexSelected = index; setStateTrack(BS_SELECTED, mIndexSelected); }
-	void deselectTrack(unsigned int index) { setStateTrack(BS_UP, index); }
-	unsigned int getTrackIndex() { return mIndexSelected; }
+	void _focusLost() {}
+	
+	void setTracks(const Ogre::StringVector& tracks);
+	Ogre::String getSelectedTrack() { return mSelectionString; }
 
 private:
-	void _createNewTrack(const Ogre::String& namePanel, const Ogre::String& caption, Ogre::Real leftTrack, Ogre::Real topTrack, Ogre::Real widthTrack);
-	void _destroyAllItems();
-	void _viewPage(unsigned int index);
+	void _setDisplayIndex(unsigned int index);
+	void _destroyItems();
 
-	std::vector<sItemTrack> mItems; // Items options
-	sMiniButton mBttPrevious, mBttNext;
-	Ogre::FontPtr mFont; // Font used for items
-	Ogre::ColourValue mColourSelect, mColourDeselect; // Colours when mouse is over an item 
-	unsigned int mIndexOver, mIndexSelected; // Current index item over, and current item selected
-	unsigned int mMaxRows;
-	unsigned int mCurrentPage;
+	const Ogre::String mNameWidget;
+	Ogre::TextAreaOverlayElement* mTextCaption;
+	Ogre::OverlayElement* mSeparator;
+	std::vector<Ogre::OverlayElement*> mItems;
+	Ogre::OverlayElement* mDecorVol;
+	Ogre::BorderPanelOverlayElement* mTrackFront;
+	Ogre::OverlayElement* mHandle;
+	Ogre::StringVector mTracks;
+	unsigned int mItemsShown, mMaxItemsShown, mDisplayIndex;
+	int mSelectionIndex;
+	Ogre::String mSelectionString;
+	bool mDragging;
+	Ogre::Real mDragOffset;
 };
 
 #endif // #ifndef _TRACKLIST_H__
