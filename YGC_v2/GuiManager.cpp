@@ -79,6 +79,10 @@ mShutDown(false)
 	mMiniPlayer->hide();
 	mMiniPlayer->_assignListener(this);
 	mMiniPlayer->assignSliderListener(this);	
+	Ogre::String randomTrack = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Random_Track", "Yes");
+	Ogre::String repeatTrack = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Repeat_Track", "Yes");
+	mMiniPlayer->setRandom(randomTrack == "Yes" ? true : false);
+	mMiniPlayer->setRepeat(repeatTrack == "Yes" ? true : false);
 	mPlayerTray->addChild(mMiniPlayer->getOverlayElement());
 	mTrackList = new TrackList("GuiManager/TrackList", Ogre::StringVector(), 20, mMiniPlayer->getTop() + mMiniPlayer->getHeight() + 10, 7);
 	mTrackList->hide();
@@ -104,6 +108,11 @@ mShutDown(false)
 
 GuiManager::~GuiManager()
 {
+	// save miniPlayer status [random and repeat]
+	ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM", "Random_Track", mMiniPlayer->isRandom() ? "Yes" : "No" );
+	ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM", "Repeat_Track", mMiniPlayer->isRepeatMedia() ? "Yes" : "No");
+	ConfigReader::getSingletonPtr()->saveConfig();
+
 	if (mAudioPlayer) delete mAudioPlayer;
 
 	Ogre::OverlayManager& om = Ogre::OverlayManager::getSingleton();
@@ -543,8 +552,14 @@ void GuiManager::mediaPlayerMiniHit(MediaPlayerMini* miniPlayer)
 	switch (miniPlayer->getSelectedAction())
 	{
 	case (MINI_PLAY):
-		if (mAudioPlayer) mAudioPlayer->Play();
-		else { mTrackList->selectTrack(0); _playTrack(mTrackList->getSelectedTrack()); }
+		if (mAudioPlayer) 
+			mAudioPlayer->Play();
+		else 
+		{
+			if (mMiniPlayer->isRandom()) mTrackList->selectRandomTrack();
+			else mTrackList->selectTrack(0);
+			_playTrack(mTrackList->getSelectedTrack()); 
+		}
 		break;
 	case (MINI_PAUSE):
 		if (mAudioPlayer) mAudioPlayer->Pause();

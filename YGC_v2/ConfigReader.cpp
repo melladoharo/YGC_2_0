@@ -27,6 +27,9 @@ SI_Error ConfigReader::_createDefaultConfig()
 	mReader->Reset();
 	mReader->SetValue("SYSTEM", "Path_Games", "./Games");
 	mReader->SetValue("SYSTEM", "Path_Sagas", "./Sagas");
+	mReader->SetValue("SYSTEM", "AutoPlay_Music", "Yes");
+	mReader->SetValue("SYSTEM", "Random_Track", "No");
+	mReader->SetValue("SYSTEM", "Repeat_Track", "No");
 	mReader->SetValue("SYSTEM.GRAPHICS", "Fullscreen", "Yes");
 	mReader->SetValue("SYSTEM.GRAPHICS", "VSync", "Yes");
 	mReader->SetValue("SYSTEM.GRAPHICS", "Aspect_Ratio", "Auto");

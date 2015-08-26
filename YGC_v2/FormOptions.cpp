@@ -118,6 +118,14 @@ void FormOptions::buttonHit(Button* button)
 		hideOptionsAdvancedGraphics();
 		showOptionsGraphics();
 	}
+	else if (button->getName() == "FormOptions/Button/CloseOptionsSound")
+	{
+		ItemSelector* selAutoPlay = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/AutoPlay"));
+		if (selAutoPlay) ConfigReader::getSingletonPtr()->getReader()->SetValue("SYSTEM", "AutoPlay_Music", selAutoPlay->getSelectedOption().c_str());
+		ConfigReader::getSingletonPtr()->saveConfig();
+		hideOptionsSound();
+		showOptionsGeneral();
+	}
 	else if (button->getName() == "FormOptions/Button/SelectPathGames")
 	{
 		FileExplorer* explorer = dynamic_cast<FileExplorer*>(mTrayMgr->getWidget("FormOptions/Explorer/PathGames"));
@@ -163,6 +171,11 @@ void FormOptions::labelHit(Label* label)
 		hideOptionsGraphics();
 		showOptionsAdvancedGraphics();
 	}
+	else if (label->getName() == "FormOptions/Label/Sound")
+	{
+		hideOptions();
+		showOptionsSound();
+	}
 	else if (label->getName() == "FormOptions/Label/EditGamesPath")
 	{
 		hideOptionsGeneral();
@@ -200,6 +213,7 @@ void FormOptions::hideAllOptions()
 	hideOptionsGraphics();
 	hideOptionsAdvancedGraphics();
 	hideOptionsThumbnails();
+	hideOptionsSound();
 }
 
 void FormOptions::hideOptions()
@@ -431,6 +445,39 @@ void FormOptions::showOptionsAdvancedGraphics()
 		selBlurShadows->selectOption(blurShadowValue, false);
 		selTextFiltering->selectOption(filterModeValue, false);
 		selAnistropic->selectOption(anisotropicFilter, false);
+	}
+}
+
+void FormOptions::hideOptionsSound()
+{
+	if (mTrayMgr->getWidget("FormOptions/Window/Sound"))
+	{
+		mTrayMgr->destroyDialogWindow("FormOptions/Window/Sound");
+		mTrayMgr->destroyWidget("FormOptions/Selector/AutoPlay");
+		mTrayMgr->destroyWidget("FormOptions/Button/CloseOptionsSound");
+	}
+}
+
+void FormOptions::showOptionsSound()
+{
+	if (!mTrayMgr->getWidget("FormOptions/Window/Sound")) // menu is hidden
+	{
+		unsigned int numOptions = 2;
+		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
+		Ogre::Real left = 50;
+		Ogre::Real width = 420;
+		Ogre::Real height = numOptions * sepOptions;
+		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
+
+		Ogre::String autoPlay = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "AutoPlay_Music", "Yes");
+		Ogre::StringVector itemsYesNo; itemsYesNo.push_back("Yes"); itemsYesNo.push_back("No");
+
+		mTrayMgr->createDialogWindow("FormOptions/Window/Sound", "SOUND OPTIONS", left, top, width, height);	 top += sepOptions / 2;
+		ItemSelector* selAutoPlay = mTrayMgr->createItemSelector("FormOptions/Selector/AutoPlay", "AutoPlay Music", itemsYesNo, left, top, width);
+		top = mScreenSize.y - sepWindow - sepButton;
+		mTrayMgr->createButton("FormOptions/Button/CloseOptionsSound", "BACK", left, top, 60);
+		
+		selAutoPlay->selectOption(autoPlay, false);
 	}
 }
 

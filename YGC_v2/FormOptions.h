@@ -32,6 +32,8 @@ public:
 	void showOptionsGraphics();
 	void hideOptionsAdvancedGraphics();
 	void showOptionsAdvancedGraphics();
+	void hideOptionsSound();
+	void showOptionsSound();
 	void hideEditPathGames();
 	void showEditPathGames();
 

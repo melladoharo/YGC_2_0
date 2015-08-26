@@ -7,6 +7,7 @@
 #include "FormVideos.h"
 #include "FormMusic.h"
 #include "FormCollector.h"
+#include "ConfigReader.h"
 
 FormSelectorGame::FormSelectorGame(GameInfo* gInfo, GuiManager* tray, GuiListener* oldListener /*= 0*/) :
 mTrayMgr(tray),
@@ -75,8 +76,13 @@ mFormCollector(0)
 	mTrayMgr->enableFadeEffect();
 	mTrayMgr->showMenuBar();
 	mTrayMgr->showCursor();
-	if (!mTrayMgr->getDefaultTrackList()->isEmpty())
+	// autoplay music?
+	Ogre::String autoPlay = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "AutoPlay_Music", "Yes");
+	if (autoPlay == "Yes" && !mTrayMgr->getDefaultTrackList()->isEmpty())
+	{
 		mTrayMgr->showMiniPlayer();
+		mTrayMgr->startMiniPlayer();
+	}
 }
 
 

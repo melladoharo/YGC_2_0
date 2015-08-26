@@ -22,6 +22,7 @@
 #include "LineEdit.h"
 #include "DepthOfFieldEffect.h"
 #include "UtilsOgreDshow.h"
+#include "ConfigReader.h"
 
 class GuiManager : public GuiListener, public Ogre::ResourceGroupListener
 {
@@ -69,6 +70,12 @@ public:
 	void playMiniPlayer() { if (mAudioPlayer && mAudioPlayer->isPaused()) mAudioPlayer->Play(); }
 	void pauseMiniPlayer() { if (mAudioPlayer) mAudioPlayer->Pause(); }
 	void stopMiniPlayer() { _stopTrack(); hideMiniPlayer(); }
+	void startMiniPlayer() 
+	{ 
+		if (mMiniPlayer->isRandom()) mTrackList->selectRandomTrack();
+		else mTrackList->selectTrack(0);
+		_playTrack(mTrackList->getSelectedTrack()); 
+	}
 
 	// VISIBILITY
 	void showWidgets() { mWidgetsLayer->show(); }

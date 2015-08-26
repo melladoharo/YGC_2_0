@@ -35,6 +35,9 @@ public:
 	bool isRepeatMedia() { return mRepeatMedia; }
 	bool isSilence() { return mSilence; }
 	bool isRandom() { return mRandomMedia; }
+	void setSilence(bool silence) { mSilence = silence; }
+	void setRandom(bool random) { mRandomMedia = random; mBttRandom.panel->setMaterialName(mRandomMedia ? "YgcGui/MiniRandom/Enable/Over" : "YgcGui/MiniRandom/Disable/Over"); }
+	void setRepeat(bool repeat) { mRepeatMedia = repeat; mBttRepeat.panel->setMaterialName(mRepeatMedia ? "YgcGui/MiniRepeat/Enable/Over" : "YgcGui/MiniRepeat/Disable/Over"); }
 
 private:
 	Ogre::String _secondsToString(int totalSeconds);
