@@ -4,7 +4,7 @@
 #include "Widget.h"
 #include "SliderOptions.h"
 
-enum ePlayerAction {MP_PLAY, MP_PAUSE, MP_STOP, MP_NEXT, MP_PREVIOUS, MP_REPEAT, MP_RANDOM, MP_VOLUME, MP_TRACKLIST};
+enum eMiniAction {MINI_PLAY, MINI_PAUSE, MINI_STOP, MINI_NEXT, MINI_PREV, MINI_REPEAT, MINI_RANDOM, MINI_VOLUME, MINI_TRACKLIST};
 
 struct sMiniPlayerButton
 {
@@ -25,9 +25,21 @@ public:
 	void _cursorReleased(const Ogre::Vector2& cursorPos);
 	void setState(const ButtonState& bs, sMiniPlayerButton& button);
 
+	void setCaptionTrack(const Ogre::String& caption) { fitCaptionToArea(caption, mCaptionMedia, mElement->getWidth()); }
 	unsigned int getSelectedAction() { return mSelectedAction; }
+	Ogre::Real getSliderValue() { return mSlider->getValue(); }
+	void setSliderValue(Ogre::Real newVal, Ogre::Real maxValue, bool notifyListener = true);
+	void setSliderRange(Ogre::Real minValue, Ogre::Real maxValue, unsigned int snaps);
+	void assignSliderListener(GuiListener* listener) { mSlider->_assignListener(listener); }
+
+	bool isRepeatMedia() { return mRepeatMedia; }
+	bool isSilence() { return mSilence; }
+	bool isRandom() { return mRandomMedia; }
 
 private:
+	Ogre::String _secondsToString(int totalSeconds);
+	Ogre::String _minutesToString(int totalSeconds);
+
 	const Ogre::String mNamePlayer;
 	SliderOptions* mSlider;
 	Ogre::TextAreaOverlayElement* mTextTime;

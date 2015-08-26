@@ -57,6 +57,7 @@ private:
 	Thumbnail3D* mLastThumbOver;
 	sGridThumbs mGridThumbs;
 	Video::VideoPlayer* mVideoPlayer;
+	MediaPlayer* mPlayer;
 	Ogre::Real mTimeOver;
 	std::pair<unsigned int, unsigned int> mIndexTrailer, mIndexGameplay;
 	unsigned int mCurrentIndex;

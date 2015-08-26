@@ -65,6 +65,9 @@ mCurrentIndex(0)
 	sm->setLeft(-sm->getWidth() / 2);
 	addWidgetToForm(sm);
 
+	mPlayer = mTrayMgr->createMediaPlayer("FormVideos/MediaPlayer");
+	mPlayer->_assignListener(this);
+	mPlayer->_assignSliderListener(this);
 	show();
 }
 
@@ -77,6 +80,7 @@ FormVideos::~FormVideos()
 	Ogre::MaterialManager::getSingleton().unload("Mat/FormVideos/Videoplayer");
 	Ogre::MaterialManager::getSingleton().remove("Mat/FormVideos/Videoplayer");
 	hideAllOptions();
+	mTrayMgr->destroyMediaPlayer(mPlayer);
 }
 
 
@@ -86,7 +90,7 @@ bool FormVideos::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	if (mVideoPlayer)
 	{
 		mVideoPlayer->update();
-		mTrayMgr->setMediaPlayerSliderValue(mVideoPlayer->getCurrentTime(), mVideoPlayer->getDuration(), false);
+		mPlayer->setSliderValue(mVideoPlayer->getCurrentTime(), mVideoPlayer->getDuration(), false);
 	}
 
 	if (mTimeOver > 5.0f && !mVideoPlayer)
@@ -108,16 +112,16 @@ bool FormVideos::keyPressed(const OIS::KeyEvent &arg)
 {
 	if (arg.key == OIS::KC_LEFT)
 	{
-		Ogre::Real durationSound = mVideoPlayer->getDuration();
-		Ogre::Real currentTime = mVideoPlayer->getCurrentTime();
+		mVideoPlayer->seek(mVideoPlayer->getCurrentTime() - 10);
+	}
+	else if (arg.key == OIS::KC_RIGHT)
+	{
 		mVideoPlayer->seek(mVideoPlayer->getCurrentTime() + 10);
 	}
 	else if (arg.key == OIS::KC_SPACE)
 	{
-		if (mVideoPlayer->isPaused())
-			mVideoPlayer->play();
-		else
-			mVideoPlayer->pause();
+		if (mVideoPlayer->isPaused()) mVideoPlayer->play();
+		else mVideoPlayer->pause();
 	}
 	return FormBase::keyPressed(arg);
 }
@@ -131,13 +135,25 @@ bool FormVideos::mouseMoved(const OIS::MouseEvent &arg)
 {
 	if (mTrayMgr->injectMouseMove(arg)) return true;
 
+	if (mPlayer->isVisible())
+		mPlayer->_cursorMoved(Ogre::Vector2(arg.state.X.abs, arg.state.Y.abs));
+	else 
+	{
+		// show the icon settings if cursor is over the right bottom corner
+		if (mIconSettings->isVisible())
+			mIconSettings->hide();
+
+		if (arg.state.X.abs <= 50 && arg.state.Y.abs >= (mScreenSize.y - 50))
+		{
+			mIconSettings->show();
+		}
+	}
+
 	if (!mTrayMgr->isWindowDialogVisible()) // is a option windows visible? if not, continue
 	{
-		if (mVideoPlayer && arg.state.Y.abs >= (mScreenSize.y - 55))
-			mTrayMgr->showMediaPlayer(this);
-		else
-			mTrayMgr->hideMediaPlayer();
-
+		if (mVideoPlayer && arg.state.Y.abs >= (mScreenSize.y - 55)) mPlayer->show();
+		else mPlayer->hide();
+		
 		// mouse ray [intersection with objects]
 		Ogre::Ray mouseRay = mTrayMgr->getCursorRay(mCamera);
 		mRaySceneQuery->setRay(mouseRay);
@@ -164,15 +180,19 @@ bool FormVideos::mouseMoved(const OIS::MouseEvent &arg)
 			if (mVideoPlayer) { mVideoPlayer->close(); delete mVideoPlayer; }
 			mVideoPlayer = 0;
 			mLastThumbOver->setMouseUp(); mLastThumbOver = 0; mTimeOver = 0.0f;
+			mTrayMgr->playMiniPlayer();
 		}
 	}
 	
-	return FormBase::mouseMoved(arg);;
+	//return FormBase::mouseMoved(arg);
 }
 
 bool FormVideos::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
 	if (mTrayMgr->injectMouseDown(arg, id)) return true;
+
+	if (mPlayer->isVisible())
+		mPlayer->_cursorPressed(Ogre::Vector2(arg.state.X.abs, arg.state.Y.abs));
 
 	return FormBase::mousePressed(arg, id);;
 }
@@ -180,6 +200,9 @@ bool FormVideos::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 bool FormVideos::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 {
 	if (mTrayMgr->injectMouseUp(arg, id)) return true;
+
+	if (mPlayer->isVisible())
+		mPlayer->_cursorReleased(Ogre::Vector2(arg.state.X.abs, arg.state.Y.abs));
 
 	if (id == OIS::MouseButtonID::MB_Left)
 	{
@@ -220,15 +243,16 @@ bool FormVideos::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id
 		if (mTrayMgr->isBackdropVisible())
 		{
 			if (mVideoPlayer) { mVideoPlayer->close(); delete mVideoPlayer; } mVideoPlayer = 0;
-			mTrayMgr->hideMediaPlayer();
 			mTrayMgr->hideBackdrop();
 			mTrayMgr->showMenuBar();
 			mTrayMgr->showWidgets();
+			mTrayMgr->playMiniPlayer();
+			mPlayer->hide(); 
 			show();
 		}
 	}
 
-	return FormBase::mouseReleased(arg, id);;
+	return FormBase::mouseReleased(arg, id);
 }
 
 
@@ -236,6 +260,7 @@ bool FormVideos::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id
 void FormVideos::hide()
 {
 	FormBase::hide();
+	mPlayer->hide();
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		mThumbs[i]->hide();
 	hideAllOptions();
@@ -249,6 +274,7 @@ void FormVideos::show()
 	resetCamera();
 
 	FormBase::show();
+	mPlayer->hide();
 	// show slider if images are not empty
 	if (mVideos.size() < mGridThumbs.rows * 2)
 		mTrayMgr->getWidget("FormVideos/Slider")->hide();
@@ -311,15 +337,10 @@ void FormVideos::buttonHit(Button* button)
 
 void FormVideos::sliderMoved(Slider* slider)
 {
-	if (slider->getName() == "FormVideos/Slider")
+	if (slider->getName() == "FormVideos/Slider") // thumbs slider
 	{
 		mParentThumbs->setPosition(-slider->getValue(), 0, 0);
 	}
-	else
-	{
-		mVideoPlayer->seek(slider->getValue());
-	}
-	
 }
 
 void FormVideos::itemSelected(SelectMenu* menu)
@@ -340,34 +361,34 @@ void FormVideos::itemSelected(SelectMenu* menu)
 
 void FormVideos::mediaPlayerHit(MediaPlayer* player)
 {
-	if (player->getCurrentAction() == "Play")
+	switch (player->getSelectedAction())
 	{
+	case(MP_PLAY):
 		mVideoPlayer->play();
-	}
-	else if (player->getCurrentAction() == "Pause")
-	{
+		break;
+	case(MP_PAUSE):
 		mVideoPlayer->pause();
-	}
-	else if (player->getCurrentAction() == "Stop")
-	{
+		break;
+	case(MP_STOP):
 		mVideoPlayer->close();
 		delete mVideoPlayer;
 		mVideoPlayer = 0;
-		mTrayMgr->hideMediaPlayer();
 		mTrayMgr->hideBackdrop();
 		mTrayMgr->showMenuBar();
 		mTrayMgr->showWidgets();
+		mTrayMgr->playMiniPlayer();
 		show();
-	}
-	else if (player->getCurrentAction() == "Previous")
-	{
-		mCurrentIndex = (mCurrentIndex == 0) ? mVideos.size() - 1 : mCurrentIndex - 1;
-		playVideo(mCurrentIndex);
-	}
-	else if (player->getCurrentAction() == "Next")
-	{
+		break;
+	case(MP_NEXT):
 		mCurrentIndex = (mCurrentIndex == mVideos.size() - 1) ? 0 : mCurrentIndex + 1;
 		playVideo(mCurrentIndex);
+		break;
+	case(MP_PREV):
+		mCurrentIndex = (mCurrentIndex == 0) ? mVideos.size() - 1 : mCurrentIndex - 1;
+		playVideo(mCurrentIndex);
+		break;
+	case(MP_VOLUME):
+		break;
 	}
 }
 
@@ -429,6 +450,10 @@ void FormVideos::sliderOptionsMoved(SliderOptions* slider)
 		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
 		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.VIDEOS", "Thumbs_Vertial_Sep", mGridThumbs.verticalSep);
 	}
+	else // player slider
+	{
+		mVideoPlayer->seek(slider->getValue());
+	}
 }
 
 
@@ -455,7 +480,8 @@ void FormVideos::playVideo(unsigned int index, bool fullscreen /*= true*/)
 		mVideoPlayer = new Video::VideoPlayer;
 		mVideoPlayer->setAudioFactory(new SDLMovieAudioFactory());
 		mVideoPlayer->playVideo(mVideos[index].filename);
-		mTrayMgr->setMediaPlayerRange(0, mVideoPlayer->getDuration(), mVideoPlayer->getDuration() + 1);
+		mPlayer->setSliderRange(0, mVideoPlayer->getDuration(), mVideoPlayer->getDuration() + 1);
+		mTrayMgr->pauseMiniPlayer();
 
 		if (!mVideoPlayer->getTextureName().empty())
 		{

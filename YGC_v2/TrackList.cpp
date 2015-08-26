@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include "TrackList.h"
 
-TrackList::TrackList(const Ogre::String& name, const Ogre::StringVector& tracks, Ogre::Real left, Ogre::Real top) : 
+TrackList::TrackList(const Ogre::String& name, const Ogre::StringVector& tracks, Ogre::Real left, Ogre::Real top, unsigned int maxItemShown) : 
 mNameWidget(name),
 mTracks(tracks),
 mDisplayIndex(0),
-mSelectionIndex(-1),
+mMaxItemsShown(maxItemShown),
+mItemSelectedShown(-1),
+mTrackSelected(-1),
 mDragging(false),
 mDragOffset(0.0f)
 {
@@ -100,7 +102,7 @@ void TrackList::_cursorMoved(const Ogre::Vector2& cursorPos)
 
 	for (unsigned int i = 0; i < mItemsShown; ++i)
 	{
-		if (i != mSelectionIndex)
+		if (i != mItemSelectedShown)
 		{
 			if (isCursorOver(mItems[i], cursorPos))
 				mItems[i]->setParameter("transparent", "false");
@@ -138,18 +140,16 @@ void TrackList::_cursorReleased(const Ogre::Vector2& cursorPos)
 
 	for (unsigned int i = 0; i < mItemsShown; ++i)
 	{
-		if (mItems[i]->getParameter("transparent") == "false" && i != mSelectionIndex)
+		if (mItems[i]->getParameter("transparent") == "false" && i != mItemSelectedShown)
 		{
 			// deselect previous item selected
-			if (mSelectionIndex != -1)
-				mItems[mSelectionIndex]->setParameter("transparent", "true");
+			if (mItemSelectedShown >= 0)
+				mItems[mItemSelectedShown]->setParameter("transparent", "true");
 
-			mSelectionIndex = i;
-			Ogre::OverlayContainer* ic = (Ogre::OverlayContainer*)mItems[mSelectionIndex];
-			Ogre::TextAreaOverlayElement* textArea = (Ogre::TextAreaOverlayElement*)ic->getChild(ic->getName() + "/ItemFileExplorerCaption");
-			mSelectionString = textArea->getCaption();
+			mItemSelectedShown = i;
+			mTrackSelected = mDisplayIndex + i;
 			mDecorVol->show();
-			mDecorVol->setTop(mItems[mSelectionIndex]->getTop() + 5);
+			mDecorVol->setTop(mItems[mItemSelectedShown]->getTop() + 5);
 			mListener->trackListHit(this);
 			return;
 		}
@@ -158,20 +158,31 @@ void TrackList::_cursorReleased(const Ogre::Vector2& cursorPos)
 
 
 
+void TrackList::setMaxItemShown(unsigned int maxItems)
+{
+	mMaxItemsShown = maxItems;
+	setTracks(mTracks);
+}
+
+
+
 void TrackList::setTracks(const Ogre::StringVector& tracks)
 {
 	mTracks = tracks;
-	mSelectionIndex = -1;
-	mSelectionString = Ogre::StringUtil::BLANK;
+	mItemSelectedShown = -1;
+	mTrackSelected = -1;
 	mDecorVol->hide();
 	_destroyItems();
 
 	// height widget
-	Ogre::Real screenHeight = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
-	unsigned int maxItems = (screenHeight - mElement->getTop() - 40 - 60)/30;
-	mElement->setHeight(std::min<int>((40 + (mTracks.size() * 30) + 5), (40 + (maxItems * 30) + 5)));
-	mMaxItemsShown = (mElement->getHeight() - 40) / 30;
+	//Ogre::Real screenHeight = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getActualHeight();
+	//unsigned int maxItems = (screenHeight - mElement->getTop() - 40 - 60)/30;
+	//mElement->setHeight(std::min<int>((40 + (mTracks.size() * 30) + 5), (40 + (maxItems * 30) + 5)));
+	//mMaxItemsShown = (mElement->getHeight() - 40) / 30;
+
+	mElement->setHeight(40 + (mMaxItemsShown * 30) + 5);
 	mItemsShown = std::max<int>(0, std::min<int>(mMaxItemsShown, mTracks.size()));
+
 	// show or hide slider
 	if (mMaxItemsShown == mTracks.size())
 	{
@@ -201,7 +212,8 @@ void TrackList::setTracks(const Ogre::StringVector& tracks)
 		Ogre::OverlayContainer* ic = (Ogre::OverlayContainer*)mItems.back();
 		Ogre::TextAreaOverlayElement* textArea = (Ogre::TextAreaOverlayElement*)ic->getChild(ic->getName() + "/ItemFileExplorerCaption");
 		textArea->setLeft(20);
-		fitCaptionToArea(tracks[i], textArea, mItems.back()->getWidth() - 50);
+		Ogre::String trackCaption = boost::filesystem::path(tracks[i]).filename().generic_string();
+		fitCaptionToArea(trackCaption, textArea, mItems.back()->getWidth() - 50);
 		c->addChild(mItems.back());
 
 		topItems += 30;
@@ -214,40 +226,39 @@ void TrackList::_setDisplayIndex(unsigned int index)
 {
 	mDisplayIndex = std::min<int>(index, mTracks.size() - mItems.size());
 
-	Ogre::Real newSelIndex = -1;
 	Ogre::OverlayContainer* ie;
 	Ogre::TextAreaOverlayElement* ta;
+
 	for (int i = 0; i < (int)mItems.size(); i++)
 	{
 		ie = (Ogre::OverlayContainer*)mItems[i];
 		ta = (Ogre::TextAreaOverlayElement*)ie->getChild(ie->getName() + "/ItemFileExplorerCaption");
-		fitCaptionToArea(mTracks[mDisplayIndex + i], ta, mItems.back()->getWidth() - 50);
+		Ogre::String trackCaption = boost::filesystem::path(mTracks[mDisplayIndex + i]).filename().generic_string();
+		fitCaptionToArea(trackCaption, ta, mItems.back()->getWidth() - 50);
 
-		// move the selected item
-		if (ta->getCaption() == mSelectionString)
-		{
-			// deselect previous item selected
-			if (mSelectionIndex != -1)
-				mItems[mSelectionIndex]->setParameter("transparent", "true");
-
-			newSelIndex = mSelectionIndex = i;
-			mItems[mSelectionIndex]->setParameter("transparent", "false");
-			mDecorVol->show();
-			mDecorVol->setTop(mItems[mSelectionIndex]->getTop() + 5);
-		}
-	}
-	// if selected item is not in the mItems then hide it
-	if (mSelectionString != Ogre::StringUtil::BLANK && newSelIndex==-1)
-	{
 		// deselect previous item selected
-		if (mSelectionIndex != -1)
+		if (mItemSelectedShown >= 0 && mItemSelectedShown < mItems.size())
 		{
-			mItems[mSelectionIndex]->setParameter("transparent", "true");
+			mItems[mItemSelectedShown]->setParameter("transparent", "true");
 			mDecorVol->hide();
 		}
-		mSelectionIndex = -1;
+
+		// new selected index
+		mItemSelectedShown = (index - mDisplayIndex <= 0)
+			? mTrackSelected - mDisplayIndex 
+			: mTrackSelected + mDisplayIndex;
+		
+		// select the new index if it is possible
+		if (mItemSelectedShown >= 0 && mItemSelectedShown < mItems.size())
+		{
+			mItems[mItemSelectedShown]->setParameter("transparent", "false");
+			mDecorVol->show();
+			mDecorVol->setTop(mItems[mItemSelectedShown]->getTop() + 5);
+		}
 	}
 }
+
+
 
 void TrackList::_destroyItems()
 {
@@ -258,5 +269,61 @@ void TrackList::_destroyItems()
 		Widget::nukeOverlayElement(mItems[i]);
 	}
 	mItems.clear();
+}
+
+
+
+Ogre::String TrackList::getSelectedTrack()
+{
+	return (mTrackSelected >= 0 && mTrackSelected <= mTracks.size())
+		? mTracks[mTrackSelected]
+		: Ogre::StringUtil::BLANK;
+}
+
+void TrackList::selectNextTrack()
+{
+	if (mTracks.size() > 1)
+	{
+		mTrackSelected = (mTrackSelected == mTracks.size() - 1) ? 0 : mTrackSelected + 1;
+		_setDisplayIndex(mDisplayIndex);
+	}
+}
+
+void TrackList::selectPrevTrack()
+{
+	if (mTracks.size() > 1)
+	{
+		mTrackSelected = (mTrackSelected > 0) ? mTrackSelected - 1 : mTracks.size() - 1;
+		_setDisplayIndex(mDisplayIndex);
+	}
+}
+
+void TrackList::selectRandomTrack()
+{
+	if (mTracks.size() > 1)
+	{
+		mTrackSelected = Ogre::Math::RangeRandom(0, mTracks.size() - 1);
+		_setDisplayIndex(mDisplayIndex);
+	}
+}
+
+void TrackList::selectTrack(unsigned int index)
+{
+	if (index >= 0 && index < mTracks.size())
+	{
+		mTrackSelected = index;
+		_setDisplayIndex(mDisplayIndex);
+	}
+}
+
+void TrackList::deselectAllTracks()
+{
+	// deselect previous item selected
+	if (mItemSelectedShown >= 0 && mItemSelectedShown < mItems.size())
+		mItems[mItemSelectedShown]->setParameter("transparent", "true");
+	mDecorVol->hide();
+
+	mItemSelectedShown = -1;
+	mTrackSelected = -1;
 }
 

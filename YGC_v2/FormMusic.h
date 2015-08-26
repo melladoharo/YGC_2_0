@@ -3,8 +3,6 @@
 
 #include "FormBase.h"
 #include "GameInfo.h"
-#include "TrackList.h"
-#include "UtilsOgreDshow.h"
 
 class FormMusic : public FormBase
 {
@@ -24,25 +22,14 @@ public:
 	bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 	bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 
-	// GuiListener
-	void sliderMoved(Slider* slider);
-	void trackListHit(TrackList* track);
-	void mediaPlayerHit(MediaPlayer* player);
-
 	// FormBase
 	void hide();
 	void show();
 	void showOptions();
 
-	// Music Controls
-	void playTrack(unsigned int index);
-
 private:
 	GameInfo* mGameInfo;
 	CModel* mDiscClose;
-	std::vector<sInfoResource> mInfoTracks;
-	TrackList* mTrackList;
-	DirectShowSound* mAudioPlayer;
 	unsigned int mCurrentIndex;
 };
 

@@ -6,7 +6,7 @@
 class TrackList : public Widget
 {
 public:
-	TrackList(const Ogre::String& name, const Ogre::StringVector& tracks, Ogre::Real left, Ogre::Real top);
+	TrackList(const Ogre::String& name, const Ogre::StringVector& tracks, Ogre::Real left, Ogre::Real top, unsigned int maxItemShown);
 	~TrackList();
 
 	// mouse managment
@@ -15,8 +15,18 @@ public:
 	void _cursorReleased(const Ogre::Vector2& cursorPos);
 	void _focusLost() {}
 	
+	void setMaxItemShown(unsigned int maxItems);
+
 	void setTracks(const Ogre::StringVector& tracks);
-	Ogre::String getSelectedTrack() { return mSelectionString; }
+	Ogre::StringVector getTracks() { return mTracks; }
+	bool isEmpty() { return mTracks.empty(); }
+
+	Ogre::String getSelectedTrack();
+	void selectNextTrack();
+	void selectPrevTrack();
+	void selectRandomTrack();
+	void selectTrack(unsigned int index);
+	void deselectAllTracks();
 
 private:
 	void _setDisplayIndex(unsigned int index);
@@ -31,8 +41,8 @@ private:
 	Ogre::OverlayElement* mHandle;
 	Ogre::StringVector mTracks;
 	unsigned int mItemsShown, mMaxItemsShown, mDisplayIndex;
-	int mSelectionIndex;
-	Ogre::String mSelectionString;
+	int mItemSelectedShown;
+	int mTrackSelected;
 	bool mDragging;
 	Ogre::Real mDragOffset;
 };

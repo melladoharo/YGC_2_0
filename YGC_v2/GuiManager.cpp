@@ -13,9 +13,12 @@ mListener(listener),
 mExpandedMenu(0), mMediaPlayer(0), mLoadBar(0), mDialogDecorWindows(0), mDialogMessage(0),
 mOk(0), mYes(0), mNo(0),
 mDofEffect(0),
+mAudioPlayer(0),
 mRenderText(0),
 mFadeAmount(0),
+mAutoHidePlayer(0.0f),
 mCursorWasVisible(false),
+mCursorOverPlayer(false),
 mShutDown(false)
 {
 	mTimer = Ogre::Root::getSingleton().getTimer();
@@ -33,10 +36,12 @@ mShutDown(false)
 	mWidgetsLayer = om.create(nameBase + "WidgetsLayer");
 	mMenuBarLayer = om.create(nameBase + "MenuBarLayer");
 	mWindowsLayer = om.create(nameBase + "WindowsLayer");
-	mWindowsLayer->setZOrder(300);
+	mPlayerLayer = om.create(nameBase + "MediaPlayerLayer");
+	mWindowsLayer->setZOrder(340);
 	mWidgetsLayer->setZOrder(350);
-	mMenuBarLayer->setZOrder(370);
-	mBackdropLayer->setZOrder(380);
+	mMenuBarLayer->setZOrder(360);
+	mBackdropLayer->setZOrder(370);
+	mPlayerLayer->setZOrder(380);
 	mPriorityLayer->setZOrder(390);
 	mCursorLayer->setZOrder(400);
 
@@ -56,6 +61,9 @@ mShutDown(false)
 	mDialogWindows = (Ogre::OverlayContainer*)om.createOverlayElement("Panel", nameBase + "WindowsDialog");
 	mWindowsLayer->add2D(mDialogWindows);
 	mWindowsLayer->hide();
+	mPlayerTray = (Ogre::OverlayContainer*)om.createOverlayElement("Panel", nameBase + "ContainerPlayer");
+	mPlayerLayer->add2D(mPlayerTray);
+	mPlayerLayer->show();
 
 	// create the menu bar
 	mMenuBar = new MenuBar;
@@ -64,8 +72,18 @@ mShutDown(false)
 	mMenuBar->_assignListener(mListener);
 
 	// create media player
-	//mMediaPlayer = createMediaPlayer("GuiManager/MediaPlayer");
-	//mMediaPlayer->hide();
+	mMiniPlayer = new MediaPlayerMini("GuiManager/MiniPlayer", 80, 100);
+	mMiniPlayer->setTop(80);
+	mMiniPlayer->setLeft(-mMiniPlayer->getWidth() - 20);
+	mMiniPlayer->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_RIGHT);
+	mMiniPlayer->hide();
+	mMiniPlayer->_assignListener(this);
+	mMiniPlayer->assignSliderListener(this);	
+	mPlayerTray->addChild(mMiniPlayer->getOverlayElement());
+	mTrackList = new TrackList("GuiManager/TrackList", Ogre::StringVector(), 20, mMiniPlayer->getTop() + mMiniPlayer->getHeight() + 10, 7);
+	mTrackList->hide();
+	mTrackList->_assignListener(this);
+	mPlayerTray->addChild(mTrackList->getOverlayElement());
 
 	// render texture [fade effect]
 	mTextRtt = Ogre::TextureManager::getSingleton().createManual("GuiManager/Texture/Rtt", 
@@ -86,6 +104,8 @@ mShutDown(false)
 
 GuiManager::~GuiManager()
 {
+	if (mAudioPlayer) delete mAudioPlayer;
+
 	Ogre::OverlayManager& om = Ogre::OverlayManager::getSingleton();
 
 	destroyAllWidgets();
@@ -102,12 +122,14 @@ GuiManager::~GuiManager()
 	om.destroy(mWidgetsLayer);
 	om.destroy(mCursorLayer);
 	om.destroy(mMenuBarLayer);
+	om.destroy(mPlayerLayer);
 
 	Widget::nukeOverlayElement(mBackdrop);
 	Widget::nukeOverlayElement(mTray);
 	Widget::nukeOverlayElement(mDialogWindows);
 	Widget::nukeOverlayElement(mCursor);
 	Widget::nukeOverlayElement(mDialogShade);
+	Widget::nukeOverlayElement(mPlayerTray);
 	Widget::nukeOverlayElement(mMenuBar->getOverlayElement());
 }
 
@@ -134,7 +156,13 @@ void GuiManager::destroyDialogWindow(Widget* windows)
 	windows->cleanup();
 	mWidgetDeathRow.push_back(windows);
 }
+void GuiManager::destroyMediaPlayer(MediaPlayer* player)
+{
+	if (!player) OGRE_EXCEPT(Ogre::Exception::ERR_ITEM_NOT_FOUND, "Widget does not exist.", "TrayManager::destroyWidget");
 
+	mPlayerTray->removeChild(player->getName());
+	player->cleanup();
+}
 
 
 void GuiManager::setExpandedMenu(SelectMenu* m)
@@ -180,6 +208,28 @@ bool GuiManager::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			hideBackdrop();
 	}
 
+	// audio player
+	if (mAudioPlayer && mAudioPlayer->isReady())
+	{
+		if (mAudioPlayer->endSound())
+		{
+			if (!mMiniPlayer->isRepeatMedia())
+			{
+				if (mMiniPlayer->isRandom()) mTrackList->selectRandomTrack();
+				else mTrackList->selectNextTrack();
+			}
+			_playTrack(mTrackList->getSelectedTrack());
+		}
+
+		mMiniPlayer->setSliderValue(mAudioPlayer->getActualTime(), mAudioPlayer->getDuration(), false);
+	}
+
+	if (mMiniPlayer->isVisible() && mAutoHidePlayer < 0)
+		hideMiniPlayer();
+
+	if (evt.timeSinceLastFrame < 0.5f && !mCursorOverPlayer) // :((
+		mAutoHidePlayer -= evt.timeSinceLastFrame;
+
 	return true;
 }
 
@@ -189,7 +239,27 @@ bool GuiManager::injectMouseMove(const OIS::MouseEvent& evt)
 
 	Ogre::Vector2 cursorPos(evt.state.X.abs, evt.state.Y.abs);
 	mCursor->setPosition(cursorPos.x, cursorPos.y);
-
+	
+	// miniplayer visibility
+	mCursorOverPlayer = false;
+	if (!mTrackList->isEmpty())
+	{
+		if (!mMiniPlayer->isVisible())
+		{
+			if (cursorPos.x >= mWindow->getWidth() - 10 && cursorPos.y > 60 && cursorPos.y < 170)
+			{
+				mMiniPlayer->show();
+				mAutoHidePlayer = 3;
+				mCursorOverPlayer = true;
+			}
+		}
+		else if (mMiniPlayer->isCursorOver(mMiniPlayer->getOverlayElement(), cursorPos, - 20) || 
+			(mTrackList->isVisible() && mTrackList->isCursorOver(mTrackList->getOverlayElement(), cursorPos, - 20)))
+		{
+			mCursorOverPlayer = true;
+		}
+	}
+	
 	if (mExpandedMenu)   // only check top priority widget until it passes on
 	{
 		mExpandedMenu->_cursorMoved(cursorPos);
@@ -213,6 +283,9 @@ bool GuiManager::injectMouseMove(const OIS::MouseEvent& evt)
 	mMenuBar->_cursorMoved(cursorPos);
 	if (mMenuBar->isMouseOver())
 		return true;
+
+	mMiniPlayer->_cursorMoved(cursorPos);
+	mTrackList->_cursorMoved(cursorPos);
 
 	if (!mWidgetsLayer->isVisible()) return false;
 	for (unsigned int i = 0; i < mWidgets.size(); i++)
@@ -257,6 +330,9 @@ bool GuiManager::injectMouseUp(const OIS::MouseEvent& evt, OIS::MouseButtonID id
 	if (mMenuBar->isMouseOver())
 		return true;
 
+	mMiniPlayer->_cursorReleased(cursorPos);
+	mTrackList->_cursorReleased(cursorPos);
+
 	for (unsigned int i = 0; i < mWidgets.size(); i++)
 	{
 		Widget* w = mWidgets[i];
@@ -298,6 +374,9 @@ bool GuiManager::injectMouseDown(const OIS::MouseEvent& evt, OIS::MouseButtonID 
 	mMenuBar->_cursorPressed(cursorPos);
 	if (mMenuBar->isMouseOver())
 		return true;
+
+	mMiniPlayer->_cursorPressed(cursorPos);
+	mTrackList->_cursorPressed(cursorPos);
 
 	for (unsigned int i = 0; i < mWidgets.size(); i++)
 	{
@@ -435,6 +514,7 @@ void GuiManager::setProgressBarCaption(const Ogre::DisplayString& caption)
 
 
 
+
 void GuiManager::buttonHit(Button* button)
 {
 	if (mListener)
@@ -444,6 +524,62 @@ void GuiManager::buttonHit(Button* button)
 	}
 	closeDialog();
 }
+
+void GuiManager::sliderOptionsMoved(SliderOptions* slider)
+{
+	if (mAudioPlayer && mAudioPlayer->isPlaying())
+	{
+		mAudioPlayer->forwardTime(slider->getValue());
+	}
+}
+
+void GuiManager::trackListHit(TrackList* track)
+{
+	_playTrack(track->getSelectedTrack());
+}
+
+void GuiManager::mediaPlayerMiniHit(MediaPlayerMini* miniPlayer)
+{
+	switch (miniPlayer->getSelectedAction())
+	{
+	case (MINI_PLAY):
+		if (mAudioPlayer) mAudioPlayer->Play();
+		else { mTrackList->selectTrack(0); _playTrack(mTrackList->getSelectedTrack()); }
+		break;
+	case (MINI_PAUSE):
+		if (mAudioPlayer) mAudioPlayer->Pause();
+		break;
+	case(MINI_STOP) :
+		_stopTrack();
+		break;
+	case(MINI_NEXT) :
+		if (mMiniPlayer->isRandom()) mTrackList->selectRandomTrack();
+		else mTrackList->selectNextTrack();
+		_playTrack(mTrackList->getSelectedTrack());
+		break;
+	case(MINI_PREV):
+		if (mMiniPlayer->isRandom()) mTrackList->selectRandomTrack();
+		else mTrackList->selectPrevTrack();
+		_playTrack(mTrackList->getSelectedTrack());
+		break;
+	case(MINI_VOLUME) :
+		if (mAudioPlayer)
+		{
+			if (mMiniPlayer->isSilence()) mAudioPlayer->setVolume(-10000);
+			else mAudioPlayer->setVolume(-500);
+		}
+		break;
+	case (MINI_TRACKLIST):
+		mTrackList->getOverlayElement()->setHorizontalAlignment(mMiniPlayer->getOverlayElement()->getHorizontalAlignment());
+		mTrackList->setTop(mMiniPlayer->getTop() + mMiniPlayer->getHeight() + 10);
+		mTrackList->setLeft(mMiniPlayer->getLeft());
+		if (mTrackList->isVisible()) mTrackList->hide();
+		else mTrackList->show();
+		break;
+	}
+}
+
+
 
 void GuiManager::showOkDialog(const Ogre::DisplayString& caption, const Ogre::DisplayString& message)
 {
@@ -579,5 +715,30 @@ void GuiManager::closeDialog()
 		mDialogDecorWindows = 0;
 		hideBackdrop();
 	}
+}
+
+
+
+void GuiManager::_playTrack(const Ogre::String& pathTrack)
+{
+	if (mAudioPlayer) delete mAudioPlayer;
+	mAudioPlayer = new DirectShowSound(const_cast<char *>(pathTrack.c_str()));
+	mAudioPlayer->Play();
+	mAudioPlayer->setVolume(-500);
+
+	if (mAudioPlayer->isPlaying())
+	{
+		mMiniPlayer->setSliderRange(0, mAudioPlayer->getDuration(), mAudioPlayer->getDuration() + 1);
+		mMiniPlayer->setCaptionTrack(boost::filesystem::path(pathTrack).stem().generic_string());
+	}
+}
+
+void GuiManager::_stopTrack()
+{
+	if (mAudioPlayer) { mAudioPlayer->Stop(); delete mAudioPlayer; }
+	mAudioPlayer = 0;
+	mMiniPlayer->setSliderValue(0, 0, false);
+	mMiniPlayer->setCaptionTrack("No track");
+	mTrackList->deselectAllTracks();
 }
 

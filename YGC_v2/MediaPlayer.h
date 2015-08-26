@@ -2,7 +2,17 @@
 #define _MEDIAPLAYER_H__
 
 #include "Widget.h"
-#include "Slider.h"
+#include "SliderOptions.h"
+
+enum ePlayerAction { MP_PLAY, MP_PAUSE, MP_STOP, MP_NEXT, MP_PREV, MP_VOLUME };
+
+struct sPlayerButton
+{
+	Ogre::PanelOverlayElement* panel;
+	Ogre::MaterialPtr matUp, matOver, matDown;
+	ButtonState currentState;
+	unsigned int action;
+};
 
 class MediaPlayer : public Widget
 {
@@ -14,34 +24,25 @@ public:
 	void _cursorPressed(const Ogre::Vector2& cursorPos);
 	void _cursorReleased(const Ogre::Vector2& cursorPos);
 	void _cursorMoved(const Ogre::Vector2& cursorPos);
-	void setState(const ButtonState& bs, sMiniButton& button);
+	void setState(const ButtonState& bs, sPlayerButton& button);
 
+	unsigned int getSelectedAction() { return mSelectedAction; }
 	void setSliderValue(Ogre::Real newVal, Ogre::Real maxValue, bool notifyListener = true);
-	Ogre::Real getSliderValue() { return mTimeSlider->getValue(); }
-	void setSliderRange(Ogre::Real minValue, Ogre::Real maxValue, unsigned int snaps)
-	{
-		mTimeSlider->setRange(minValue, maxValue, snaps); 
-		mBttPlay.action = "Pause";
-		mBttPlay.matUp = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Up");
-		mBttPlay.matOver = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Over");
-		mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Down");
-		setState(BS_UP, mBttPlay);
-	}
-	Ogre::String getCurrentAction() { return mCurrentAction; }
-	void hide() { mElement->hide(); this->_assignListener(NULL); mTimeSlider->_assignListener(NULL); }
-	void show(GuiListener* listener) { mElement->show(); this->_assignListener(listener); mTimeSlider->_assignListener(listener); }
+	Ogre::Real getSliderValue() { return mSlider->getValue(); }
+	void setSliderRange(Ogre::Real minValue, Ogre::Real maxValue, unsigned int snaps);
+	void _assignSliderListener(GuiListener* listener) { mSlider->_assignListener(listener); }
 
 private:
 	Ogre::String secondsToString(int totalSeconds);
 	Ogre::String minutesToString(int totalSeconds);
 
 	Ogre::String mNameMediaPlayer;
-	Slider* mTimeSlider;
-	sMiniButton  mBttPlay, mBttStop, mBttNext, 
-		mBttPrevious, mBttVolume;
-	Ogre::FontPtr mFont; // Font used for items
+	SliderOptions* mSlider;
+	sPlayerButton  mBttPlay, mBttStop, mBttNext;
+	sPlayerButton mBttPrevious, mBttVolume;
 	Ogre::TextAreaOverlayElement* mTextTime;
-	Ogre::String mCurrentAction;
+	unsigned int mSelectedAction;
+	bool mRepeatMedia, mSilence, mRandomMedia;
 };
 
 #endif // #ifndef _MEDIAPLAYER_H__

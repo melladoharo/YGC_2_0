@@ -3,22 +3,22 @@
 
 MediaPlayerMini::MediaPlayerMini(const Ogre::String& name, Ogre::Real left, Ogre::Real top) :
 mNamePlayer(name),
-mSelectedAction(MP_STOP),
+mSelectedAction(MINI_STOP),
 mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 {
 	// create background for elements
 	Ogre::OverlayManager& om = Ogre::OverlayManager::getSingleton();
 	mElement = om.createOverlayElement("Panel", mNamePlayer);
 	mElement->setMetricsMode(Ogre::GMM_PIXELS);
-	mElement->setWidth(400);
-	mElement->setHeight(70 + 33);
 	mElement->setHorizontalAlignment(Ogre::GHA_LEFT);
 	mElement->setVerticalAlignment(Ogre::GVA_TOP);
+	mElement->setHeight(70 + 33);
+	mElement->setWidth(400);
 	mElement->setTop(top);
 	mElement->setLeft(left);
 	mElement->setMaterialName("YgcGui/Thumbnail/Dark");
 	Ogre::OverlayContainer* c = (Ogre::OverlayContainer*)mElement;
-
+	
 	mDecorVol = om.createOverlayElement("Panel", mNamePlayer + "/Element/DecorVol");
 	mDecorVol->setMetricsMode(Ogre::GMM_PIXELS);
 	mDecorVol->setWidth(24);
@@ -32,7 +32,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 
 	mCaptionMedia = (Ogre::TextAreaOverlayElement*)om.createOverlayElement("TextArea", mNamePlayer + "/TextArea/CaptionMedia");
 	mCaptionMedia->setMetricsMode(Ogre::GMM_PIXELS);
-	mCaptionMedia->setCaption("No media");
+	mCaptionMedia->setCaption("No track");
 	mCaptionMedia->setFontName("YgcFont/SemiBold/21");
 	mCaptionMedia->setCharHeight(20);
 	mCaptionMedia->setColour(Ogre::ColourValue(0.84f, 0.85f, 0.84f));
@@ -42,7 +42,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 
 	mTextTime = (Ogre::TextAreaOverlayElement*)om.createOverlayElement("TextArea", mNamePlayer + "/TextArea/Time");
 	mTextTime->setMetricsMode(Ogre::GMM_PIXELS);
-	mTextTime->setCaption("99:99/99:99");
+	mTextTime->setCaption("00:00/00:00");
 	mTextTime->setFontName("YgcFont/SemiBold/21");
 	mTextTime->setCharHeight(18);
 	mTextTime->setColour(Ogre::ColourValue(0.84f, 0.85f, 0.84f));
@@ -50,7 +50,10 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mTextTime->setLeft(mElement->getWidth() - sizeInPixels(mTextTime->getCaption(), mTextTime->getFontName(), mTextTime->getCharHeight(), mTextTime->getSpaceWidth()) - 12);
 	c->addChild(mTextTime);
 
-	mSlider = new SliderOptions(mNamePlayer + "/Slider/Time", "", -195, 37, 500, 0, 100, 101);
+	Ogre::Real sizeTextTime = sizeInPixels(mTextTime->getCaption(), mTextTime->getFontName(), mTextTime->getCharHeight(), mTextTime->getSpaceWidth());
+	Ogre::Real sliderWidth = (mElement->getWidth() - ((sizeTextTime - 6) * 2) ) * 2;
+	Ogre::Real sliderLeft = (-sliderWidth/2) + 7 + 24 + 25;
+	mSlider = new SliderOptions(mNamePlayer + "/Slider/Time", "", sliderLeft, 37, sliderWidth, 0, 100, 101);
 	mSlider->disableElements();
 	c->addChild(mSlider->getOverlayElement());
 
@@ -63,7 +66,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttVolume.panel->setLeft(mElement->getWidth() - 38);
 	mBttVolume.panel->setMaterialName(mSilence ? "YgcGui/MiniVolume/Disable/Up" : "YgcGui/MiniVolume/Enable/Up");
 	mBttVolume.currentState = BS_UP;
-	mBttVolume.action = MP_VOLUME;
+	mBttVolume.action = MINI_VOLUME;
 	c->addChild(mBttVolume.panel);
 
 	mBttRandom.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Random");
@@ -74,7 +77,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttRandom.panel->setLeft(mBttVolume.panel->getLeft() - 40 - 0.5f);
 	mBttRandom.panel->setMaterialName(mRandomMedia ? "YgcGui/MiniRandom/Enable/Up" : "YgcGui/MiniRandom/Disable/Up");
 	mBttRandom.currentState = BS_UP;
-	mBttRandom.action = MP_RANDOM;
+	mBttRandom.action = MINI_RANDOM;
 	c->addChild(mBttRandom.panel);
 
 	mBttRepeat.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Repeat");
@@ -85,7 +88,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttRepeat.panel->setLeft(mBttRandom.panel->getLeft() - 40 - 0.5f);
 	mBttRepeat.panel->setMaterialName(mRepeatMedia ? "YgcGui/MiniRepeat/Enable/Up" : "YgcGui/MiniRepeat/Disable/Up");
 	mBttRepeat.currentState = BS_UP;
-	mBttRepeat.action = MP_REPEAT;
+	mBttRepeat.action = MINI_REPEAT;
 	c->addChild(mBttRepeat.panel);
 
 	mBttList.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniList/Next");
@@ -99,7 +102,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttList.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniList/Down");
 	mBttList.panel->setMaterialName(mBttList.matUp->getName());
 	mBttList.currentState = BS_UP;
-	mBttList.action = MP_TRACKLIST;
+	mBttList.action = MINI_TRACKLIST;
 	c->addChild(mBttList.panel);
 
 	mBttNext.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Next");
@@ -113,7 +116,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttNext.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniNext/Down");
 	mBttNext.panel->setMaterialName(mBttNext.matUp->getName());
 	mBttNext.currentState = BS_UP;
-	mBttNext.action = MP_NEXT;
+	mBttNext.action = MINI_NEXT;
 	c->addChild(mBttNext.panel);
 
 	mBttStop.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Pause");
@@ -127,7 +130,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttStop.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniStop/Down");
 	mBttStop.panel->setMaterialName(mBttStop.matUp->getName());
 	mBttStop.currentState = BS_UP;
-	mBttStop.action = MP_STOP;
+	mBttStop.action = MINI_STOP;
 	c->addChild(mBttStop.panel);
 
 	mBttPlay.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Play");
@@ -141,7 +144,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Down");
 	mBttPlay.panel->setMaterialName(mBttPlay.matUp->getName());
 	mBttPlay.currentState = BS_UP;
-	mBttPlay.action = MP_PLAY;
+	mBttPlay.action = MINI_PLAY;
 	c->addChild(mBttPlay.panel);
 
 	mBttPrevious.panel = (Ogre::PanelOverlayElement *)om.createOverlayElement("Panel", mNamePlayer + "/MiniButton/Previous");
@@ -155,7 +158,7 @@ mRepeatMedia(false), mSilence(false), mRandomMedia(false)
 	mBttPrevious.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPrevious/Down");
 	mBttPrevious.panel->setMaterialName(mBttPrevious.matUp->getName());
 	mBttPrevious.currentState = BS_UP;
-	mBttPrevious.action = MP_PREVIOUS;
+	mBttPrevious.action = MINI_PREV;
 	c->addChild(mBttPrevious.panel);
 }
 
@@ -257,12 +260,7 @@ void MediaPlayerMini::_cursorPressed(const Ogre::Vector2& cursorPos)
 	if (isCursorOver(mBttPrevious.panel, cursorPos)) setState(BS_DOWN, mBttPrevious);
 	if (isCursorOver(mBttNext.panel, cursorPos)) setState(BS_DOWN, mBttNext);
 	if (isCursorOver(mBttList.panel, cursorPos)) setState(BS_DOWN, mBttList);
-	if (isCursorOver(mBttVolume.panel, cursorPos))
-	{
-		mBttVolume.currentState = BS_DOWN;
-		mSilence = !mSilence;
-		mBttVolume.panel->setMaterialName(mSilence ? "YgcGui/MiniVolume/Disable/Over" : "YgcGui/MiniVolume/Enable/Over");
-	}
+	if (isCursorOver(mBttVolume.panel, cursorPos)) { mBttVolume.currentState = BS_DOWN; }
 	if (isCursorOver(mBttRepeat.panel, cursorPos))
 	{
 		mBttRepeat.currentState = BS_DOWN;
@@ -285,19 +283,27 @@ void MediaPlayerMini::_cursorReleased(const Ogre::Vector2& cursorPos)
 	{
 		if (mBttPlay.matDown->getName() == "YgcGui/MiniPlay/Down")
 		{
-			mBttPlay.action = MP_PAUSE;
+			mBttPlay.action = MINI_PAUSE;
 			mBttPlay.matUp = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Up");
 			mBttPlay.matOver = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Over");
 			mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Down");
 		}
 		else
 		{
-			mBttPlay.action = MP_PLAY;
+			mBttPlay.action = MINI_PLAY;
 			mBttPlay.matUp = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Up");
 			mBttPlay.matOver = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Over");
 			mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPlay/Down");
 		}
 		setState(BS_OVER, mBttPlay);
+		if (mListener) mListener->mediaPlayerMiniHit(this);
+	}
+	if (mBttVolume.currentState==BS_DOWN)
+	{
+		mBttVolume.currentState = BS_OVER;
+		mSilence = !mSilence;
+		mBttVolume.panel->setMaterialName(mSilence ? "YgcGui/MiniVolume/Disable/Over" : "YgcGui/MiniVolume/Enable/Over");
+		mSelectedAction = MINI_VOLUME;
 		if (mListener) mListener->mediaPlayerMiniHit(this);
 	}
 	if (mBttStop.currentState == BS_DOWN)
@@ -336,6 +342,51 @@ void MediaPlayerMini::setState(const ButtonState& bs, sMiniPlayerButton& button)
 	}
 
 	button.currentState = bs;
+}
+
+
+
+void MediaPlayerMini::setSliderValue(Ogre::Real newVal, Ogre::Real maxValue, bool notifyListener /*= true*/)
+{
+	mSlider->setValue(newVal, notifyListener);
+
+	int secondsVal = newVal;
+	Ogre::String currentSeconds = _secondsToString(secondsVal) + ":" + _minutesToString(secondsVal);
+	secondsVal = maxValue;
+	Ogre::String totalSeconds = _secondsToString(secondsVal) + ":" + _minutesToString(secondsVal);
+
+	mTextTime->setCaption(currentSeconds + "/" + totalSeconds);
+}
+
+
+
+void MediaPlayerMini::setSliderRange(Ogre::Real minValue, Ogre::Real maxValue, unsigned int snaps)
+{
+	mSlider->setRange(minValue, maxValue, snaps);
+	mBttPlay.action = MINI_PAUSE;
+	mBttPlay.matUp = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Up");
+	mBttPlay.matOver = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Over");
+	mBttPlay.matDown = Ogre::MaterialManager::getSingleton().getByName("YgcGui/MiniPause/Down");
+	setState(BS_UP, mBttPlay);
+}
+
+
+Ogre::String MediaPlayerMini::_secondsToString(int totalSeconds)
+{
+	Ogre::String strSeconds = Ogre::StringConverter::toString(totalSeconds / 60);
+	if (strSeconds.size() == 1)
+		strSeconds = "0" + strSeconds;
+
+	return strSeconds;
+}
+
+Ogre::String MediaPlayerMini::_minutesToString(int totalSeconds)
+{
+	Ogre::String strSeconds = Ogre::StringConverter::toString(totalSeconds % 60);
+	if (strSeconds.size() == 1)
+		strSeconds = "0" + strSeconds;
+
+	return strSeconds;
 }
 
 

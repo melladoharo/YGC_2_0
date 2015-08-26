@@ -63,7 +63,7 @@ void MenuBar::createMenuGame()
 	_createNewOption("mbw_game_review", "Review", currLeft);
 	_createNewOption("mbw_game_images", "Images", currLeft);
 	_createNewOption("mbw_game_videos", "Videos", currLeft);
-	_createNewOption("mbw_game_music", "Music", currLeft);
+	//_createNewOption("mbw_game_music", "Music", currLeft);
 	_createNewOption("mbw_game_models", "Models", currLeft);
 	_createNewOption("mbw_game_collector", "Collector", currLeft);
 	_createNewOption("mbw_game_play", "Play", currLeft);

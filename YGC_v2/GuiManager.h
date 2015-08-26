@@ -21,6 +21,7 @@
 #include "FileExplorer.h"
 #include "LineEdit.h"
 #include "DepthOfFieldEffect.h"
+#include "UtilsOgreDshow.h"
 
 class GuiManager : public GuiListener, public Ogre::ResourceGroupListener
 {
@@ -61,18 +62,23 @@ public:
 	void setDofEffectAperture(Ogre::Real newAperture) { if (mDofEffect) mDofEffect->setAperture(newAperture); }
 	Ogre::Real getDofEffectAperture() { return (mDofEffect) ? mDofEffect->getAperture() : 0; }
 
-	// media player
-	void showMediaPlayer(GuiListener* listener) { mMediaPlayer->show(listener); }
-	void hideMediaPlayer() { mMediaPlayer->hide(); }
-	void setMediaPlayerSliderValue(Ogre::Real newVal, Ogre::Real maxValue, bool notifyListener = true) { mMediaPlayer->setSliderValue(newVal, maxValue, notifyListener); }
-	Ogre::Real getMediaPlayerSliderValue() { return mMediaPlayer->getSliderValue(); }
-	void setMediaPlayerRange(Ogre::Real minValue, Ogre::Real maxValue, unsigned int snaps) { mMediaPlayer->setSliderRange(minValue, maxValue, snaps); }
+	// media player and miniplayer
+	MediaPlayerMini* getDefaultMiniPlayer() { return mMiniPlayer; }
+	TrackList* getDefaultTrackList() { return mTrackList; }
+	bool isMiniPlaying() { return (mAudioPlayer && mAudioPlayer->isPlaying()); }
+	void playMiniPlayer() { if (mAudioPlayer && mAudioPlayer->isPaused()) mAudioPlayer->Play(); }
+	void pauseMiniPlayer() { if (mAudioPlayer) mAudioPlayer->Pause(); }
+	void stopMiniPlayer() { _stopTrack(); hideMiniPlayer(); }
 
 	// VISIBILITY
 	void showWidgets() { mWidgetsLayer->show(); }
 	void hideWidgets() { mWidgetsLayer->hide(); }
 	void showMenuBar() { mMenuBar->show(); }
 	void hideMenuBar() { mMenuBar->hide(); }
+	void showMiniPlayer() { mAutoHidePlayer = 3; mMiniPlayer->show(); mTrackList->hide(); }
+	void hideMiniPlayer() { mMiniPlayer->hide(); mTrackList->hide(); }
+	void showTrackList() { mTrackList->show(); }
+	void hideTrackList() { mTrackList->hide(); }
 	void showAll() { showBackdrop(); showMenuBar(); showWidgets(); showCursor(); }
 	void hideAll() { hideBackdrop(); hideMenuBar(); hideWidgets(); hideCursor(); }
 	bool isCursorVisible() { return mCursorLayer->isVisible(); }
@@ -143,6 +149,9 @@ public:
 
 	// Listener
 	void buttonHit(Button* button);
+	void mediaPlayerMiniHit(MediaPlayerMini* miniPlayer);
+	void trackListHit(TrackList* track);
+	void sliderOptionsMoved(SliderOptions* slider);
 
 	// Fade effect
 	void enableFadeEffect()
@@ -357,30 +366,33 @@ public:
 		return pb;
 	}
 
-	TrackList* createTrackList(const Ogre::String& name, const Ogre::StringVector& tracks, Ogre::Real left, Ogre::Real top)
+	// manual widget
+	MediaPlayer* createMediaPlayer(const Ogre::String& namePlayer)
 	{
-		TrackList* tl = new TrackList(name, tracks, left, top);
+		MediaPlayer* mp = new MediaPlayer(namePlayer);
+		//mWidgets.push_back(mp);
+		mPlayerTray->addChild(mp->getOverlayElement());
+		mp->_assignListener(mListener);
+		return mp;
+	}
+	void destroyMediaPlayer(MediaPlayer* player);
+
+	MediaPlayerMini* createMediaPlayerMini(const Ogre::String& name, Ogre::Real left, Ogre::Real top)
+	{
+		MediaPlayerMini* mpm = new MediaPlayerMini(name, left, top);
+		mWidgets.push_back(mpm);
+		mTray->addChild(mWidgets.back()->getOverlayElement());
+		mpm->_assignListener(mListener);
+		return mpm;
+	}
+
+	TrackList* createTrackList(const Ogre::String& name, const Ogre::StringVector& tracks, Ogre::Real left, Ogre::Real top, unsigned int maxItemShown)
+	{
+		TrackList* tl = new TrackList(name, tracks, left, top, maxItemShown);
 		mWidgets.push_back(tl);
 		mTray->addChild(mWidgets.back()->getOverlayElement());
 		tl->_assignListener(mListener);
 		return tl;
-	}
-
-	MediaPlayer* createMediaPlayer(const Ogre::String& namePlayer)
-	{
-		MediaPlayer* mp = new MediaPlayer(namePlayer);
-		mWidgets.push_back(mp);
-		mTray->addChild(mWidgets.back()->getOverlayElement());
-		mp->_assignListener(mListener);
-		return mp;
-	}
-
-	MediaPlayerMini* createMediaPlayerMini()
-	{
-		MediaPlayerMini* mpm = new MediaPlayerMini;
-		mWidgets.push_back(mpm);
-		mTray->addChild(mWidgets.back()->getOverlayElement());
-		return mpm;
 	}
 
 	DialogWindows* createDialogWindow(const Ogre::String& name, const Ogre::DisplayString& caption, Ogre::Real left, Ogre::Real top, Ogre::Real width, Ogre::Real height)
@@ -418,6 +430,8 @@ public:
 	}
 
 protected:
+	void _playTrack(const Ogre::String& pathTrack);
+	void _stopTrack();
 	void setExpandedMenu(SelectMenu* m);
 	
 	Ogre::String mName;                   // name of this tray system
@@ -431,29 +445,36 @@ protected:
 	Ogre::Overlay* mCursorLayer;          // cursor layer
 	Ogre::Overlay* mMenuBarLayer;		  // menu bar layer
 	Ogre::Overlay* mWindowsLayer;
+	Ogre::Overlay* mPlayerLayer;		  // media player layer
 	Ogre::OverlayContainer* mBackdrop;    // backdrop
 	Ogre::OverlayContainer* mCursor;      // cursor
 	Ogre::OverlayContainer* mTray;
 	Ogre::OverlayContainer* mDialogWindows;
 	Ogre::OverlayContainer* mDialogShade; // top priority dialog shade
+	Ogre::OverlayContainer* mPlayerTray;
 	WidgetList mWidgets;			      // widgets
 	WidgetList mWidgetDeathRow;           // widget queue for deletion
 	GuiListener* mListener;				  // tray listener
 	MenuBar* mMenuBar;
 	MediaPlayer* mMediaPlayer;
+	MediaPlayerMini* mMiniPlayer;
+	TrackList* mTrackList;
 	SelectMenu* mExpandedMenu;            // top priority expanded menu widget
 	ProgressBar* mLoadBar;				  // progress bar widget
 	DialogWindows* mDialogDecorWindows;
 	Button* mOk, *mYes, *mNo;
 	SimpleText* mDialogMessage;
 	DOFManager* mDofEffect;				  // Depth of field effect
+	DirectShowSound* mAudioPlayer;
 	Ogre::RenderTexture* mRenderText;
 	Ogre::TexturePtr mTextRtt;
 	Ogre::MaterialPtr mMatRtt;
 	Ogre::Timer* mTimer;                  // Root::getSingleton().getTimer()
 	Ogre::Real mFadeAmount;				  // [0 - 1]  [not-visible - visible]
+	Ogre::Real mAutoHidePlayer;
 	unsigned long mLastStatUpdateTime;    // The last time the stat text were updated
 	bool mCursorWasVisible;               // cursor state before showing dialog
+	bool mCursorOverPlayer;
 	bool mShutDown;
 };
 

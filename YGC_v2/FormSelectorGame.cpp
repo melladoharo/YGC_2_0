@@ -75,6 +75,8 @@ mFormCollector(0)
 	mTrayMgr->enableFadeEffect();
 	mTrayMgr->showMenuBar();
 	mTrayMgr->showCursor();
+	if (!mTrayMgr->getDefaultTrackList()->isEmpty())
+		mTrayMgr->showMiniPlayer();
 }
 
 
@@ -89,6 +91,7 @@ FormSelectorGame::~FormSelectorGame()
 	if (mFormCollector) delete mFormCollector;
 
 	mGameInfo->destroyResourceGroup();
+	mTrayMgr->stopMiniPlayer();
 }
 
 void FormSelectorGame::menuBarItemHit(MenuBar* menu)
