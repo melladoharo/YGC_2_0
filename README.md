@@ -6,6 +6,6 @@ If you have any suggestions or questions you can send it here: [melladoharo@gmai
 
 ![Alt text](./YGC_v2/media/screenshots/form_overview.jpg?raw=true "Form Overview")
 
-![Alt text](./YGC_v2/media/screenshots/form_games.jpg?raw=true "Form Overview")
+![Alt text](./YGC_v2/media/screenshots/form_games.jpg?raw=true "Form Games")
 
-![Alt text](./YGC_v2/media/screenshots/form_models.jpg?raw=true "Form Models")
+![Alt text](./YGC_v2/media/screenshots/form_models_2.jpg?raw=true "Form Models")
