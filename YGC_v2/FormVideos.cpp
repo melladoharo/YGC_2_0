@@ -149,7 +149,8 @@ bool FormVideos::mouseMoved(const OIS::MouseEvent &arg)
 		}
 	}
 
-	if (!mTrayMgr->isWindowDialogVisible()) // is a option windows visible? if not, continue
+	// is a option windows or mediaplayer visible? if not, continue
+	if (!mTrayMgr->isWindowDialogVisible() && !mTrayMgr->isMiniPlayerVisible()) 
 	{
 		if (mVideoPlayer && arg.state.Y.abs >= (mScreenSize.y - 55)) mPlayer->show();
 		else mPlayer->hide();

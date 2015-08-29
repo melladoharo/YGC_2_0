@@ -94,6 +94,7 @@ public:
 	bool isWidgetsVisible() { return mWidgetsLayer->isVisible(); }
 	bool isWindowDialogVisible() { return mWindowsLayer->isVisible(); }
 	bool isDialogVisible() { return mDialogDecorWindows != 0; }
+	bool isMiniPlayerVisible() { return mMiniPlayer->isVisible(); }
 
 	/*-----------------------------------------------------------------------------
 	| Displays specified material on backdrop, or the last material used if

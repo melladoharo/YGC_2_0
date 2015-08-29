@@ -104,7 +104,8 @@ bool FormImages::mouseMoved(const OIS::MouseEvent &arg)
 {
 	if (mTrayMgr->injectMouseMove(arg)) return true;
 
-	if (!mTrayMgr->isWindowDialogVisible()) // is a option windows visible? if not, continue
+	// is a option windows or mediaplayer visible? if not, continue
+	if (!mTrayMgr->isWindowDialogVisible() && !mTrayMgr->isMiniPlayerVisible()) 
 	{
 		// mouse ray [intersection with objects]
 		Ogre::Ray mouseRay = mTrayMgr->getCursorRay(mCamera);
