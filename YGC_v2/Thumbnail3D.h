@@ -21,16 +21,15 @@ public:
 	~Thumbnail3D();
 
 	bool isVisible() { return mVisible; }
-	void show() { if (mNodeThumb) mNodeThumb->setVisible(true); mVisible = true; }
-	void hide() { if (mNodeThumb) mNodeThumb->setVisible(false); mVisible = false; }
+	void show() { mNodeThumb->setVisible(true); mNodeThumbBack->setVisible(true); mVisible = true; }
+	void hide() { mNodeThumb->setVisible(false); mNodeThumbBack->setVisible(false); mVisible = false; }
 	bool isMouseOver() { return (mState == BS_OVER); }
 	void setMouseOver();
 	void setMouseUp();
 	void setIndex(unsigned int newIndex) { mIndex = newIndex; }
 	unsigned int getIndex() { return mIndex; }
-	void setPosition(const Ogre::Vector3& newPos) { if (mNodeThumb) mNodeThumb->setPosition(newPos); }
+	void setPosition(const Ogre::Vector3& newPos) { mNodeThumb->setPosition(newPos); mNodeThumbBack->setPosition(newPos); }
 	Ogre::Vector3 getPosition() { return mNodeThumb->getPosition(); }
-	void scale(Ogre::Vector3 newScl) { mNodeThumb->scale(newScl); }
 	void setScale(Ogre::Vector3 newScl) { _resizeThumb(newScl); }
 	void setMaterialWidget(Ogre::String nameMaterial) { mThumbWidget->setMaterial(nameMaterial); }
 	Ogre::String getName() { return (mEntThumb) ? mEntThumb->getName() : Ogre::StringUtil::BLANK; }
@@ -47,7 +46,9 @@ private:
 	Ogre::SceneManager* mSceneMgr;				// default scene manager 
 	Ogre::Camera* mCamera;						// default scene camera
 	Ogre::SceneNode* mNodeThumb;				// scene node for 3d rectangle model
+	Ogre::SceneNode* mNodeThumbBack;
 	Ogre::Entity* mEntThumb;					// entity for thumbnail
+	Ogre::Entity* mEntThumbBack;
 	Ogre::MaterialPtr matThumb;					// mat fot thumbnail
 	Thumbnail* mThumbWidget;					// thumbnail mouse over 
 	Ogre::Overlay* mThumbLayer;					// overlay for thumbnail widget [mthumbwidget]

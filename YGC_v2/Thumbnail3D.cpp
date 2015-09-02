@@ -10,7 +10,7 @@ mThumbWidget(0), mThumbLayer(0), mElement(0),
 mName(name), mCaption(caption), mTextName(textName), mNameGroup(nameGroupRes),
 mIndex(0),
 mState(BS_UP),
-mVisible(true)
+mVisible(true) 
 {
 	// new 3d plane [from mesh_thumb.mesh] for thumbnail
 	mEntThumb = mSceneMgr->createEntity("Mesh/Thumbnail3D/" + mName, "mesh_thumb.mesh");
@@ -21,13 +21,21 @@ mVisible(true)
 	mNodeThumb->setPosition(0, 0, 0);
 	mNodeThumb->pitch(Ogre::Degree(90));
 
+	mEntThumbBack = mSceneMgr->createEntity("Mesh/Thumbnail3D_Back/" + mName, "mesh_thumb.mesh");
+	mEntThumbBack->setCastShadows(false);
+	mEntThumbBack->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
+	mNodeThumbBack = rootNode->createChildSceneNode();
+	mNodeThumbBack->attachObject(mEntThumbBack);
+	mNodeThumbBack->setPosition(0, 0, 0);
+	mNodeThumbBack->pitch(Ogre::Degree(90));
+
 	// new material with texture from images
 	matThumb = Ogre::MaterialManager::getSingleton().create("Mat/YgcGui/Thumbnail3D/" + mName, nameGroupRes);
 	matThumb->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
 	matThumb->getTechnique(0)->getPass(0)->setLightingEnabled(false);
 	matThumb->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 	matThumb->getTechnique(0)->getPass(0)->createTextureUnitState(mTextName);
-	mEntThumb->getSubEntity(1)->setMaterialName(matThumb->getName());
+	mEntThumb->getSubEntity(0)->setMaterialName(matThumb->getName());
 
 	// resize thumb to correct aspect ratio
 	_resizeThumb(Ogre::Vector3(2.7f, 2.7f, 2.7f));
@@ -39,8 +47,11 @@ Thumbnail3D::~Thumbnail3D()
 	Ogre::MaterialManager::getSingleton().unload(matThumb->getName());
 	Ogre::MaterialManager::getSingleton().remove(matThumb->getName());
 	mNodeThumb->detachAllObjects();
+	mNodeThumbBack->detachAllObjects();
 	mSceneMgr->destroyEntity(mEntThumb);
+	mSceneMgr->destroyEntity(mEntThumbBack);
 	mSceneMgr->destroySceneNode(mNodeThumb);
+	mSceneMgr->destroySceneNode(mNodeThumbBack);
 }
 
 
@@ -138,12 +149,16 @@ Thumbnail3D* Thumbnail3D::getThumbnail3dOver(std::vector<Thumbnail3D*>& thumbs, 
 void Thumbnail3D::_resizeThumb(const Ogre::Vector3& scl)
 {
 	mNodeThumb->setScale(scl);
+	mNodeThumbBack->setScale(scl);
 	Ogre::Real sizeTexX = matThumb->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions().first;
 	Ogre::Real sizeTexY = matThumb->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions().second;
 	Ogre::Vector3 sclFactor(mNodeThumb->getScale());
 	Ogre::Real ratio = sizeTexX / sizeTexY;
 	sclFactor.x *= ratio;
 	mNodeThumb->setScale(sclFactor);
+	sclFactor.x += 0.09f;
+	sclFactor.z += 0.09f;
+	mNodeThumbBack->setScale(sclFactor);
 }
 
 Ogre::Vector2 Thumbnail3D::_getScreenPosition(Ogre::Vector3 position)
