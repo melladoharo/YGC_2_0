@@ -51,6 +51,13 @@ SI_Error ConfigReader::_createDefaultConfig()
 	mReader->SetDoubleValue("FORM.GAMES", "Thumbs_Left", -21);
 	mReader->SetDoubleValue("FORM.GAMES", "Thumbs_Horizontal_Sep", 11.5f);
 	mReader->SetDoubleValue("FORM.GAMES", "Thumbs_Vertial_Sep", 6.25f);
+	mReader->SetValue("FORM.SAGAS", "Thumbs_Resolution", "256");
+	mReader->SetDoubleValue("FORM.SAGAS", "Thumbs_Rows", 3);
+	mReader->SetDoubleValue("FORM.SAGAS", "Thumbs_Size", 2.77f);
+	mReader->SetDoubleValue("FORM.SAGAS", "Thumbs_Top", 3);
+	mReader->SetDoubleValue("FORM.SAGAS", "Thumbs_Left", -21);
+	mReader->SetDoubleValue("FORM.SAGAS", "Thumbs_Horizontal_Sep", 11.5f);
+	mReader->SetDoubleValue("FORM.SAGAS", "Thumbs_Vertial_Sep", 6.25f);
 	mReader->SetValue("FORM.IMAGES", "Thumbs_Resolution", "128");
 	mReader->SetDoubleValue("FORM.IMAGES", "Thumbs_Rows", 3);
 	mReader->SetDoubleValue("FORM.IMAGES", "Thumbs_Size", 2.77f);

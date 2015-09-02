@@ -2,6 +2,7 @@
 #include "FormSelectorMain.h"
 #include "FormBase.h"
 #include "FormGames.h"
+#include "FormSagas.h"
 #include "FormOptions.h"
 #include "ConfigReader.h"
 
@@ -10,6 +11,7 @@ mTrayMgr(tray),
 mOldListener(oldListener),
 mFormCurrent(0),
 mFormGames(0),
+mFormSagas(0),
 mFormOptions(0)
 {
 	mTrayMgr->setListener(this);
@@ -17,6 +19,12 @@ mFormOptions(0)
 	mTrayMgr->loadMenuBarMain();
 
 	// default form for info game
+	mFormSagas = new FormSagas(ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Sagas", "./Sagas"), mTrayMgr, this);
+	mFormSagas->hide();
+	mFormSagas->disableForm();
+	mFormOptions = new FormOptions(mTrayMgr, this);
+	mFormOptions->hide();
+	mFormOptions->disableForm();
 	mFormGames = new FormGames(ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Games", "./Games"), mTrayMgr, this);
 	mFormCurrent = mFormGames;
 }
@@ -25,6 +33,7 @@ mFormOptions(0)
 FormSelectorMain::~FormSelectorMain()
 {
 	if (mFormGames) delete mFormGames;
+	if (mFormSagas) delete mFormSagas;
 	if (mFormOptions) delete mFormOptions;
 }
 
@@ -43,7 +52,8 @@ void FormSelectorMain::menuBarItemHit(MenuBar* menu)
 	}
 	else if (menu->getSelectedItem() == "mbw_main_sagas")
 	{
-
+		if (!mFormSagas) mFormSagas = new FormSagas(ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Sagas", "./Sagas"), mTrayMgr, this);
+		mFormCurrent = mFormSagas;
 	}
 	else if (menu->getSelectedItem() == "mbw_main_options")
 	{
@@ -55,7 +65,7 @@ void FormSelectorMain::menuBarItemHit(MenuBar* menu)
 	if (mFormCurrent)
 	{
 		previousForm->hide();
-		//previousForm->disableForm(); // some forms need to be update every frame
+		previousForm->disableForm();
 		mFormCurrent->enableForm();
 		mFormCurrent->show();
 	}
