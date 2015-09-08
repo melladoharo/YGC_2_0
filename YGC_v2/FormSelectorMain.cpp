@@ -57,7 +57,12 @@ void FormSelectorMain::menuBarItemHit(MenuBar* menu)
 	}
 	else if (menu->getSelectedItem() == "mbw_saga_home")
 	{
-		mFormSagas->removeSaga();
+		mFormSagas->removeSagaForm();
+		mTrayMgr->loadMenuBarMain(1);
+	}
+	else if (menu->getSelectedItem() == "mbw_new_saga_back")
+	{
+		mFormSagas->removeNewSagaForm();
 		mTrayMgr->loadMenuBarMain(1);
 	}
 	else if (menu->getSelectedItem() == "mbw_main_options")

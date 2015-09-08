@@ -4,6 +4,7 @@
 #include "FormBase.h"
 #include "GameInfo.h"
 #include "Thumbnail3D.h"
+#include "FormNewSaga.h"
 #include "FormSagaOverview.h"
 
 class FormSagas : public FormBase
@@ -39,10 +40,12 @@ public:
 	void sliderOptionsMoved(SliderOptions* slider);
 
 	// Forms control
-	void removeSaga();
+	void removeNewSagaForm();
+	void removeSagaForm();
 
 private:
 	FormSagaOverview* mFormSagaOverview;
+	FormNewSaga* mFormNewSaga;
 	Ogre::SceneNode* mParentThumbs;
 	std::vector<GameInfo*> mGameInfo;
 	std::vector<Thumbnail3D*> mThumbs;

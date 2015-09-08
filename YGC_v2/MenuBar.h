@@ -33,6 +33,7 @@ public:
 	void createMenuGame();
 	void createMenuNewGame();
 	void createMenuSaga();
+	void createMenuNewSaga();
 
 	Ogre::DisplayString getSelectedItem()
 	{

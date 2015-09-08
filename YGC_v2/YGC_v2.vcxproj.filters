@@ -170,6 +170,9 @@
     <ClCompile Include="FormSagaOverview.cpp">
       <Filter>Archivos de código fuente</Filter>
     </ClCompile>
+    <ClCompile Include="FormNewSaga.cpp">
+      <Filter>Archivos de código fuente</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Background.h">
@@ -338,6 +341,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="FormSagaOverview.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="FormNewSaga.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

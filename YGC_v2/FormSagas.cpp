@@ -4,6 +4,7 @@
 FormSagas::FormSagas(const Ogre::String& pathSagas, GuiManager* tray, GuiListener* oldListener /*= 0*/) : 
 FormBase(tray, oldListener),
 mFormSagaOverview(0),
+mFormNewSaga(0),
 mParentThumbs(mSceneMgr->getRootSceneNode()->createChildSceneNode()),
 mLastThumbOver(0)
 {
@@ -70,6 +71,7 @@ mLastThumbOver(0)
 FormSagas::~FormSagas()
 {
 	if (mFormSagaOverview) delete mFormSagaOverview;
+	if (mFormNewSaga) delete mFormNewSaga;
 	for (unsigned int i = 0; i < mGameInfo.size(); ++i)
 		delete mGameInfo[i];
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
@@ -222,7 +224,13 @@ void FormSagas::buttonHit(Button* button)
 
 void FormSagas::labelHit(Label* label)
 {
-	if (label->getName() == "FormSagas/Label/EditThumbs")
+	if (label->getName()=="FormSagas/Label/NewSaga")
+	{
+		hide();
+		mTrayMgr->loadMenuBarNewSaga();
+		mFormNewSaga = new FormNewSaga(mTrayMgr, this);
+	}
+	else if (label->getName() == "FormSagas/Label/EditThumbs")
 	{
 		hideOptions();
 		showOptionsThumbs();
@@ -281,7 +289,7 @@ void FormSagas::sliderOptionsMoved(SliderOptions* slider)
 }
 
 
-void FormSagas::removeSaga()
+void FormSagas::removeSagaForm()
 {
 	if (mFormSagaOverview)
 	{
@@ -292,6 +300,19 @@ void FormSagas::removeSaga()
 		show();
 	}
 }
+
+void FormSagas::removeNewSagaForm()
+{
+	if (mFormNewSaga)
+	{
+		mTrayMgr->enableFadeEffect();
+		delete mFormNewSaga;
+		mFormNewSaga = 0;
+		enableForm();
+		show();
+	}
+}
+
 
 
 void FormSagas::hideAllOptions()

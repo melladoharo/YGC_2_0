@@ -46,6 +46,7 @@ public:
 	void loadMenuBarGame() { if (mMenuBar) mMenuBar->createMenuGame(); }
 	void loadMenuBarNewGame() { if (mMenuBar) mMenuBar->createMenuNewGame(); }
 	void loadMenuBarSaga() { if (mMenuBar) mMenuBar->createMenuSaga(); }
+	void loadMenuBarNewSaga() { if (mMenuBar) mMenuBar->createMenuNewSaga(); }
 
 	// System
 	void setMouseEventCallback(OIS::MouseListener* mouseListener) { mMouse->setEventCallback(mouseListener); }

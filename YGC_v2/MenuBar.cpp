@@ -100,6 +100,19 @@ void MenuBar::createMenuSaga()
 	setState(BS_SELECTED, mIndexSelected);
 }
 
+void MenuBar::createMenuNewSaga()
+{
+	_destroyAllItems();
+
+	Ogre::Real currLeft = sizeInPixels("       ", mFont->getName(), 21, 7);
+	_createNewOption("mbw_new_saga", "New Saga", currLeft);
+	currLeft = Ogre::Real(mElement->getWidth() - sizeInPixels("Sagas       ", mFont->getName(), 21, 7));
+	_createNewOption("mbw_new_saga_back", "Sagas", currLeft);
+
+	mIndexSelected = mIndexOver = 0;
+	setState(BS_SELECTED, mIndexSelected);
+}
+
 
 
 void MenuBar::_cursorPressed(const Ogre::Vector2& cursorPos)
