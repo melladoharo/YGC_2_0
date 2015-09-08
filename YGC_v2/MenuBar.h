@@ -29,7 +29,7 @@ public:
 	void _forceCursorReleased();
 
 	// creates the differents menus
-	void createMenuMain();
+	void createMenuMain(unsigned int selOption = 0);
 	void createMenuGame();
 	void createMenuNewGame();
 	void createMenuSaga();

@@ -42,7 +42,7 @@ public:
 	void assignListenerToMenuBar(GuiListener* listener) { mMenuBar->_assignListener(listener); }
 	void callListenerMenuBar() { mMenuBar->_forceCursorReleased(); }
 	Ogre::Real getMenuBarHeight() { return mMenuBar->getHeight(); }
-	void loadMenuBarMain() { if (mMenuBar) mMenuBar->createMenuMain(); }
+	void loadMenuBarMain(unsigned int selOption = 0) { if (mMenuBar) mMenuBar->createMenuMain(selOption); }
 	void loadMenuBarGame() { if (mMenuBar) mMenuBar->createMenuGame(); }
 	void loadMenuBarNewGame() { if (mMenuBar) mMenuBar->createMenuNewGame(); }
 	void loadMenuBarSaga() { if (mMenuBar) mMenuBar->createMenuSaga(); }

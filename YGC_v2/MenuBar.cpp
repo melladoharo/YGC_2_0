@@ -39,7 +39,7 @@ void MenuBar::_destroyAllItems()
 
 
 
-void MenuBar::createMenuMain()
+void MenuBar::createMenuMain(unsigned int selOption /*= 0*/)
 {
 	_destroyAllItems();
 
@@ -50,7 +50,7 @@ void MenuBar::createMenuMain()
 	currLeft = Ogre::Real(mElement->getWidth() - sizeInPixels(" Exit        ", mFont->getName(), 21, 7));
 	_createNewOption("mbw_main_exit", " Exit ", currLeft);
 
-	mIndexSelected = mIndexOver = 0;
+	mIndexSelected = mIndexOver = (selOption >= 0 && selOption < mItems.size()) ? selOption : 0;
 	setState(BS_SELECTED, mIndexSelected);
 }
 
