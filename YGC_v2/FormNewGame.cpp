@@ -5,7 +5,7 @@
 FormNewGame::FormNewGame(GuiManager* tray, GuiListener* oldListener /*= 0*/) :
 FormBase(tray, oldListener),
 mNameGame(Ogre::StringUtil::BLANK),
-mIsFinish(false)
+mNewGameAdded(false)
 {
 	showOptions();
 }
@@ -61,11 +61,7 @@ bool FormNewGame::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID i
 
 void FormNewGame::buttonHit(Button* button)
 {
-	if (button->getName() == "FormNewGame/Button/ExitNewGame")
-	{
-		mIsFinish = true;
-	}
-	else if (button->getName() == "FormNewGame/Button/NextName")
+	if (button->getName() == "FormNewGame/Button/NextName")
 	{
 		LineEdit* leName = dynamic_cast<LineEdit*>(mTrayMgr->getWidget("FormNewGame/LineEdit/Name"));
 		mNameGame = (leName) ? leName->getText() : Ogre::StringUtil::BLANK;
@@ -86,7 +82,7 @@ void FormNewGame::okDialogClosed(const Ogre::DisplayString& message)
 {
 	if (message == "The new game has been added to the library correctly.")
 	{
-		mIsFinish = true;
+		mNewGameAdded = true;
 	}
 }
 
@@ -103,7 +99,6 @@ void FormNewGame::hideOptions()
 	{
 		mTrayMgr->destroyDialogWindow("FormNewGame/Window/Options");
 		mTrayMgr->destroyWidget("FormNewGame/LineEdit/Name");
-		mTrayMgr->destroyWidget("FormNewGame/Button/ExitNewGame");
 		mTrayMgr->destroyWidget("FormNewGame/Button/NextName");
 	}
 }
@@ -121,8 +116,7 @@ void FormNewGame::showOptions()
 		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
 		mTrayMgr->createDialogWindow("FormNewGame/Window/Options", "NEW GAME", left, top, width, height);	 top += sepOptions / 2;
 		mTrayMgr->createLineEdit("FormNewGame/LineEdit/Name", "Name", "", left, top, width); top = mScreenSize.y - sepWindow - sepButton;
-		mTrayMgr->createButton("FormNewGame/Button/ExitNewGame", "CANCEL", left, top, 70);
-		mTrayMgr->createButton("FormNewGame/Button/NextName", "NEXT", left + 70 + 8, top, 60);
+		mTrayMgr->createButton("FormNewGame/Button/NextName", "NEXT", left, top, 60);
 	}
 }
 

@@ -44,6 +44,7 @@ public:
 	Ogre::Real getMenuBarHeight() { return mMenuBar->getHeight(); }
 	void loadMenuBarMain() { if (mMenuBar) mMenuBar->createMenuMain(); }
 	void loadMenuBarGame() { if (mMenuBar) mMenuBar->createMenuGame(); }
+	void loadMenuBarNewGame() { if (mMenuBar) mMenuBar->createMenuNewGame(); }
 	void loadMenuBarSaga() { if (mMenuBar) mMenuBar->createMenuSaga(); }
 
 	// System

@@ -45,6 +45,9 @@ public:
 	void sliderOptionsMoved(SliderOptions* slider);
 	void yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit);
 
+	// Forms control
+	void removeNewGameForm();
+
 private:
 	void _addNewGame(const Ogre::String& newGame);
 	void _removeGame(unsigned int index);

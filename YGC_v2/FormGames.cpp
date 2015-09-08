@@ -110,15 +110,9 @@ bool FormGames::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		mTrayMgr->loadMenuBarMain();
 		show();
 	}
-	if (mFormNewGame && mFormNewGame->isFinished())
-	{
-		_addNewGame(mFormNewGame->getName());
-		mTrayMgr->enableFadeEffect();
-		delete mFormNewGame;
-		mFormNewGame = 0;
-		enableForm();
-		show();
-	}
+
+	if (mFormNewGame && mFormNewGame->isNewGameAdded())
+		removeNewGameForm();
 
 	return FormBase::frameRenderingQueued(evt);
 }
@@ -306,6 +300,7 @@ void FormGames::labelHit(Label* label)
 	else if (label->getName() == "FormGames/Label/NewGame")
 	{
 		hide();
+		mTrayMgr->loadMenuBarNewGame();
 		mFormNewGame = new FormNewGame(mTrayMgr, this);
 	}
 	else if (label->getName() == "FormGames/Label/DeleteGame")
@@ -375,6 +370,24 @@ void FormGames::yesNoDialogClosed(const Ogre::DisplayString& question, bool yesH
 			if (mLastThumbOver) _removeGame(mLastThumbOver->getIndex());
 		}
 		mLastThumbOver = 0;
+	}
+}
+
+
+
+void FormGames::removeNewGameForm()
+{
+	if (mFormNewGame)
+	{
+		if (mFormNewGame->isNewGameAdded())
+			_addNewGame(mFormNewGame->getName());
+
+		mTrayMgr->loadMenuBarMain();
+		mTrayMgr->enableFadeEffect();
+		delete mFormNewGame;
+		mFormNewGame = 0;
+		enableForm();
+		show();
 	}
 }
 

@@ -65,6 +65,10 @@ void FormSelectorMain::menuBarItemHit(MenuBar* menu)
 		if (!mFormOptions) mFormOptions = new FormOptions(mTrayMgr, this);
 		mFormCurrent = mFormOptions;
 	}
+	else if (menu->getSelectedItem() == "mbw_new_game_back")
+	{
+		if (mFormGames) mFormGames->removeNewGameForm();
+	}
 
 	// apply the new form
 	if (mFormCurrent)

@@ -31,14 +31,14 @@ public:
 	void okDialogClosed(const Ogre::DisplayString& message);
 
 	Ogre::String getName() { return mNameGame; }
-	bool isFinished() { return mIsFinish; }
+	bool isNewGameAdded() { return mNewGameAdded; }
 
 private:
 	bool _isValidGame(const Ogre::String& nameGame);
 	bool _createNewGame(const Ogre::String& nameGame);
 
 	Ogre::String mNameGame;
-	bool mIsFinish;
+	bool mNewGameAdded;
 };
 
 #endif // #ifndef _FORMNEWGAME_H__
