@@ -143,7 +143,7 @@ void TrackList::_cursorReleased(const Ogre::Vector2& cursorPos)
 		if (mItems[i]->getParameter("transparent") == "false" && i != mItemSelectedShown)
 		{
 			// deselect previous item selected
-			if (mItemSelectedShown >= 0)
+			if (mItemSelectedShown >= 0 && mItemSelectedShown < mItems.size())
 				mItems[mItemSelectedShown]->setParameter("transparent", "true");
 
 			mItemSelectedShown = i;
