@@ -16,9 +16,11 @@ public:
 	void _focusLost() {}
 
 	void setPath(const Ogre::String& path);
-	Ogre::String getSelectedPath() { return mSelectedPath.generic_string(); }
+	Ogre::String getSelectedPath() { return (mSelectedPath >= 0 && mSelectedPath < mPaths.size()) ? mPaths[mSelectedPath].substr(3) : Ogre::StringUtil::BLANK; }
+	void enableSelectDir(bool enable) { mSelectDir = enable; }
 	void scrollUp();
 	void scrollDown();
+	void deselectAll();
 
 private:
 	void _getPathItems();
@@ -33,13 +35,14 @@ private:
 	Ogre::TextAreaOverlayElement* mTextAreaParentPath;
 	Ogre::BorderPanelOverlayElement* mTrackFront;
 	Ogre::PanelOverlayElement* mHandle;
-	Ogre::StringVector mItems;
-	std::vector<Ogre::OverlayElement*> mItemElements;
-	boost::filesystem::path mPath;
-	boost::filesystem::path mSelectedPath;
+	Ogre::StringVector mPaths;
+	std::vector<Ogre::OverlayElement*> mItems;
+	boost::filesystem::path mCurrentPath;
 	unsigned int mItemsShown, mMaxItemsShown, mDisplayIndex;
-	int mSelectionIndex;
+	int mItemSelectedShown;
+	int mSelectedPath;
 	bool mDragging;
+	bool mSelectDir;
 	Ogre::Real mDragOffset;
 };
 
