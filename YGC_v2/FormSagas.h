@@ -4,12 +4,16 @@
 #include "FormBase.h"
 #include "GameInfo.h"
 #include "Thumbnail3D.h"
+#include "FormSagaOverview.h"
 
 class FormSagas : public FormBase
 {
 public:
 	FormSagas(const Ogre::String& pathSagas, GuiManager* tray, GuiListener* oldListener = 0);
 	~FormSagas();
+
+	// Ogre::FrameListener
+	bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 
 	// OIS::MouseListener
 	bool mouseMoved(const OIS::MouseEvent &arg);
@@ -34,8 +38,13 @@ public:
 	void itemChanged(ItemSelector* selector);
 	void sliderOptionsMoved(SliderOptions* slider);
 
+	// Forms control
+	void removeSaga();
+
 private:
+	FormSagaOverview* mFormSagaOverview;
 	Ogre::SceneNode* mParentThumbs;
+	std::vector<GameInfo*> mGameInfo;
 	std::vector<Thumbnail3D*> mThumbs;
 	sGridThumbs mGridThumbs;
 	Thumbnail3D* mLastThumbOver;

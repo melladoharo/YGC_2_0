@@ -74,6 +74,20 @@ void MenuBar::createMenuGame()
 	setState(BS_SELECTED, mIndexSelected);
 }
 
+void MenuBar::createMenuSaga()
+{
+	_destroyAllItems();
+
+	Ogre::Real currLeft = sizeInPixels("       ", mFont->getName(), 21, 7);
+	_createNewOption("mbw_saga_overview", "Saga", currLeft);	
+	currLeft = Ogre::Real(mElement->getWidth() - sizeInPixels("Home       ", mFont->getName(), 21, 7));
+	_createNewOption("mbw_saga_home", "Home", currLeft);
+
+	mIndexSelected = mIndexOver = 0;
+	setState(BS_SELECTED, mIndexSelected);
+}
+
+
 void MenuBar::_cursorPressed(const Ogre::Vector2& cursorPos)
 {
 	mMouseOverBar = isCursorOver(mBar, cursorPos);

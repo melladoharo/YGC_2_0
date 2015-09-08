@@ -87,6 +87,10 @@ public:
 	{
 		_findGenericResource(infoIni, getPathGame() + "/Models/Collectors Edition/", FT_INI);
 	}
+	void findIniSaga(sInfoResource& infoIni)
+	{
+		_findGenericResource(infoIni, getPathGame(), FT_INI);
+	}
 	void findModelsCollector(std::vector<sInfoResource>& infoModels)
 	{
 		_findGenericResource(infoModels, getPathGame() + "/Models/Collectors Edition/", FT_ZIP, "Model/CEModel/");

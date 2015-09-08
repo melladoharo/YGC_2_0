@@ -44,6 +44,7 @@ public:
 	Ogre::Real getMenuBarHeight() { return mMenuBar->getHeight(); }
 	void loadMenuBarMain() { if (mMenuBar) mMenuBar->createMenuMain(); }
 	void loadMenuBarGame() { if (mMenuBar) mMenuBar->createMenuGame(); }
+	void loadMenuBarSaga() { if (mMenuBar) mMenuBar->createMenuSaga(); }
 
 	// System
 	void setMouseEventCallback(OIS::MouseListener* mouseListener) { mMouse->setEventCallback(mouseListener); }

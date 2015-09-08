@@ -55,6 +55,11 @@ void FormSelectorMain::menuBarItemHit(MenuBar* menu)
 		if (!mFormSagas) mFormSagas = new FormSagas(ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Sagas", "./Sagas"), mTrayMgr, this);
 		mFormCurrent = mFormSagas;
 	}
+	else if (menu->getSelectedItem() == "mbw_saga_home")
+	{
+		mFormSagas->removeSaga();
+		mTrayMgr->loadMenuBarMain();
+	}
 	else if (menu->getSelectedItem() == "mbw_main_options")
 	{
 		if (!mFormOptions) mFormOptions = new FormOptions(mTrayMgr, this);

@@ -31,6 +31,7 @@ public:
 	// creates the differents menus
 	void createMenuMain();
 	void createMenuGame();
+	void createMenuSaga();
 
 	Ogre::DisplayString getSelectedItem()
 	{

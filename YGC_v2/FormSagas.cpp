@@ -3,6 +3,7 @@
 
 FormSagas::FormSagas(const Ogre::String& pathSagas, GuiManager* tray, GuiListener* oldListener /*= 0*/) : 
 FormBase(tray, oldListener),
+mFormSagaOverview(0),
 mParentThumbs(mSceneMgr->getRootSceneNode()->createChildSceneNode()),
 mLastThumbOver(0)
 {
@@ -25,9 +26,9 @@ mLastThumbOver(0)
 	{
 		if (boost::filesystem::is_directory(it->path()))
 		{
-			GameInfo infoSaga(it->path().generic_string());
+			mGameInfo.push_back(new GameInfo(it->path().generic_string()));
 			sInfoResource infoHeaderSaga;
-			infoSaga.findHeaderResource(infoHeaderSaga);
+			mGameInfo.back()->findHeaderResource(infoHeaderSaga);
 
 			// header is not empty?
 			if (infoHeaderSaga.path != Ogre::StringUtil::BLANK)
@@ -46,7 +47,7 @@ mLastThumbOver(0)
 			}
 			// create the 3d thumbnail widget
 			mThumbs.push_back(new Thumbnail3D(mParentThumbs, "FormSagas/Thumb/Widget/" + Ogre::StringConverter::toString(mThumbs.size()),
-				"Group/FormSagas", infoSaga.getName(), infoHeaderSaga.nameThumb));
+				"Group/FormSagas", mGameInfo.back()->getName(), infoHeaderSaga.nameThumb));
 			mThumbs.back()->setIndex(mThumbs.size() - 1);
 			mThumbs.back()->setScale(Ogre::Vector3(mGridThumbs.size, mGridThumbs.size, mGridThumbs.size));
 		}
@@ -68,11 +69,21 @@ mLastThumbOver(0)
 
 FormSagas::~FormSagas()
 {
+	if (mFormSagaOverview) delete mFormSagaOverview;
+	for (unsigned int i = 0; i < mGameInfo.size(); ++i)
+		delete mGameInfo[i];
 	for (unsigned int i = 0; i < mThumbs.size(); ++i)
 		delete mThumbs[i];
 	mSceneMgr->destroySceneNode(mParentThumbs);
 	Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup("Group/FormSagas");
 	hideAllOptions();
+}
+
+
+
+bool FormSagas::frameRenderingQueued(const Ogre::FrameEvent& evt)
+{
+	return FormBase::frameRenderingQueued(evt);
 }
 
 
@@ -127,7 +138,8 @@ bool FormSagas::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 			mLastThumbOver = 0;
 
 			hide();
-			//mFormSelector = new FormSelectorGame(mGameInfo[index], mTrayMgr, this);
+			mFormSagaOverview = new FormSagaOverview(mGameInfo[index], mTrayMgr, this);
+			mTrayMgr->loadMenuBarSaga();
 		}
 	}
 
@@ -265,6 +277,19 @@ void FormSagas::sliderOptionsMoved(SliderOptions* slider)
 		mGridThumbs.verticalSep = slider->getValue();
 		Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
 		ConfigReader::getSingletonPtr()->getReader()->SetDoubleValue("FORM.SAGAS", "Thumbs_Vertial_Sep", mGridThumbs.verticalSep);
+	}
+}
+
+
+void FormSagas::removeSaga()
+{
+	if (mFormSagaOverview)
+	{
+		mTrayMgr->enableFadeEffect();
+		delete mFormSagaOverview;
+		mFormSagaOverview = 0;
+		enableForm();
+		show();
 	}
 }
 
