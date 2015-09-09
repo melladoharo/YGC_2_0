@@ -37,6 +37,9 @@ mShutDown(false)
 	mMenuBarLayer = om.create(nameBase + "MenuBarLayer");
 	mWindowsLayer = om.create(nameBase + "WindowsLayer");
 	mPlayerLayer = om.create(nameBase + "MediaPlayerLayer");
+	mReviewLayer = om.create(nameBase + "ReviewLayer");
+	
+	mReviewLayer->setZOrder(330);
 	mWindowsLayer->setZOrder(340);
 	mWidgetsLayer->setZOrder(350);
 	mMenuBarLayer->setZOrder(360);
@@ -64,6 +67,9 @@ mShutDown(false)
 	mPlayerTray = (Ogre::OverlayContainer*)om.createOverlayElement("Panel", nameBase + "ContainerPlayer");
 	mPlayerLayer->add2D(mPlayerTray);
 	mPlayerLayer->show();
+	mReviewTray = (Ogre::OverlayContainer*)om.createOverlayElement("Panel", nameBase + "ContainerReview");
+	mReviewLayer->add2D(mReviewTray);
+	mReviewLayer->show();
 
 	// create the menu bar
 	mMenuBar = new MenuBar;
@@ -132,6 +138,7 @@ GuiManager::~GuiManager()
 	om.destroy(mCursorLayer);
 	om.destroy(mMenuBarLayer);
 	om.destroy(mPlayerLayer);
+	om.destroy(mReviewLayer);
 
 	Widget::nukeOverlayElement(mBackdrop);
 	Widget::nukeOverlayElement(mTray);
@@ -140,6 +147,7 @@ GuiManager::~GuiManager()
 	Widget::nukeOverlayElement(mDialogShade);
 	Widget::nukeOverlayElement(mPlayerTray);
 	Widget::nukeOverlayElement(mMenuBar->getOverlayElement());
+	Widget::nukeOverlayElement(mReviewTray);
 }
 
 
@@ -172,6 +180,17 @@ void GuiManager::destroyMediaPlayer(MediaPlayer* player)
 	mPlayerTray->removeChild(player->getName());
 	player->cleanup();
 }
+
+void GuiManager::destroyReviewText(SimpleText* text)
+{
+	if (!text) OGRE_EXCEPT(Ogre::Exception::ERR_ITEM_NOT_FOUND, "Widget does not exist.", "TrayManager::destroyWidget");
+
+	mReviewTray->removeChild(text->getName());
+	mWidgets.erase(std::find(mWidgets.begin(), mWidgets.end(), text));
+	text->cleanup();
+	mWidgetDeathRow.push_back(text);
+}
+
 
 
 void GuiManager::setExpandedMenu(SelectMenu* m)

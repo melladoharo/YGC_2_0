@@ -157,6 +157,7 @@ public:
 
 	void destroyDialogWindow(Widget* windows);
 	void destroyDialogWindow(const Ogre::String& name) { destroyDialogWindow(getWidget(name)); }
+	void destroyReviewText(SimpleText* text);
 
 	// Listener
 	void buttonHit(Button* button);
@@ -295,6 +296,16 @@ public:
 		mTray->addChild(mWidgets.back()->getOverlayElement());
 		st->_assignListener(mListener);
 		return st;
+	}
+
+	SimpleText* createReviewText(const Ogre::String& name, const Ogre::String& caption, const Ogre::String& nameFont,
+		Ogre::Real width, Ogre::Real height, int oveCharHeight, Ogre::Real oveLineSep)
+	{
+		SimpleText* rt = new SimpleText(name, caption, nameFont, oveCharHeight, width, height, oveLineSep);
+		mWidgets.push_back(rt);
+		mReviewTray->addChild(mWidgets.back()->getOverlayElement());
+		rt->_assignListener(mListener);
+		return rt;
 	}
 
 	DecorWidget* createDecorWidget(const Ogre::String& name, const Ogre::String& templateName)
@@ -457,12 +468,14 @@ protected:
 	Ogre::Overlay* mMenuBarLayer;		  // menu bar layer
 	Ogre::Overlay* mWindowsLayer;
 	Ogre::Overlay* mPlayerLayer;		  // media player layer
+	Ogre::Overlay* mReviewLayer;
 	Ogre::OverlayContainer* mBackdrop;    // backdrop
 	Ogre::OverlayContainer* mCursor;      // cursor
 	Ogre::OverlayContainer* mTray;
 	Ogre::OverlayContainer* mDialogWindows;
 	Ogre::OverlayContainer* mDialogShade; // top priority dialog shade
 	Ogre::OverlayContainer* mPlayerTray;
+	Ogre::OverlayContainer* mReviewTray;
 	WidgetList mWidgets;			      // widgets
 	WidgetList mWidgetDeathRow;           // widget queue for deletion
 	GuiListener* mListener;				  // tray listener

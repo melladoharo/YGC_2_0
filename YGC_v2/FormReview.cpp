@@ -19,10 +19,10 @@ FormReview::~FormReview()
 {
 	hideAllOptions();
 	for (unsigned int i = 0; i < mReviews.size(); ++i)
-	{
-		mTrayMgr->destroyWidget(mReviews[i].review);
-		mTrayMgr->destroyWidget(mReviews[i].score);
-		mTrayMgr->destroyWidget(mReviews[i].author);
+	{		
+		mTrayMgr->destroyReviewText(mReviews[i].review);
+		mTrayMgr->destroyReviewText(mReviews[i].score);
+		mTrayMgr->destroyReviewText(mReviews[i].author);
 	}
 }
 
@@ -244,14 +244,14 @@ void FormReview::_createReview(const Ogre::String& name, const Ogre::String& tex
 	mReviews.back().top = top;
 	mReviews.back().fontSize = sizeFont;
 
-	mReviews.back().review = mTrayMgr->createSimpleText("FormReview/Review/" + name,
+	mReviews.back().review = mTrayMgr->createReviewText("FormReview/Review/" + name,
 		textReview, "YgcFont/SemiBold/21", 350, 90, mReviews.back().fontSize, 6);
-	mReviews.back().score = mTrayMgr->createSimpleText("FormReview/Score/" + name,
+	mReviews.back().score = mTrayMgr->createReviewText("FormReview/Score/" + name,
 		textScore, "YgcFont/SemiboldItalic/16", 250, 90, mReviews.back().fontSize, 6);
-	mReviews.back().author = mTrayMgr->createSimpleText("FormReview/Author/" + name,
+	mReviews.back().author = mTrayMgr->createReviewText("FormReview/Author/" + name,
 		textAuthor, "YgcFont/SemiboldItalic/16", 250, 90, mReviews.back().fontSize - 6, 6);
 	mReviews.back().author->setTextColor(Ogre::ColourValue(0.79f, 0.79f, 0.80f));
-
+	
 	_spacingReview(mReviews.size() - 1);
 }
 

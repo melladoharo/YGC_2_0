@@ -56,6 +56,7 @@ private:
 	void _loadConfigWindowsReview(unsigned int currentReview, bool newReview = false);
 
 	GameInfo* mGameInfo;
+	
 	std::vector<sInfoReview> mReviews;
 	Ogre::String mPathIni;
 	unsigned int mCurrentReview;
