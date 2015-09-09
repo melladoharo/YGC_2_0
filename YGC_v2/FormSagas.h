@@ -38,19 +38,25 @@ public:
 	void labelHit(Label* label);
 	void itemChanged(ItemSelector* selector);
 	void sliderOptionsMoved(SliderOptions* slider);
+	void yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit);
 
 	// Forms control
 	void removeNewSagaForm();
 	void removeSagaForm();
 
 private:
+	void _addNewSaga(const Ogre::String& newSaga);
+	void _removeSaga(unsigned int index);
+
 	FormSagaOverview* mFormSagaOverview;
 	FormNewSaga* mFormNewSaga;
+	Ogre::String mPathSagas;
 	Ogre::SceneNode* mParentThumbs;
 	std::vector<GameInfo*> mGameInfo;
 	std::vector<Thumbnail3D*> mThumbs;
 	sGridThumbs mGridThumbs;
 	Thumbnail3D* mLastThumbOver;
+	Ogre::DisplayString mQuestionDelete;
 };
 
 #endif // #ifndef _FORMSAGAS_H__

@@ -63,11 +63,33 @@ void FormNewSaga::buttonHit(Button* button)
 		{
 			hideOptions();
 			showSelectGames();
+			mGamesSaga.clear();
 		}
 		else
 		{
-			mTrayMgr->showOkDialog("NO VALID SAGA", "A saga with its name already exists.");
+			mTrayMgr->showOkDialog("NEW SAGA ERROR", "A saga with this name already exists in YGC. "
+				"Choose a different name for this saga.");
 		}
+	}
+	else if (button->getName() == "FormNewSaga/Button/BackPathGames")
+	{
+		mGamesSaga.clear();
+		hideSelectGames();
+		showOptions();
+	}
+	else if (button->getName() == "FormNewSaga/Button/AddPathGames")
+	{
+		FileExplorer* fe = dynamic_cast<FileExplorer*>(mTrayMgr->getWidget("FormNewSaga/Explorer/PathGames"));
+		if (fe->getSelectedPath() != Ogre::StringUtil::BLANK)
+		{
+			_addNewGameToSaga(fe->getSelectedPath());
+			fe->deselectAll();
+		}
+	}
+	else if (button->getName() == "FormNewSaga/Button/AcceptPathGames")
+	{
+		_createNewSaga(mNameSaga);
+		mNewSagaAdded = true;
 	}
 }
 
@@ -88,53 +110,41 @@ bool FormNewSaga::_isValidSaga(const Ogre::String& nameSaga)
 }
 
 
+bool FormNewSaga::_addNewGameToSaga(const Ogre::String& nameGame)
+{
+	if (std::find(mGamesSaga.begin(), mGamesSaga.end(), nameGame) == mGamesSaga.end())
+	{
+		mGamesSaga.push_back(nameGame);
+		return true;
+	}
+	return false;
+}
+
 
 bool FormNewSaga::_createNewSaga(const Ogre::String& nameSaga)
 {
-	Ogre::String pathNewSaga = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Games", "./Games");
+	Ogre::String pathNewSaga = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Sagas", "./Sagas");
 	pathNewSaga += "/" + nameSaga;
 
 	if (!boost::filesystem::create_directory(pathNewSaga)) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Fonts")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Images")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/BoxArt")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/Concept Art")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/Cover")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/Discs")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/Header")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/Logo")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/Screenshots")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/Thumbs")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Images/Wallpapers")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Models")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Models/Characters")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Models/Collectors Edition")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Models/Objects")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Reviews")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Sounds")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Sounds/Soundtrack")) return false;
 	if (!boost::filesystem::create_directory(pathNewSaga + "/Sounds/Voices")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Videos")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Videos/Gameplays")) return false;
-	if (!boost::filesystem::create_directory(pathNewSaga + "/Videos/Trailers")) return false;
 
 	CSimpleIniA defaultIni;
-	if (defaultIni.SetValue("GAME.INFO", "Name", nameSaga.c_str()) < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Platform", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Developer", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Publisher", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Genre", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "ReleaseDate", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Rating", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Score", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Overview", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Summary", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.PATHS", "GamePath", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.STATS", "Playing", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.STATS", "PlayCount", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.STATS", "LastGame", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.STATS", "TimePlayed", "") < 0) return false;
-	if (defaultIni.SaveFile(Ogre::String(pathNewSaga + "/GameInfo.ini").c_str()) < 0) return false;
+	for (unsigned int i = 0; i < mGamesSaga.size(); ++i)
+	{
+		Ogre::String nameKey = "Game_" + Ogre::StringConverter::toString(i + 1);
+		defaultIni.SetValue("SAGA.GAMES", nameKey.c_str(), mGamesSaga[i].c_str());
+	}
+
+	if (defaultIni.SaveFile(Ogre::String(pathNewSaga + "/" + nameSaga + ".ini").c_str()) < 0) return false;
 
 	return true; // ok!
 }
@@ -181,6 +191,7 @@ void FormNewSaga::hideSelectGames()
 		mTrayMgr->destroyDialogWindow("FormNewSaga/Window/PathGames");
 		mTrayMgr->destroyWidget("FormNewSaga/Explorer/PathGames");
 		mTrayMgr->destroyWidget("FormNewSaga/Button/BackPathGames");
+		mTrayMgr->destroyWidget("FormNewSaga/Button/AddPathGames");
 		mTrayMgr->destroyWidget("FormNewSaga/Button/AcceptPathGames");
 	}
 }
@@ -192,15 +203,17 @@ void FormNewSaga::showSelectGames()
 		unsigned int numOptions = 11;
 		Ogre::Real sepOptions = 40, sepButton = 30, sepWindow = 50;
 		Ogre::Real left = 50;
-		Ogre::Real width = 560;
+		Ogre::Real width = 480;
 		Ogre::Real height = numOptions * sepOptions;
 		Ogre::Real top = mScreenSize.y - height - sepWindow - sepButton;
 		Ogre::String pathGames = ConfigReader::getSingletonPtr()->getReader()->GetValue("SYSTEM", "Path_Games", "./Games");
 
 		mTrayMgr->createDialogWindow("FormNewSaga/Window/PathGames", "GAMES SAGA", left, top, width, height);	 top += sepOptions / 2;
-		mTrayMgr->createFileExplorer("FormNewSaga/Explorer/PathGames", pathGames, left, top, width, height); top = mScreenSize.y - sepWindow - sepButton;
+		FileExplorer* fe = mTrayMgr->createFileExplorer("FormNewSaga/Explorer/PathGames", pathGames, left, top, width, height); top = mScreenSize.y - sepWindow - sepButton;
 		mTrayMgr->createButton("FormNewSaga/Button/BackPathGames", "BACK", left, top, 60);
-		mTrayMgr->createButton("FormNewSaga/Button/AcceptPathGames", "ACCEPT", left + 70, top, 80);
+		mTrayMgr->createButton("FormNewSaga/Button/AddPathGames", "ADD", left + 65, top, 60);
+		mTrayMgr->createButton("FormNewSaga/Button/AcceptPathGames", "ACCEPT", width - 30, top, 80);
+		fe->enableSelectDir(true);
 	}
 }
 

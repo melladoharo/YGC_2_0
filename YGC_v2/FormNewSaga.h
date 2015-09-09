@@ -29,11 +29,16 @@ public:
 	void buttonHit(Button* button);
 	void okDialogClosed(const Ogre::DisplayString& message);
 
+	Ogre::String getNewSagaName() const { return mNameSaga; }
+	bool isNewSagaAdded() { return mNewSagaAdded; }
+
 private:
 	bool _isValidSaga(const Ogre::String& nameSaga);
+	bool _addNewGameToSaga(const Ogre::String& nameGame);
 	bool _createNewSaga(const Ogre::String& nameSaga);
 
 	Ogre::String mNameSaga;
+	Ogre::StringVector mGamesSaga;
 	bool mNewSagaAdded;
 };
 

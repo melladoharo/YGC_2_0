@@ -5,8 +5,10 @@ FormSagas::FormSagas(const Ogre::String& pathSagas, GuiManager* tray, GuiListene
 FormBase(tray, oldListener),
 mFormSagaOverview(0),
 mFormNewSaga(0),
+mPathSagas(pathSagas),
 mParentThumbs(mSceneMgr->getRootSceneNode()->createChildSceneNode()),
-mLastThumbOver(0)
+mLastThumbOver(0),
+mQuestionDelete(Ogre::StringUtil::BLANK)
 {
 	resetCamera();
 	// load grid-thumbs values from .ini config file
@@ -22,8 +24,8 @@ mLastThumbOver(0)
 	Ogre::ResourceGroupManager::getSingleton().createResourceGroup("Group/FormSagas");
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("Group/FormSagas");
 
-	// iterate over the main path game and add them 
-	for (boost::filesystem::directory_iterator it(pathSagas), end; it != end; ++it)
+	// iterate over the main path saga and add them 
+	for (boost::filesystem::directory_iterator it(mPathSagas), end; it != end; ++it)
 	{
 		if (boost::filesystem::is_directory(it->path()))
 		{
@@ -85,6 +87,9 @@ FormSagas::~FormSagas()
 
 bool FormSagas::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
+	if (mFormNewSaga && mFormNewSaga->isNewSagaAdded())
+		removeNewSagaForm();
+
 	return FormBase::frameRenderingQueued(evt);
 }
 
@@ -132,7 +137,7 @@ bool FormSagas::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 
 	if (id == OIS::MouseButtonID::MB_Left)
 	{
-		// clin on a thumbnail, then open the game selected
+		// clin on a thumbnail, then open the saga selected
 		if (mLastThumbOver)
 		{
 			unsigned int index = mLastThumbOver->getIndex();
@@ -142,6 +147,20 @@ bool FormSagas::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 			hide();
 			mFormSagaOverview = new FormSagaOverview(mGameInfo[index], mTrayMgr, this);
 			mTrayMgr->loadMenuBarSaga();
+		}
+	}
+	else if (id == OIS::MouseButtonID::MB_Right)
+	{
+		// clin on a thumbnail, then open the saga selected
+		if (mLastThumbOver)
+		{
+			unsigned int index = mLastThumbOver->getIndex();
+			mLastThumbOver->setMouseUp();
+
+			mQuestionDelete = "When you delete a saga, all the resources like screenshots, 3d models, videos, etc "
+				"are removed too. Are you sure want to delete \"" + mGameInfo[index]->getName() + "\" "
+				"saga from library?";
+			mTrayMgr->showYesNoDialog("DELETE SAGA", mQuestionDelete);
 		}
 	}
 
@@ -288,6 +307,18 @@ void FormSagas::sliderOptionsMoved(SliderOptions* slider)
 	}
 }
 
+void FormSagas::yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit)
+{
+	if (question == mQuestionDelete)
+	{
+		if (yesHit)
+		{
+			if (mLastThumbOver) _removeSaga(mLastThumbOver->getIndex());
+		}
+		mLastThumbOver = 0;
+	}
+}
+
 
 void FormSagas::removeSagaForm()
 {
@@ -305,12 +336,78 @@ void FormSagas::removeNewSagaForm()
 {
 	if (mFormNewSaga)
 	{
+		if (mFormNewSaga->isNewSagaAdded())
+			_addNewSaga(mFormNewSaga->getNewSagaName());
+
+		mTrayMgr->loadMenuBarMain(1);
 		mTrayMgr->enableFadeEffect();
 		delete mFormNewSaga;
 		mFormNewSaga = 0;
 		enableForm();
 		show();
 	}
+}
+
+
+
+void FormSagas::_addNewSaga(const Ogre::String& newSaga)
+{
+	// iterate over the main path game and add them 
+	unsigned int indexNewSaga = 0;
+	for (boost::filesystem::directory_iterator it(mPathSagas), end; it != end; ++it)
+	{
+		if (boost::filesystem::is_directory(it->path()) && it->path().filename().generic_string() == newSaga)
+		{
+			mGameInfo.insert(mGameInfo.begin() + indexNewSaga, new GameInfo(it->path().generic_string()));
+			sInfoResource infoHeaderSaga;
+			mGameInfo[indexNewSaga]->findHeaderResource(infoHeaderSaga);
+
+			// header is not empty?
+			if (infoHeaderSaga.path != Ogre::StringUtil::BLANK)
+			{
+				Ogre::String resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.SAGAS", "Thumbs_Resolution", 0);
+				if (resThumb == "Source Size") // load the original image [full size]
+				{
+					GameInfo::loadImageFromDisk(infoHeaderSaga.path, infoHeaderSaga.nameThumb, "Group/FormSagas");
+				}
+				else // load the thumbnail [thumb size]
+				{
+					unsigned int resThumbValue = Ogre::StringConverter::parseInt(resThumb);
+					if (!boost::filesystem::is_regular_file(infoHeaderSaga.pathThumb))
+						GameInfo::createThumbnail(infoHeaderSaga.path, infoHeaderSaga.pathThumb, resThumbValue);
+					GameInfo::loadImageFromDisk(infoHeaderSaga.pathThumb, infoHeaderSaga.nameThumb, "Group/FormSagas");
+				}
+			}
+			// create the 3d thumbnail widget
+			mThumbs.insert(mThumbs.begin() + indexNewSaga, new Thumbnail3D(mParentThumbs, "FormSagas/Thumb/Widget/" + Ogre::StringConverter::toString(mThumbs.size()),
+				"Group/FormSagas", mGameInfo[indexNewSaga]->getName(), infoHeaderSaga.nameThumb));
+			mThumbs[indexNewSaga]->setIndex(indexNewSaga);
+			mThumbs[indexNewSaga]->setScale(Ogre::Vector3(mGridThumbs.size, mGridThumbs.size, mGridThumbs.size));
+
+			// set thumbs in a grid
+			Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
+			break;
+		}
+		indexNewSaga++;
+	}
+}
+
+void FormSagas::_removeSaga(unsigned int index)
+{
+	boost::filesystem::remove_all(mGameInfo[index]->getPathGame());
+	delete mGameInfo[index];
+	delete mThumbs[index];
+	mGameInfo.erase(mGameInfo.begin() + index);
+	mThumbs.erase(mThumbs.begin() + index);
+
+	// a very bad solution [index thumbs] [fix] :(
+	if (index < mThumbs.size())
+	{
+		for (unsigned int i = index; i < mThumbs.size(); ++i)
+			mThumbs[i]->setIndex(mThumbs[i]->getIndex() - 1);
+	}
+
+	Thumbnail3D::setThumbs3DInGrid(mThumbs, mGridThumbs);
 }
 
 
