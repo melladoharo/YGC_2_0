@@ -80,8 +80,8 @@ void FormOptions::buttonHit(Button* button)
 		if (selResDisc) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.OVERVIEW", "Disc_Resolution", selResDisc->getSelectedOption().c_str());
 		ItemSelector* selResLogo = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResLogo"));
 		if (selResLogo) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.OVERVIEW", "Logo_Resolution", selResLogo->getSelectedOption().c_str());
-		ItemSelector* selBoxArt = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResBoxArt"));
-		if (selBoxArt) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.OVERVIEW", "BoxArt_Resolution", selBoxArt->getSelectedOption().c_str());
+		ItemSelector* selBooklet = dynamic_cast<ItemSelector*>(mTrayMgr->getWidget("FormOptions/Selector/ResBooklet"));
+		if (selBooklet) ConfigReader::getSingletonPtr()->getReader()->SetValue("FORM.OVERVIEW", "Booklet_Resolution", selBooklet->getSelectedOption().c_str());
 		ConfigReader::getSingletonPtr()->saveConfig();
 		hideOptionsThumbnails();
 		showOptions();
@@ -289,7 +289,7 @@ void FormOptions::hideOptionsThumbnails()
 		mTrayMgr->destroyWidget("FormOptions/Selector/ResCover");
 		mTrayMgr->destroyWidget("FormOptions/Selector/ResDisc");
 		mTrayMgr->destroyWidget("FormOptions/Selector/ResLogo");
-		mTrayMgr->destroyWidget("FormOptions/Selector/ResBoxArt");
+		mTrayMgr->destroyWidget("FormOptions/Selector/ResBooklet");
 		mTrayMgr->destroyWidget("FormOptions/Label/ResetThumbnails");
 		mTrayMgr->destroyWidget("FormOptions/Button/CloseThumbnails");
 	}
@@ -317,7 +317,7 @@ void FormOptions::showOptionsThumbnails()
 		ItemSelector* selResCover = mTrayMgr->createItemSelector("FormOptions/Selector/ResCover", "Cover Resolution", itemsRes, left, top, width); top += sepOptions;
 		ItemSelector* selResDisc = mTrayMgr->createItemSelector("FormOptions/Selector/ResDisc", "Discs Resolution", itemsRes, left, top, width); top += sepOptions;
 		ItemSelector* selResLogo = mTrayMgr->createItemSelector("FormOptions/Selector/ResLogo", "Logo Resolution", itemsRes, left, top, width); top += sepOptions;
-		ItemSelector* selBoxArt = mTrayMgr->createItemSelector("FormOptions/Selector/ResBoxArt", "BoxArt Resolution", itemsRes, left, top, width); top += sepOptions;
+		ItemSelector* selBooklet = mTrayMgr->createItemSelector("FormOptions/Selector/ResBooklet", "Booklet Resolution", itemsRes, left, top, width); top += sepOptions;
 		mTrayMgr->createLabel("FormOptions/Label/ResetThumbnails", "RESET THUMBNAILS", left, top, width, 23); top = mScreenSize.y - sepWindow - sepButton;
 		mTrayMgr->createButton("FormOptions/Button/CloseThumbnails", "BACK", left, top, 60);	
 
@@ -333,8 +333,8 @@ void FormOptions::showOptionsThumbnails()
 		selResDisc->selectOption(discValue, false);
 		Ogre::String logoValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Logo_Resolution", "0");
 		selResLogo->selectOption(logoValue, false);
-		Ogre::String boxArtValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "BoxArt_Resolution", "0");
-		selBoxArt->selectOption(boxArtValue, false);
+		Ogre::String bookletValue = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Booklet_Resolution", "0");
+		selBooklet->selectOption(bookletValue, false);
 	}
 }
 

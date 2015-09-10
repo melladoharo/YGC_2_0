@@ -327,18 +327,18 @@ void FormOverview::_createOverview()
 	mDiscClose->hide();
 	mDiscClose->applyNewText(infoDisc.front().nameThumb);
 
-	// find and load boxart resource
-	sInfoResource infoBoxArt;
-	mGameInfo->findBoxArtResource(infoBoxArt);
-	resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "BoxArt_Resolution", 0);
+	// find and load booklet resource
+	sInfoResource infoBooklet;
+	mGameInfo->findBookletResource(infoBooklet);
+	resThumb = ConfigReader::getSingletonPtr()->getReader()->GetValue("FORM.OVERVIEW", "Booklet_Resolution", 0);
 	if (resThumb == "Source Size") // load the original image
-		GameInfo::loadImageFromDisk(infoBoxArt.path, infoBoxArt.nameThumb, mGameInfo->getGroupName(), 2);
+		GameInfo::loadImageFromDisk(infoBooklet.path, infoBooklet.nameThumb, mGameInfo->getGroupName(), 2);
 	else // load the thumbnail
 	{
 		unsigned int resThumbValue = Ogre::StringConverter::parseInt(resThumb);
-		if (!boost::filesystem::is_regular_file(infoBoxArt.pathThumb))
-			GameInfo::createThumbnail(infoBoxArt.path, infoBoxArt.pathThumb, resThumbValue);
-		GameInfo::loadImageFromDisk(infoBoxArt.pathThumb, infoBoxArt.nameThumb, mGameInfo->getGroupName(), 2);
+		if (!boost::filesystem::is_regular_file(infoBooklet.pathThumb))
+			GameInfo::createThumbnail(infoBooklet.path, infoBooklet.pathThumb, resThumbValue);
+		GameInfo::loadImageFromDisk(infoBooklet.pathThumb, infoBooklet.nameThumb, mGameInfo->getGroupName(), 2);
 	}
 
 	// Open DVD model
@@ -346,7 +346,7 @@ void FormOverview::_createOverview()
 	mDvdOpen->getNode()->translate(0, 0, -38);
 	mDvdOpen->getNode()->yaw(Ogre::Degree(150));
 	mDvdOpen->applyNewText(infoCover.nameThumb); // cover
-	mDvdOpen->applyNewText(infoBoxArt.nameThumb, 3); // boxart
+	mDvdOpen->applyNewText(infoBooklet.nameThumb, 3); // booklet
 	mDvdOpen->applyNewText(infoDisc.front().nameThumb, 4); // disc
 	mDvdOpen->hide();
 	

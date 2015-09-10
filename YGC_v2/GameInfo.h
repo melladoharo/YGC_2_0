@@ -47,9 +47,9 @@ public:
 	{
 		_findGenericResource(infoWall, getPathGame() + "/Images/Wallpapers/", FT_IMAGE, "Overview/Wallpaper/", "sdk_default_wall.png");
 	}
-	void findBoxArtResource(sInfoResource& infoBoxArt)
+	void findBookletResource(sInfoResource& infoBooklet)
 	{
-		_findGenericResource(infoBoxArt, getPathGame() + "/Images/BoxArt/", FT_IMAGE, "Overview/BoxArt/", "sdk_default_boxart.png");
+		_findGenericResource(infoBooklet, getPathGame() + "/Images/Booklet/", FT_IMAGE, "Overview/Booklet/", "sdk_default_booklet.png");
 	}
 	void findConceptArtResources(std::vector<sInfoResource>& infoImages)
 	{
@@ -61,7 +61,7 @@ public:
 	}
 	void findSoundtrackResources(std::vector<sInfoResource>& infoTracks)
 	{
-		_findGenericResource(infoTracks, getPathGame() + "/Sounds/Soundtrack", FT_SOUND, "Sound/Soundtrack/");
+		_findGenericResource(infoTracks, getPathGame() + "/Soundtrack", FT_SOUND, "Sound/Soundtrack/");
 	}
 	void findTrailersResources(std::vector<sInfoResource>& infoTrailers)
 	{
@@ -117,8 +117,8 @@ public:
 		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(getPathGame() + "/Models/Objects/", "FileSystem", getGroupName());
 		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(getPathGame() + "/Videos/Gameplays/", "FileSystem", getGroupName());
 		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(getPathGame() + "/Videos/Trailers/", "FileSystem", getGroupName());
-		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(getPathGame() + "/Sounds/Soundtrack/", "FileSystem", getGroupName());
-		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(getPathGame() + "/Sounds/Voices/", "FileSystem", getGroupName());
+		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(getPathGame() + "/Soundtrack/", "FileSystem", getGroupName());
+		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(getPathGame() + "/Models/Characters/Voices/", "FileSystem", getGroupName());
 		Ogre::ResourceGroupManager::getSingletonPtr()->initialiseResourceGroup(getGroupName());
 	}
 	void destroyResourceGroup()

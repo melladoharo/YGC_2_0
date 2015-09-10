@@ -43,7 +43,7 @@ SI_Error ConfigReader::_createDefaultConfig()
 	mReader->SetValue("FORM.OVERVIEW", "Cover_Resolution", "2048");
 	mReader->SetValue("FORM.OVERVIEW", "Disc_Resolution", "1024");
 	mReader->SetValue("FORM.OVERVIEW", "Logo_Resolution", "256");
-	mReader->SetValue("FORM.OVERVIEW", "BoxArt_Resolution", "1024");
+	mReader->SetValue("FORM.OVERVIEW", "Booklet_Resolution", "1024");
 	mReader->SetValue("FORM.GAMES", "Thumbs_Resolution", "256");
 	mReader->SetDoubleValue("FORM.GAMES", "Thumbs_Rows", 3);
 	mReader->SetDoubleValue("FORM.GAMES", "Thumbs_Size", 2.77f);

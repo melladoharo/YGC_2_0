@@ -140,7 +140,7 @@ bool FormNewGame::_createNewGame(const Ogre::String& nameGame)
 	if (!boost::filesystem::create_directory(pathGames)) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Fonts")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Images")) return false;
-	if (!boost::filesystem::create_directory(pathGames + "/Images/BoxArt")) return false;
+	if (!boost::filesystem::create_directory(pathGames + "/Images/Booklet")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Images/Concept Art")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Images/Cover")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Images/Discs")) return false;
@@ -151,25 +151,23 @@ bool FormNewGame::_createNewGame(const Ogre::String& nameGame)
 	if (!boost::filesystem::create_directory(pathGames + "/Images/Wallpapers")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Models")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Models/Characters")) return false;
+	if (!boost::filesystem::create_directory(pathGames + "/Models/Characters/Voices")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Models/Collectors Edition")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Models/Objects")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Reviews")) return false;
-	if (!boost::filesystem::create_directory(pathGames + "/Sounds")) return false;
-	if (!boost::filesystem::create_directory(pathGames + "/Sounds/Soundtrack")) return false;
-	if (!boost::filesystem::create_directory(pathGames + "/Sounds/Voices")) return false;
+	if (!boost::filesystem::create_directory(pathGames + "/Soundtrack")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Videos")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Videos/Gameplays")) return false;
 	if (!boost::filesystem::create_directory(pathGames + "/Videos/Trailers")) return false;
 
 	CSimpleIniA defaultIni;
 	if (defaultIni.SetValue("GAME.INFO", "Name", nameGame.c_str()) < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Platform", "") < 0) return false;
 	if (defaultIni.SetValue("GAME.INFO", "Developer", "") < 0) return false;
 	if (defaultIni.SetValue("GAME.INFO", "Publisher", "") < 0) return false;
 	if (defaultIni.SetValue("GAME.INFO", "Genre", "") < 0) return false;
+	if (defaultIni.SetValue("GAME.INFO", "Platform", "") < 0) return false;
 	if (defaultIni.SetValue("GAME.INFO", "ReleaseDate", "") < 0) return false;
 	if (defaultIni.SetValue("GAME.INFO", "Rating", "") < 0) return false;
-	if (defaultIni.SetValue("GAME.INFO", "Score", "") < 0) return false;
 	if (defaultIni.SetValue("GAME.INFO", "Overview", "") < 0) return false;
 	if (defaultIni.SetValue("GAME.INFO", "Summary", "") < 0) return false;
 	if (defaultIni.SetValue("GAME.PATHS", "GamePath", "") < 0) return false;
