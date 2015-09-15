@@ -15,6 +15,8 @@ struct sModel
 	SI_Error iniStatus;
 	std::vector<sView> views;
 	unsigned int currentView;
+	std::vector<Ogre::String> voices;
+	unsigned int currentVoice;
 };
 
 enum eFMstatus{ FM_OVERVIEW, FM_ZOOM, FM_DETAILS, FM_EDITVIEWS, FM_EDITCAMERA};
@@ -77,6 +79,7 @@ private:
 	void _newCameraView(sModel& model);
 	void _loadConfigWindowsViews(sModel& model, bool newView = false);
 	void _playAnimation(sModel& model);
+	bool _loadModelVoices(sModel& model);
 
 	GameInfo* mGameInfo;
 	OgreBites::SdkCameraMan* mCameraMan;
@@ -84,8 +87,10 @@ private:
 	std::vector<sModel> mModels;
 	Ogre::SceneNode* mTarget;
 	CModelController* mController;
+	DirectShowSound* mAudioPlayer;
 	unsigned int mCurrentIndex;
 	bool mCtrlPressed, mAltPressed, mShiftPressed;
+	bool mStartVoice;
 };
 
 #endif // #ifndef _FORMMODELS_H__

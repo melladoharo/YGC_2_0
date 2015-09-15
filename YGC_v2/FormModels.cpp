@@ -8,7 +8,9 @@ mState(FM_OVERVIEW),
 mTarget(0),
 mController(0),
 mCurrentIndex(0),
-mCtrlPressed(false), mAltPressed(false), mShiftPressed(false)
+mAudioPlayer(0),
+mCtrlPressed(false), mAltPressed(false), mShiftPressed(false),
+mStartVoice(false)
 {
 	// create target
 	mTarget = mSceneMgr->getRootSceneNode()->createChildSceneNode();
@@ -77,6 +79,7 @@ FormModels::~FormModels()
 
 	mSceneMgr->destroySceneNode(mTarget);
 	if (mController) delete mController;
+	if (mAudioPlayer) delete mAudioPlayer;
 
 	for (unsigned int i = 0; i < mModels.size(); ++i)
 		delete mModels[i].model;
@@ -93,6 +96,15 @@ bool FormModels::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 		mTrayMgr->enableFadeEffect();
 		_playAnimation(mModels[mCurrentIndex]);
+	}
+
+	// stop voices
+	if (mStartVoice && mAudioPlayer->endSound())
+	{
+		mModels[mCurrentIndex].currentVoice = 
+			(mModels[mCurrentIndex].currentVoice == mModels[mCurrentIndex].voices.size() - 1) ? 0 : mModels[mCurrentIndex].currentVoice + 1;
+		mStartVoice = false;
+		mTrayMgr->setVolumenMiniPlayer(-500);
 	}
 
 	return FormBase::frameRenderingQueued(evt);
@@ -282,8 +294,32 @@ bool FormModels::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id
 			_setFormToZoom();
 		}
 	}
+	else if (mMBPressed)
+	{
+		if (mState == FM_OVERVIEW || mState == FM_ZOOM)
+		{
+			if (mCurrentIndex >= 0 && mCurrentIndex < mModels.size())
+			{
+				unsigned int currVoice = mModels[mCurrentIndex].currentVoice;
+				if (currVoice >= 0 && currVoice < mModels[mCurrentIndex].voices.size())
+				{
+					// if is playing a track, pause
+					if (mTrayMgr->isMiniPlaying())
+					{
+						mTrayMgr->setVolumenMiniPlayer(-5000);
+					}
 
-	return FormBase::mouseReleased(arg, id);;
+					if (mAudioPlayer) delete mAudioPlayer;
+					mAudioPlayer = new DirectShowSound(const_cast<char *>(mModels[mCurrentIndex].voices[currVoice].c_str()));
+					mAudioPlayer->Play();
+					mAudioPlayer->setVolume(-500);
+					mStartVoice = true;
+				}
+			}
+		}
+	}
+
+	return FormBase::mouseReleased(arg, id);
 }
 
 
@@ -521,8 +557,10 @@ void FormModels::_loadModel(const sInfoResource& infoModel)
 	mModels.back().iniStatus = mModels.back().simpleIni->LoadFile(Ogre::String(mModels.back().pathIni).c_str());
 	mModels.back().model->hide();
 	mModels.back().currentView = 0;	
+	mModels.back().currentVoice = 0;
 	_loadModelStatusFromIni(mModels.back().simpleIni, "MODEL.INITIAL.STATUS", mModels.back().model);
 	_loadCameraView(mModels.back());
+	_loadModelVoices(mModels.back());
 
 	// default values for new models
 	if (!boost::filesystem::is_regular_file(mModels.back().pathIni))
@@ -777,6 +815,27 @@ void FormModels::_playAnimation(sModel& model)
 		// prepares the next animation to the next view
 		model.currentView = (model.currentView == model.views.size() - 1) ? 0 : model.currentView + 1;
 	}
+}
+
+
+
+bool FormModels::_loadModelVoices(sModel& model)
+{
+	if (model.iniStatus == SI_OK)
+	{
+		// find voices
+		CSimpleIniA::TNamesDepend keys;
+		model.simpleIni->GetAllKeys("MODEL.VOICES", keys);
+		CSimpleIniA::TNamesDepend::const_iterator i;
+		for (i = keys.begin(); i != keys.end(); i++)
+		{
+			// full path voice
+			Ogre::String nameVoice = model.simpleIni->GetValue("MODEL.VOICES", i->pItem, "Voice");
+			model.voices.push_back(mGameInfo->getPathGame() + "/Models/Characters/Voices/" + nameVoice);
+		}
+		return true;
+	}
+	return false;
 }
 
 

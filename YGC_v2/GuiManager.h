@@ -73,6 +73,7 @@ public:
 	void playMiniPlayer() { if (mAudioPlayer && mAudioPlayer->isPaused()) mAudioPlayer->Play(); }
 	void pauseMiniPlayer() { if (mAudioPlayer) mAudioPlayer->Pause(); }
 	void stopMiniPlayer() { _stopTrack(); hideMiniPlayer(); }
+	void setVolumenMiniPlayer(long vol) { if (mAudioPlayer) mAudioPlayer->setVolume(vol); }
 	void startMiniPlayer() 
 	{ 
 		if (mMiniPlayer->isRandom()) mTrackList->selectRandomTrack();
