@@ -177,6 +177,9 @@ public:
 		mFadeAmount = 1;
 	}
 
+	// Execute games
+	void lauchGame(const Ogre::String& pathGame);
+
 
 	/*-----------------------------------------------------------------------------
 	| Process frame events. Updates frame statistics widget set and deletes

@@ -133,6 +133,13 @@ public:
 			return mIniGame.GetValue(section.c_str(), key.c_str(), defaultvalue.c_str());
 		return defaultvalue;
 	}
+	void setValueOption(const Ogre::String& section, const Ogre::String& key, const Ogre::String& valueOption)
+	{
+		if (mIniError == SI_OK)
+		{
+			mIniGame.SetValue(section.c_str(), key.c_str(), valueOption.c_str());
+		}
+	}
 
 	Ogre::String getPathGame() const { return mPathGame.generic_string(); }
 	Ogre::String getId() const { return mId; }
@@ -153,6 +160,7 @@ private:
 		const Ogre::String& nameRes = Ogre::StringUtil::BLANK, const Ogre::String& textureRes = Ogre::StringUtil::BLANK);
 
 	boost::filesystem::path mPathGame; // full path of the game
+	Ogre::String mPathINI;
 	Ogre::String mId; // unique identifier for the game
 	Ogre::String mName; // name game
 	CSimpleIniA mIniGame; // .ini file

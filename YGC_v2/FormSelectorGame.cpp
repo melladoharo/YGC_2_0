@@ -7,6 +7,7 @@
 #include "FormVideos.h"
 #include "FormMusic.h"
 #include "FormCollector.h"
+#include "FormPlay.h"
 #include "ConfigReader.h"
 
 FormSelectorGame::FormSelectorGame(GameInfo* gInfo, GuiManager* tray, GuiListener* oldListener /*= 0*/) :
@@ -19,6 +20,7 @@ mFormModels(0),
 mFormImages(0),
 mFormVideos(0),
 mFormMusic(0),
+mFormPlay(0),
 mFormCollector(0)
 {
 	// assing this listener to menubar
@@ -95,6 +97,7 @@ FormSelectorGame::~FormSelectorGame()
 	if (mFormVideos) delete mFormVideos;
 	if (mFormMusic) delete mFormMusic;
 	if (mFormCollector) delete mFormCollector;
+	if (mFormPlay) delete mFormPlay;
 
 	mGameInfo->destroyResourceGroup();
 	mTrayMgr->stopMiniPlayer();
@@ -143,13 +146,18 @@ void FormSelectorGame::menuBarItemHit(MenuBar* menu)
 		if (!mFormCollector) mFormCollector = new FormCollector(mGameInfo, mTrayMgr);
 		mFormCurrent = mFormCollector;
 	}
-	
+	else if (menu->getSelectedItem() == "mbw_game_play")
+	{
+		if (!mFormPlay) mFormPlay = new FormPlay(mGameInfo, mTrayMgr);
+		mFormCurrent = mFormPlay;
+	}
+
 	// Apply the new form
 	if (mFormCurrent)
 	{
 		mTrayMgr->enableFadeEffect();
 		previousForm->hide();
-		//previousForm->disableForm(); // some forms need to be update every frame
+		previousForm->disableForm();
 		mFormCurrent->enableForm();
 		mFormCurrent->show();
 	}

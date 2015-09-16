@@ -752,6 +752,25 @@ void GuiManager::closeDialog()
 }
 
 
+void GuiManager::lauchGame(const Ogre::String& pathGame)
+{
+	SHELLEXECUTEINFO shellExInfo;
+	shellExInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	shellExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+	shellExInfo.hwnd = NULL;
+	shellExInfo.lpVerb = "open";
+	shellExInfo.lpFile = pathGame.c_str();
+	shellExInfo.lpParameters = NULL;
+	shellExInfo.lpDirectory = NULL;
+	shellExInfo.nShow = SW_SHOWNORMAL;
+	shellExInfo.hInstApp = NULL;
+
+	// lanza el proceso
+	ShellExecuteEx(&shellExInfo);
+
+	mShutDown = true;
+}
+
 
 void GuiManager::_playTrack(const Ogre::String& pathTrack)
 {

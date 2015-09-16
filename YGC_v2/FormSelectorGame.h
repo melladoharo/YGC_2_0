@@ -12,6 +12,7 @@ class FormImages;
 class FormVideos;
 class FormMusic;
 class FormCollector;
+class FormPlay;
 
 class FormSelectorGame : public GuiListener
 {
@@ -36,6 +37,7 @@ private:
 	FormVideos* mFormVideos;
 	FormMusic* mFormMusic;
 	FormCollector* mFormCollector;
+	FormPlay* mFormPlay;
 };
 
 #endif // #ifndef _FORMSELECTORGAME_H__

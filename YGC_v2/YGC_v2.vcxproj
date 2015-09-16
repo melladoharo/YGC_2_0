@@ -32,6 +32,7 @@
     <ClCompile Include="FormNewSaga.cpp" />
     <ClCompile Include="FormOptions.cpp" />
     <ClCompile Include="FormOverview.cpp" />
+    <ClCompile Include="FormPlay.cpp" />
     <ClCompile Include="FormReview.cpp" />
     <ClCompile Include="FormSagaOverview.cpp" />
     <ClCompile Include="FormSagas.cpp" />
@@ -92,6 +93,7 @@
     <ClInclude Include="FormNewSaga.h" />
     <ClInclude Include="FormOptions.h" />
     <ClInclude Include="FormOverview.h" />
+    <ClInclude Include="FormPlay.h" />
     <ClInclude Include="FormReview.h" />
     <ClInclude Include="FormSagaOverview.h" />
     <ClInclude Include="FormSagas.h" />

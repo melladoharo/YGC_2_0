@@ -10,11 +10,14 @@ mIniError(SI_Error::SI_FAIL)
 	// load .ini config
 	sInfoResource infoIni;
 	_findGenericResource(infoIni, getPathGame(), FT_INI);
-	mIniError = mIniGame.LoadFile(infoIni.path.c_str());
+	mPathINI = infoIni.path;
+	mIniError = mIniGame.LoadFile(mPathINI.c_str());
 }
 
 GameInfo::~GameInfo()
 {
+	if (mIniError == SI_OK)
+		mIniGame.SaveFile(mPathINI.c_str());
 	destroyResourceGroup();
 }
 
