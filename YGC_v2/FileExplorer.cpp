@@ -131,13 +131,7 @@ void FileExplorer::_cursorReleased(const Ogre::Vector2& cursorPos)
 				mItems[mItemSelectedShown]->setParameter("transparent", "true");
 			
 			mSelectedPath = mDisplayIndex + i;
-			Ogre::String newPath = getSelectedPath();
-			if (!boost::filesystem::path(newPath).is_absolute())
-			{
-				if (mCurrentPath.generic_string()[mCurrentPath.generic_string().size() - 1] != '/') // no repeat character '/' 
-					newPath = "/" + newPath;
-				newPath = mCurrentPath.generic_string() + newPath;
-			}
+			Ogre::String newPath = _getNormalizedItemSelected();
 
 			// if it is a file, mark as selected
 			if (boost::filesystem::is_regular_file(newPath) || mSelectDir)
@@ -159,25 +153,30 @@ void FileExplorer::_cursorReleased(const Ogre::Vector2& cursorPos)
 
 void FileExplorer::setPath(const Ogre::String& path)
 {
-	mCurrentPath = boost::filesystem::path(path);
-	mItemSelectedShown = -1;
-	mSelectedPath = -1;
-	mHandle->setTop(0);
-	_destroyItems();
-	_getPathItems();
-	fitCaptionToArea(mCurrentPath.generic_string(), mTextAreaFullPath, mTextAreaFullPath->getWidth());
-	fitCaptionToArea(mCurrentPath.has_leaf() ? " - " + mCurrentPath.leaf().generic_string() : " - " + mCurrentPath.generic_string(), mTextAreaParentPath, mTextAreaParentPath->getWidth());
-
-	mItemsShown = std::max<int>(0, std::min<int>(mMaxItemsShown, mPaths.size()));
-
-	for (unsigned int i = 0; i < mItemsShown; i++)   // create all the item elements
+	if (boost::filesystem::is_directory(path))
 	{
-		Ogre::String nameItem = "ItemFileExplorer_n" + Ogre::StringConverter::toString(i + 1);
-		_createTextAreaItems(nameItem, mPaths[i], (i + 1) * 30);
+		mCurrentPath = boost::filesystem::path(path);
+		mItemSelectedShown = -1;
+		mSelectedPath = -1;
+		mHandle->setTop(0);
+		_destroyItems();
+		_getPathItems();
+		fitCaptionToArea(mCurrentPath.generic_string(), mTextAreaFullPath, mTextAreaFullPath->getWidth());
+		fitCaptionToArea(mCurrentPath.has_leaf() ? " - " + mCurrentPath.leaf().generic_string() : " - " + mCurrentPath.generic_string(), mTextAreaParentPath, mTextAreaParentPath->getWidth());
+
+		mItemsShown = std::max<int>(0, std::min<int>(mMaxItemsShown, mPaths.size()));
+
+		for (unsigned int i = 0; i < mItemsShown; i++)   // create all the item elements
+		{
+			Ogre::String nameItem = "ItemFileExplorer_n" + Ogre::StringConverter::toString(i + 1);
+			_createTextAreaItems(nameItem, mPaths[i], (i + 1) * 30);
+		}
+	}
+	else
+	{
+		_setPathHome();
 	}
 }
-
-
 
 void FileExplorer::scrollUp()
 {
@@ -207,6 +206,16 @@ void FileExplorer::scrollDown()
 		Ogre::Real scrollPercentage = Ogre::Math::Clamp<Ogre::Real>(newTop / lowerBoundary, 0, 1);
 		_setDisplayIndex((unsigned int)(scrollPercentage * (mPaths.size() - mItems.size()) + 0.5));
 	}
+}
+
+void FileExplorer::deselectAll()
+{
+	// deselect previous item selected
+	if (mItemSelectedShown >= 0 && mItemSelectedShown < mItems.size())
+		mItems[mItemSelectedShown]->setParameter("transparent", "true");
+
+	mItemSelectedShown = -1;
+	mSelectedPath = -1;
 }
 
 
@@ -328,13 +337,19 @@ void FileExplorer::_setPathHome()
 	}
 }
 
-void FileExplorer::deselectAll()
+Ogre::String FileExplorer::_getNormalizedItemSelected()
 {
-	// deselect previous item selected
-	if (mItemSelectedShown >= 0 && mItemSelectedShown < mItems.size())
-		mItems[mItemSelectedShown]->setParameter("transparent", "true");	
+	Ogre::String newPath = (mSelectedPath >= 0 && mSelectedPath <= mPaths.size())
+		? mPaths[mSelectedPath].substr(3)
+		: Ogre::StringUtil::BLANK;
 
-	mItemSelectedShown = -1;
-	mSelectedPath = -1;
+	if (!mCurrentPath.empty() && !boost::filesystem::path(newPath).is_absolute())
+	{
+		if (mCurrentPath.generic_string()[mCurrentPath.generic_string().size() - 1] != '/') // no repeat character '/' 
+			newPath = "/" + newPath;
+		newPath = mCurrentPath.generic_string() + newPath;
+	}
+
+	return newPath;
 }
 

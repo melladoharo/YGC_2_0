@@ -80,9 +80,9 @@ void FormNewSaga::buttonHit(Button* button)
 	else if (button->getName() == "FormNewSaga/Button/AddPathGames")
 	{
 		FileExplorer* fe = dynamic_cast<FileExplorer*>(mTrayMgr->getWidget("FormNewSaga/Explorer/PathGames"));
-		if (fe->getSelectedPath() != Ogre::StringUtil::BLANK)
+		if (fe->getSelectedFile() != Ogre::StringUtil::BLANK)
 		{
-			_addNewGameToSaga(fe->getSelectedPath());
+			_addNewGameToSaga(fe->getSelectedFile());
 			fe->deselectAll();
 		}
 	}

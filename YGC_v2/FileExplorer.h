@@ -16,18 +16,21 @@ public:
 	void _focusLost() {}
 
 	void setPath(const Ogre::String& path);
-	Ogre::String getSelectedPath() { return (mSelectedPath >= 0 && mSelectedPath < mPaths.size()) ? mPaths[mSelectedPath].substr(3) : Ogre::StringUtil::BLANK; }
-	void enableSelectDir(bool enable) { mSelectDir = enable; }
 	void scrollUp();
 	void scrollDown();
 	void deselectAll();
 
+	Ogre::String getSelectedPath() { return (mSelectDir) ? _getNormalizedItemSelected() : mCurrentPath.generic_string(); }
+	Ogre::String getSelectedFile() { return  (mSelectedPath >= 0 && mSelectedPath <= mPaths.size()) ? mPaths[mSelectedPath].substr(3) : Ogre::StringUtil::BLANK; }
+	void enableSelectDir(bool enable) { mSelectDir = enable; }
+	
 private:
 	void _getPathItems();
 	void _destroyItems();
 	void _createTextAreaItems(const Ogre::String& name, const Ogre::String& caption, Ogre::Real top);
 	void _setDisplayIndex(unsigned int index);
 	void _setPathHome();
+	Ogre::String _getNormalizedItemSelected();
 
 	Ogre::OverlayContainer* mHeader, *mBody;
 	Ogre::OverlayElement* mNextButton, *mPrevButton, *mHomeButton;
