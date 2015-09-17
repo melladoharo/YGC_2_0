@@ -65,7 +65,7 @@ mStartVoice(false)
 	sd->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
 	sd->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
 	sd->setLeft(-(sd->getWidth() / 2));
-	sd->setTop(-50);
+	sd->setTop(-45);
 	sd->hide();
 	addWidgetToForm(sd);
 

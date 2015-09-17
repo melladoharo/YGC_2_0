@@ -66,7 +66,7 @@ mQuestionDelete(Ogre::StringUtil::BLANK)
 	sd->getOverlayElement()->setVerticalAlignment(Ogre::GVA_BOTTOM);
 	sd->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
 	sd->setLeft(-(sd->getWidth() / 2)); // center slider 
-	sd->setTop(-50);
+	sd->setTop(-45);
 	addWidgetToForm(sd);
 
 	// top select menu
@@ -76,7 +76,7 @@ mQuestionDelete(Ogre::StringUtil::BLANK)
 	SelectMenu* sm = mTrayMgr->createSelectMenu("FormGames/SelectMenu", items, 275.0f);
 	sm->getOverlayElement()->setVerticalAlignment(Ogre::GVA_TOP);
 	sm->getOverlayElement()->setHorizontalAlignment(Ogre::GHA_CENTER);
-	sm->setTop(120);
+	sm->setTop(100);
 	sm->setLeft(-sm->getWidth() / 2);
 	addWidgetToForm(sm);
 }
