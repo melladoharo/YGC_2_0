@@ -77,6 +77,7 @@ FormModels::~FormModels()
 {
 	hideAllOptions();
 
+	mTrayMgr->setDofEffectEnable(false);
 	mSceneMgr->destroySceneNode(mTarget);
 	if (mController) delete mController;
 	if (mAudioPlayer) delete mAudioPlayer;
@@ -237,20 +238,23 @@ bool FormModels::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
 
 		if (mTimeDoubleClick > 0 && mTimeDoubleClick < 0.15f)
 		{
-			if (mState == FM_OVERVIEW)
+			if (!mTrayMgr->isWindowDialogVisible()) // option dialog is hidden?
 			{
-				if (!mModels.empty())
+				if (mState == FM_OVERVIEW)
 				{
-					mTrayMgr->enableFadeEffect();
-					_setFormToZoom();
+					if (!mModels.empty())
+					{
+						mTrayMgr->enableFadeEffect();
+						_setFormToZoom();
+					}
 				}
-			}
-			else if (mState == FM_ZOOM)
-			{
-				if (!mModels[mCurrentIndex].views.empty())
+				else if (mState == FM_ZOOM)
 				{
-					mTrayMgr->enableFadeEffect();
-					_setFormToDetails();
+					if (!mModels[mCurrentIndex].views.empty())
+					{
+						mTrayMgr->enableFadeEffect();
+						_setFormToDetails();
+					}
 				}
 			}
 		}
@@ -457,6 +461,7 @@ void FormModels::labelHit(Label* label)
 	}
 	else if (label->getName() == "FormModels/Label/NewView")
 	{
+		_saveCameraView(mModels[mCurrentIndex]);
 		_setOrbitCamera();
 		_newCameraView(mModels[mCurrentIndex]);
 		_loadConfigWindowsViews(mModels[mCurrentIndex], true);
