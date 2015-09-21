@@ -138,20 +138,23 @@ void TrackList::_cursorReleased(const Ogre::Vector2& cursorPos)
 {
 	mDragging = false;
 
-	for (unsigned int i = 0; i < mItemsShown; ++i)
+	if (mElement->isVisible())
 	{
-		if (mItems[i]->getParameter("transparent") == "false" && i != mItemSelectedShown)
+		for (unsigned int i = 0; i < mItemsShown; ++i)
 		{
-			// deselect previous item selected
-			if (mItemSelectedShown >= 0 && mItemSelectedShown < mItems.size())
-				mItems[mItemSelectedShown]->setParameter("transparent", "true");
+			if (mItems[i]->getParameter("transparent") == "false" && i != mItemSelectedShown)
+			{
+				// deselect previous item selected
+				if (mItemSelectedShown >= 0 && mItemSelectedShown < mItems.size())
+					mItems[mItemSelectedShown]->setParameter("transparent", "true");
 
-			mItemSelectedShown = i;
-			mTrackSelected = mDisplayIndex + i;
-			mDecorVol->show();
-			mDecorVol->setTop(mItems[mItemSelectedShown]->getTop() + 5);
-			mListener->trackListHit(this);
-			return;
+				mItemSelectedShown = i;
+				mTrackSelected = mDisplayIndex + i;
+				mDecorVol->show();
+				mDecorVol->setTop(mItems[mItemSelectedShown]->getTop() + 5);
+				mListener->trackListHit(this);
+				return;
+			}
 		}
 	}
 }
